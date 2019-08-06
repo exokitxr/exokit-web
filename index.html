@@ -1,7 +1,13 @@
 <!doctype html>
 <html>
   <head>
-    <meta http-equiv="origin-trial" content="AoprcL54oQGdbB0YIadZOZ6yiv8vwl/7Va72+lm6Mr7jo6bGQZZ7QKpiap9QkdeultpOPUilQN7aviUdvz1mZwIAAABoeyJvcmlnaW4iOiJodHRwczovL3dlYmF2ZXJzZS5jb206NDQzIiwiZmVhdHVyZSI6IldlYlhSRGV2aWNlTTc2IiwiZXhwaXJ5IjoxNTY4NzYxNzMxLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta http-equiv="origin-trial" content="AsQEDTijFlTxO2I52106H67AARzxf+HYsBUi4M0oZ4NMeVaX0tpAYmChNT1xvqRUsd6YtnMM3twvKXWbE6CmhwUAAABseyJvcmlnaW4iOiJodHRwczovL3dlYi53ZWJhdmVyc2UuY29tOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkRldmljZU03NiIsImV4cGlyeSI6MTU2ODc2NTgzMiwiaXNTdWJkb21haW4iOnRydWV9">
+    <!-- <meta http-equiv="origin-trial" content="AoprcL54oQGdbB0YIadZOZ6yiv8vwl/7Va72+lm6Mr7jo6bGQZZ7QKpiap9QkdeultpOPUilQN7aviUdvz1mZwIAAABoeyJvcmlnaW4iOiJodHRwczovL3dlYmF2ZXJzZS5jb206NDQzIiwiZmVhdHVyZSI6IldlYlhSRGV2aWNlTTc2IiwiZXhwaXJ5IjoxNTY4NzYxNzMxLCJpc1N1YmRvbWFpbiI6dHJ1ZX0="> -->
+    <style>
+body {
+  margin: 0;
+}
+    </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
@@ -9,14 +15,24 @@
     <script src="three.js"></script>
     <script>
 (async () => {
+
+const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.getElementById('canvas'),
+  canvas,
   antialias: true,
   // alpha: true,
 });
+const context = renderer.getContext();
 renderer.setPixelRatio(window.devicePixelRatio);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera();
+
+const ambientLight = new THREE.AmbientLight(0x808080);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
+directionalLight.position.set(1, 1, 1);
+scene.add(directionalLight);
 
 const cubeMesh = (() => {
   const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
@@ -30,19 +46,34 @@ const cubeMesh = (() => {
 })();
 scene.add(cubeMesh);
 
-const session = await navigator.xr.requestSession({
-  exclusive: true,
-});
+const _enterXr = () => navigator.xr.requestSession('immersive-vr')
+  .then(session => {
+    console.log('got session', session);
 
-renderer.vr.setSession(session, {
-  frameOfReferenceType: 'stage',
-});
+    /* session.updateRenderState({
+      layer: new XRWebGLLayer(session, context, {
+        antialias: true,
+      }),
+    }); */
 
-function animate() {
-  renderer.render(scene, camera);
-}
-renderer.setAnimationLoop(animate);
-})();
+    renderer.vr.enabled = true;
+    renderer.vr.setSession(session);
+
+    function animate() {
+      const c = renderer.vr.enabled ? renderer.vr.getCamera(camera) : camera;
+      renderer.render(scene, c);
+    }
+    renderer.setAnimationLoop(animate);
+  })
+  .catch(err => {
+    console.warn(err);
+  });
+await _enterXr();
+canvas.addEventListener('click', _enterXr);
+
+})().catch(err => {
+  console.warn(err);
+});
     </script>
   </body>
 </html>
