@@ -107,7 +107,7 @@ function animate() {
 
     context.linkProgram(shaderProgram)
     if (!context.getProgramParameter(shaderProgram, context.LINK_STATUS)) {
-      console.log("Error linking shader program:");
+      console.log('Error linking shader program:');
       console.log(context.getProgramInfoLog(shaderProgram));
     }
     context.useProgram(shaderProgram);
