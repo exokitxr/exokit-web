@@ -19,30 +19,16 @@ body {
 let t, screenQuadVBO, shaderProgram, imageBitmap = null;
 
 const worker = new Worker('iframe-worker.js');
-// console.log('start', worker);
 const canvas = document.getElementById('canvas');
 const canvas2 = document.getElementById('canvas2');
 const canvas3 = document.getElementById('canvas3');
 
-/* const renderer = new THREE.WebGLRenderer({
-  canvas: canvas3,
-  antialias: true,
-  // alpha: true,
-});
-const context = renderer.getContext();
-renderer.setPixelRatio(window.devicePixelRatio);
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(); */
 const offscreenCanvas = canvas.transferControlToOffscreen();
 const imageBitmapRenderingContext = canvas2.getContext('bitmaprenderer');
 const context = canvas3.getContext('webgl');
 
-// const lockBuffer = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
-// const lockBuffer2 = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
 worker.postMessage({
   canvas: offscreenCanvas,
-  /* lockBuffer,
-  lockBuffer2, */
 }, [offscreenCanvas]);
 
 const _onmessage = () => {
@@ -55,7 +41,6 @@ function animate() {
     projectionMatrices: [],
   });
 
-  // Only created once
   if (!t) {
     t = context.createTexture();
     context.bindTexture(context.TEXTURE_2D, t);
@@ -113,7 +98,7 @@ function animate() {
       context.shaderSource(shader, fsh);
       context.compileShader(shader);
       if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
-        console.log(`Error compiling fragment shader:`);
+        console.log('Error compiling fragment shader:');
         console.log(context.getShaderInfoLog(shader));
       }
       context.attachShader(shaderProgram, shader);
@@ -134,13 +119,10 @@ function animate() {
     context.uniform1i(uTexLocation, 0);
   }
 
-  // console.log('tex 2d 1');
   // context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, canvas2);
   if (imageBitmap) {
-    // console.log('2d', context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imageBitmap);
     context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imageBitmap);
   }
-  // console.log('tex 2d 2');
   context.drawArrays(context.TRIANGLES, 0, 6);
   // context.flush();
 }
@@ -158,12 +140,9 @@ const _onmessage2 = m => {
     imageBitmap.close();
   }
   imageBitmap = m.data.imageBitmap;
-  /* if (imageBitmap) {
-    imageBitmapRenderingContext.transferFromImageBitmap(imageBitmap);
-  } */
 };
 
-/* const _enterXr = () => navigator.xr.requestSession('immersive-vr')
+const _enterXr = () => navigator.xr.requestSession('immersive-vr')
   .then(session => {
     console.log('got session', session);
 
@@ -179,8 +158,8 @@ const _onmessage2 = m => {
   .catch(err => {
     console.warn(err);
   });
-await _enterXr();
-canvas.addEventListener('click', _enterXr); */
+canvas.addEventListener('click', _enterXr);
+// await _enterXr();
 
 })();
     </script>
