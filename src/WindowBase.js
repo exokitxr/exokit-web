@@ -1,14 +1,14 @@
-const {Console} = require('console');
-const {EventEmitter} = require('events');
-const stream = require('stream');
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
-const {URL} = url;
-const vm = require('vm');
-const util = require('util');
+// const {Console} = require('console');
+import {EventEmitter} from 'node_modules/events-browserify/events.js';
+import stream from 'node_modules/stream-browserify/index.js';
+import path from 'node_modules/path-browserify/index.js';
+// const fs = require('fs');
+// import url from 'url';
+// const {URL} = url;
+// const vm = require('vm');
+import util from 'node_modules/util/util.js';
 const crypto = require('crypto');
-const {performance} = require('perf_hooks');
+// const {performance} = require('perf_hooks');
 const {
   Worker: WorkerBase,
   workerData: {
@@ -18,13 +18,13 @@ const {
   parentPort,
 } = require('worker_threads');
 
-const {Buffer} = global;
+// const {Buffer} = global;
 
-const {CustomEvent, DragEvent, ErrorEvent, Event, EventTarget, KeyboardEvent, MessageEvent, MouseEvent, WheelEvent, PromiseRejectionEvent} = require('./Event');
-const {MediaDevices, Clipboard, Navigator} = require('./Navigator');
-const {Location} = require('./Location');
-const {FileReader} = require('./File');
-const {XMLHttpRequest, FormData} = require('window-xhr');
+// const {CustomEvent, DragEvent, ErrorEvent, Event, EventTarget, KeyboardEvent, MessageEvent, MouseEvent, WheelEvent, PromiseRejectionEvent} = require('./Event');
+// const {MediaDevices, Clipboard, Navigator} = require('./Navigator');
+// const {Location} = require('./Location');
+// const {FileReader} = require('./File');
+// const {XMLHttpRequest, FormData} = require('window-xhr');
 const {fetch} = require('./fetch');
 const {Request, Response, Headers, Blob} = fetch;
 const WebSocket = require('ws/lib/websocket');
@@ -34,14 +34,14 @@ const GlobalContext = require('./GlobalContext');
 
 const utils = require('./utils');
 
-const btoa = s => Buffer.from(s, 'binary').toString('base64');
-const atob = s => Buffer.from(s, 'base64').toString('binary');
+// const btoa = s => Buffer.from(s, 'binary').toString('base64');
+// const atob = s => Buffer.from(s, 'base64').toString('binary');
 
-XMLHttpRequest.setFetchImplementation(fetch);
+// XMLHttpRequest.setFetchImplementation(fetch);
 
-const {
+/* const {
   nativeConsole,
-} = require('./native-bindings');
+} = require('./native-bindings'); */
 const {process} = global;
 
 GlobalContext.xrState = args.xrState;
@@ -244,7 +244,7 @@ class Worker extends EventTarget {
 
 const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
 
-const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
+/* const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
 function getScript(url) {
   let match;
   if (match = url.match(/^data:.+?(;base64)?,(.*)$/)) {
@@ -287,7 +287,7 @@ function importScripts() {
     });
   }
 }
-global.importScripts = importScripts;
+global.importScripts = importScripts; */
 
 parentPort.on('message', m => {
   switch (m.method) {

@@ -1,8 +1,8 @@
-importScripts('worker-bootstrap.js');
-self.window = self;
-const THREE = require('three.js');
-// import 'src/WindowBase.js';
-// import THREE from 'three.js';
+// importScripts('worker-bootstrap.js');
+// self.window = self;
+// const THREE = require('three.js');
+import 'src/WindowBase.js';
+import THREE from 'three.js';
 
 let canvas, renderer, context, scene, camera, cubeMesh;
 

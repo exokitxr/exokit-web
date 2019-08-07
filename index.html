@@ -19,7 +19,9 @@ body {
 (async () => {
 let t, screenQuadVBO, shaderProgram, imageBitmap = null;
 
-const worker = new Worker('iframe-worker.js');
+const worker = new Worker('iframe-worker.js', {
+  type: 'module',
+});
 const canvas = document.getElementById('canvas');
 const canvas2 = document.getElementById('canvas2');
 const canvas3 = document.getElementById('canvas3');
