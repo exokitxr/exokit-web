@@ -1,0 +1,28 @@
+{
+  "name": "exokit-web",
+  "version": "0.0.1",
+  "description": "",
+  "main": "iframe-worker.js",
+  "dependencies": {
+    "events": "^3.0.0",
+    "events-browserify": "0.0.1",
+    "path": "^0.12.7",
+    "path-browserify": "^1.0.0",
+    "stream-browserify": "^2.0.2",
+    "util": "^0.12.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modulesio/exokit-web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modulesio/exokit-web/issues"
+  },
+  "homepage": "https://github.com/modulesio/exokit-web#readme"
+}
