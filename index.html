@@ -11,50 +11,161 @@ body {
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <iframe></iframe>
+    <canvas id="canvas2"></canvas>
+    <canvas id="canvas3"></canvas>
     <script src="three.js"></script>
     <script>
 (async () => {
+let t, screenQuadVBO, shaderProgram, imageBitmap = null;
 
+const worker = new Worker('iframe-worker.js');
+// console.log('start', worker);
 const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({
-  canvas,
+const canvas2 = document.getElementById('canvas2');
+const canvas3 = document.getElementById('canvas3');
+
+/* const renderer = new THREE.WebGLRenderer({
+  canvas: canvas3,
   antialias: true,
   // alpha: true,
 });
 const context = renderer.getContext();
 renderer.setPixelRatio(window.devicePixelRatio);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera();
+const camera = new THREE.PerspectiveCamera(); */
+const offscreenCanvas = canvas.transferControlToOffscreen();
+const imageBitmapRenderingContext = canvas2.getContext('bitmaprenderer');
+const context = canvas3.getContext('webgl');
 
-const ambientLight = new THREE.AmbientLight(0x808080);
-scene.add(ambientLight);
+// const lockBuffer = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
+// const lockBuffer2 = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
+worker.postMessage({
+  canvas: offscreenCanvas,
+  /* lockBuffer,
+  lockBuffer2, */
+}, [offscreenCanvas]);
 
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
-directionalLight.position.set(1, 1, 1);
-scene.add(directionalLight);
+const _onmessage = () => {
+worker.removeEventListener('message', _onmessage);
+worker.addEventListener('message', _onmessage2);
 
-const cubeMesh = (() => {
-  const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
-  const material = new THREE.MeshPhongMaterial({
-    color: 0xab47bc,
+function animate() {
+  worker.postMessage({
+    modelViewMatrices: [],
+    projectionMatrices: [],
   });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.rotation.order = 'YXZ';
-  mesh.frustumCulled = false;
-  return mesh;
-})();
-scene.add(cubeMesh);
 
-const _enterXr = () => navigator.xr.requestSession('immersive-vr')
+  // Only created once
+  if (!t) {
+    t = context.createTexture();
+    context.bindTexture(context.TEXTURE_2D, t);
+    context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, 1, 1, 0, context.RGBA, context.UNSIGNED_BYTE, null);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.LINEAR);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.LINEAR);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+
+    var verts = [
+      // First triangle:
+       1.0,  1.0,
+      -1.0,  1.0,
+      -1.0, -1.0,
+      // Second triangle:
+      -1.0, -1.0,
+       1.0, -1.0,
+       1.0,  1.0
+    ];
+    screenQuadVBO = context.createBuffer();
+    context.bindBuffer(context.ARRAY_BUFFER, screenQuadVBO);
+    context.bufferData(context.ARRAY_BUFFER, new Float32Array(verts), context.STATIC_DRAW);
+
+    shaderProgram = context.createProgram();
+
+    {
+      const vsh = `
+        attribute vec2 position;
+        varying vec2 vTexCoords;
+        const vec2 scale = vec2(0.5, 0.5);
+        void main() {
+          vTexCoords  = position * scale + scale; // scale vertex attribute to [0,1] range
+          gl_Position = vec4(position, 0.0, 1.0);
+        }
+      `;
+      const shader = context.createShader(context.VERTEX_SHADER);
+      context.shaderSource(shader, vsh);
+      context.compileShader(shader);
+      if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
+        console.log(`Error compiling vertex shader:`);
+        console.log(context.getShaderInfoLog(shader));
+      }
+      context.attachShader(shaderProgram, shader);
+    }
+    {
+      const fsh = `
+        precision highp float;
+        uniform sampler2D uTex;
+        varying vec2 vTexCoords;
+        void main() {
+          gl_FragColor = texture2D(uTex, vTexCoords);
+        }
+      `;
+      const shader = context.createShader(context.FRAGMENT_SHADER);
+      context.shaderSource(shader, fsh);
+      context.compileShader(shader);
+      if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
+        console.log(`Error compiling fragment shader:`);
+        console.log(context.getShaderInfoLog(shader));
+      }
+      context.attachShader(shaderProgram, shader);
+    }
+
+    context.linkProgram(shaderProgram)
+    if (!context.getProgramParameter(shaderProgram, context.LINK_STATUS)) {
+      console.log("Error linking shader program:");
+      console.log(context.getProgramInfoLog(shaderProgram));
+    }
+    context.useProgram(shaderProgram);
+
+    const positionLocation = context.getAttribLocation(shaderProgram, 'position');
+    context.enableVertexAttribArray(positionLocation);
+    context.vertexAttribPointer(positionLocation, 2, context.FLOAT, false, 0, 0);
+
+    const uTexLocation = context.getUniformLocation(shaderProgram, 'uTex');
+    context.uniform1i(uTexLocation, 0);
+  }
+
+  // console.log('tex 2d 1');
+  // context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, canvas2);
+  if (imageBitmap) {
+    // console.log('2d', context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imageBitmap);
+    context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imageBitmap);
+  }
+  // console.log('tex 2d 2');
+  context.drawArrays(context.TRIANGLES, 0, 6);
+  // context.flush();
+}
+
+function raf() {
+  requestAnimationFrame(raf);
+  animate();
+}
+requestAnimationFrame(raf);
+
+};
+worker.addEventListener('message', _onmessage);
+const _onmessage2 = m => {
+  if (imageBitmap) {
+    imageBitmap.close();
+  }
+  imageBitmap = m.data.imageBitmap;
+  /* if (imageBitmap) {
+    imageBitmapRenderingContext.transferFromImageBitmap(imageBitmap);
+  } */
+};
+
+/* const _enterXr = () => navigator.xr.requestSession('immersive-vr')
   .then(session => {
     console.log('got session', session);
-
-    /* session.updateRenderState({
-      layer: new XRWebGLLayer(session, context, {
-        antialias: true,
-      }),
-    }); */
 
     renderer.vr.enabled = true;
     renderer.vr.setSession(session);
@@ -69,11 +180,9 @@ const _enterXr = () => navigator.xr.requestSession('immersive-vr')
     console.warn(err);
   });
 await _enterXr();
-canvas.addEventListener('click', _enterXr);
+canvas.addEventListener('click', _enterXr); */
 
-})().catch(err => {
-  console.warn(err);
-});
+})();
     </script>
   </body>
 </html>

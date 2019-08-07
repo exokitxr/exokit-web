@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="origin-trial" content="AsQEDTijFlTxO2I52106H67AARzxf+HYsBUi4M0oZ4NMeVaX0tpAYmChNT1xvqRUsd6YtnMM3twvKXWbE6CmhwUAAABseyJvcmlnaW4iOiJodHRwczovL3dlYi53ZWJhdmVyc2UuY29tOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkRldmljZU03NiIsImV4cGlyeSI6MTU2ODc2NTgzMiwiaXNTdWJkb21haW4iOnRydWV9">
+    <!-- <meta http-equiv="origin-trial" content="AoprcL54oQGdbB0YIadZOZ6yiv8vwl/7Va72+lm6Mr7jo6bGQZZ7QKpiap9QkdeultpOPUilQN7aviUdvz1mZwIAAABoeyJvcmlnaW4iOiJodHRwczovL3dlYmF2ZXJzZS5jb206NDQzIiwiZmVhdHVyZSI6IldlYlhSRGV2aWNlTTc2IiwiZXhwaXJ5IjoxNTY4NzYxNzMxLCJpc1N1YmRvbWFpbiI6dHJ1ZX0="> -->
+    <style>
+body {
+  margin: 0;
+}
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <iframe></iframe>
+    <script src="three.js"></script>
+    <script>
+console.log('worker script 1');
+let renderer, context, scene, camera, cubeMesh;
+
+function animate() {
+  cubeMesh.rotation.x += 0.01;
+  cubeMesh.rotation.y += 0.01;
+
+  renderer.render(scene, camera);
+}
+
+const _onmessage = m => {
+  console.log('got message 1');
+  const {offscreenCanvas, lockBuffer, lockBuffer2} = m.data;
+
+  renderer = new THREE.WebGLRenderer({
+    canvas: offscreenCanvas,
+    antialias: true,
+    // alpha: true,
+  });
+  context = renderer.getContext();
+  renderer.setPixelRatio(window.devicePixelRatio);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera();
+
+  const ambientLight = new THREE.AmbientLight(0x808080);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  cubeMesh = (() => {
+    const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0xab47bc,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.order = 'YXZ';
+    mesh.frustumCulled = false;
+    return mesh;
+  })();
+  scene.add(cubeMesh);
+
+  window.removeEventListener('message', _onmessage);
+
+  /* for (;;) {
+    console.log('animate 1');
+    // Atomics.wait(lockBuffer, 0, 0);
+    while (lockBuffer[0] == 0) {
+
+    }
+    Atomics.sub(lockBuffer, 0, 1);
+
+    console.log('animate 2');
+
+    animate();
+
+    Atomics.add(lockBuffer2, 0, 1);
+    Atomics.notify(lockBuffer2, 0);
+  } */
+};
+window.addEventListener('message', _onmessage);
+    </script>
+  </body>
+</html>
