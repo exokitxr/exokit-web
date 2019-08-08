@@ -1,5 +1,5 @@
-const {Node, NodeList} = require('./DOM');
-const {process} = global;
+import {Node, NodeList} from './DOM.js';
+// const {process} = global;
 
 const emptyNodeList = new NodeList();
 

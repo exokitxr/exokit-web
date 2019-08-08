@@ -1,15 +1,15 @@
-const events = require('events');
+import events from 'events';
 const {EventEmitter} = events;
-const path = require('path');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const os = require('os');
-const {parentPort} = require('worker_threads');
-const util = require('util');
-const {TextEncoder, TextDecoder} = util;
-const {performance} = require('perf_hooks');
-const {
+import path from '../node_modules/path-browserify/index.js';
+// const fs = require('fs');
+// const http = require('http');
+// const https = require('https');
+// const os = require('os');
+// const {parentPort} = require('worker_threads');
+import util from '../node_modules/util/dist/util.js';
+// const {TextEncoder, TextDecoder} = util;
+// const {performance} = require('perf_hooks');
+/* const {
   workerData: {
     args: {
       options,
@@ -18,26 +18,19 @@ const {
       version,
     },
   },
-} = require('worker_threads');
+} = require('worker_threads'); */
 
-const {SpatialEvent} = require('./Event.js');
-const {XRRigidTransform} = require('./XR.js');
+import {SpatialEvent} from './Event.js';
+import {XRRigidTransform} from './XR.js';
 
-const mkdirp = require('mkdirp');
-const ws = require('ws');
+// const mkdirp = require('mkdirp');
+// const ws = require('ws');
 
-const core = require('./core.js');
+// const core = require('./core.js');
 
-const {
-  /* getUserMedia,
-  MediaStream,
-  MediaStreamTrack,
-  RTCDataChannel, */
+/* const {
   RTCIceCandidate,
   RTCPeerConnection,
-  /* RTCPeerConnectionIceEvent,
-  RTCRtpReceiver,
-  RTCRtpSender, */
   RTCRtpTransceiver,
   RTCSessionDescription,
 
@@ -45,13 +38,13 @@ const {
   RTCDataChannelEvent,
   RTCDataChannelMessageEvent,
   RTCTrackEvent,
-} = require('./RTC/index.js');
+} = require('./RTC/index.js'); */
 
-const {LocalStorage} = require('window-ls');
-const indexedDB = require('fake-indexeddb');
-const parseXml = require('@rgrove/parse-xml');
-const THREE = require('../lib/three-min.js');
-const {
+// const {LocalStorage} = require('window-ls');
+// const indexedDB = require('fake-indexeddb');
+import parseXml from '../node_modules/@rgrove/parse-xml/dist/commonjs/index.js';
+import THREE from '../lib/three-min.js';
+import {
   VRDisplay,
   VRFrameData,
   VRPose,
@@ -60,52 +53,19 @@ const {
   Gamepad,
   GamepadButton,
   lookupHMDTypeString,
-} = require('./VR.js');
+} from './VR.js';
 
-const {maxNumTrackers} = require('./constants');
-const GlobalContext = require('./GlobalContext');
-const symbols = require('./symbols');
-
-const {
-  nativeImage: Image,
-  nativeImageData: ImageData,
-  nativeImageBitmap: ImageBitmap,
-  nativePath2D: Path2D,
-  nativeCanvasGradient: CanvasGradient,
-  nativeCanvasRenderingContext2D: CanvasRenderingContext2D,
-  nativeGl: WebGLRenderingContext,
-  nativeGl2: WebGL2RenderingContext,
-  nativeAudio: {
-    AudioContext,
-    AudioNode,
-    AudioBufferSourceNode,
-    OscillatorNode,
-    AudioDestinationNode,
-    AudioParam,
-    AudioListener,
-    GainNode,
-    AnalyserNode,
-    PannerNode,
-    StereoPannerNode,
-  },
-  nativeVideo: {
-    Video,
-  },
-  nativeOpenVR,
-  nativeOculusVR,
-  nativeOculusMobileVr,
-  nativeMl,
-  nativeBrowser,
-  nativeWindow,
-} = require('./native-bindings');
+import {maxNumTrackers} from './constants.js';
+import GlobalContext from './GlobalContext.js';
+import symbols from './symbols.js';
 
 GlobalContext.id = id;
 GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 
-const {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} = require('./Document');
-const {
+import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document';
+import {
   HTMLElement,
   getBoundDOMElements,
   DOMTokenList,
@@ -114,14 +74,14 @@ const {
   DOMRect,
   DOMPoint,
   createImageBitmap,
-} = require('./DOM');
-const {History} = require('./History');
-const XR = require('./XR');
-const DevTools = require('./DevTools');
-const utils = require('./utils');
+} from './DOM.js';
+import {History} from './History.js';
+import XR from './XR.js';
+// const DevTools = require('./DevTools');
+import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 
-const isMac = os.platform() === 'darwin';
+const isMac = false;//os.platform() === 'darwin';
 
 const zeroMatrix = new THREE.Matrix4();
 const localFloat32Array = zeroMatrix.toArray(new Float32Array(16));

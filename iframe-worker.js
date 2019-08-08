@@ -24,6 +24,7 @@ const _onmessage = async m => {
 
   const [_, THREE] = await Promise.all([
     import('./src/WindowBase.js'),
+    import('./src/Window.js'),
     import('./three.module.js'),
   ]);
 

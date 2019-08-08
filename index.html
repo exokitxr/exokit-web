@@ -169,11 +169,24 @@ const offscreenCanvas = canvas.transferControlToOffscreen();
 const imageBitmapRenderingContext = canvas2.getContext('bitmaprenderer');
 const context = canvas3.getContext('webgl');
 
+const _clean = o => {
+  const result = {};
+  for (const k in o) {
+    const v = o[k];
+    if (typeof v !== 'function') {
+      result[k] = v;
+    }
+  }
+  return result;
+};
 worker.postMessage({
   canvas: offscreenCanvas,
   args: {
     initModule: './Window.js',
-    options,
+    id,
+    args: GlobalContext.args,
+    version: GlobalContext.version,
+    options: _clean(options),
     xrState,
   },
 }, [offscreenCanvas]);

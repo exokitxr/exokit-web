@@ -1,29 +1,29 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
-const vm = require('vm');
-const util = require('util');
-const {parentPort} = require('worker_threads');
+import path from '../node_modules/path-browserify/index.js';
+// const fs = require('fs');
+// const url = require('url');
+// const vm = require('vm');
+import util from '../node_modules/util/dist/util.js';
+// const {parentPort} = require('worker_threads');
 
-const {process} = global;
+// const {process} = global;
 
-const css = require('css');
-const he = require('he');
-const parse5 = require('parse5');
-const parseIntStrict = require('parse-int');
-const selector = require('window-selector');
-const {fetch} = require('./fetch');
-const {Blob} = fetch;
-const htmlUnescape = require('unescape');
+import css from '../node_modules/css/index.js';
+import he from '../node_modules/he/he.js';
+import parse5 from '../node_modules/parse5/dist/index.js';
+import parseIntStrict from '../node_modules/parse-int/dist/index.js';
+import selector from '../node_modules/window-selector/selector.js';
+// const {fetch} = require('./fetch');
+// const {Blob} = fetch;
+import htmlUnescape from '../node_modules/unescape/index.js';
 
-const bindings = require('./native-bindings');
-const {Event, EventTarget, MessageEvent, MouseEvent, ErrorEvent} = require('./Event');
-const {_makeWindow} = require('./WindowVm');
-const GlobalContext = require('./GlobalContext');
-const symbols = require('./symbols');
-const {_elementGetter, _elementSetter, _normalizeUrl} = require('./utils');
-const {XRRigidTransform} = require('./XR');
-const {ElectronVm} = require('./electron-vm.js');
+// const bindings = require('./native-bindings');
+import {MouseEvent} from './Event.js';
+import {_makeWindow} from './WindowVm.js';
+import GlobalContext from './GlobalContext.js';
+import symbols from './symbols.js';
+import {_elementGetter, _elementSetter, _normalizeUrl} from './utils.js';
+import {XRRigidTransform} from './XR.js';
+// const {ElectronVm} = require('./electron-vm.js');
 
 he.encode.options.useNamedReferences = true;
 
@@ -70,7 +70,6 @@ class DOMRect {
     this.bottom = h >= 0 ? y + h : y;
   }
 }
-module.exports.DOMRect = DOMRect;
 
 class DOMPoint {
   constructor(x = 0, y = 0, z = 0, w = 1) {
@@ -109,7 +108,6 @@ class DOMPoint {
     this.values[3] = w;
   }
 }
-module.exports.DOMPoint = DOMPoint;
 GlobalContext.DOMPoint = DOMPoint;
 
 class NodeList extends Array {
@@ -126,7 +124,6 @@ class NodeList extends Array {
     return v !== undefined ? v : null;
   }
 }
-module.exports.NodeList = NodeList;
 
 class HTMLCollection extends Array {
   constructor(nodes) {
@@ -137,7 +134,6 @@ class HTMLCollection extends Array {
     }
   }
 }
-module.exports.HTMLCollection = HTMLCollection;
 
 class Node extends EventTarget {
   constructor(window) {
@@ -307,7 +303,6 @@ Node.COMMENT_NODE = 8;
 Node.DOCUMENT_NODE = 9;
 Node.DOCUMENT_TYPE_NODE = 10;
 Node.DOCUMENT_FRAGMENT_NODE = 11;
-module.exports.Node = Node;
 
 const _setAttributeRaw = (el, prop, value) => {
   if (prop === 'length') {
@@ -700,7 +695,6 @@ class DOMTokenList extends Array {
     return this.join(' ');
   }
 }
-module.exports.DOMTokenList = DOMTokenList;
 
 const _resetClassList = (classList, className) => {
   classList.length = 0;
@@ -1353,7 +1347,6 @@ class Element extends Node {
     }
   }
 }
-module.exports.Element = Element;
 
 class HTMLElement extends Element {
   constructor(window, tagName = 'DIV', attrs = [], value = '', location = null) {
@@ -1425,7 +1418,6 @@ class HTMLElement extends Element {
   set style(style) {}
 }
 HTMLElement.upgradeElement = null;
-module.exports.HTMLElement = HTMLElement;
 
 function getAnchorUrl(anchorEl) {
   return new url.URL(anchorEl.href, anchorEl.ownerDocument.defaultView.location.toString());
@@ -1534,7 +1526,6 @@ class HTMLAnchorElement extends HTMLElement {
     this.href = u.href;
   }
 }
-module.exports.HTMLAnchorElement = HTMLAnchorElement;
 
 class HTMLLoadableElement extends HTMLElement {
   constructor(window, tagName, attrs = [], value = '', location = null) {
@@ -1555,7 +1546,6 @@ class HTMLLoadableElement extends HTMLElement {
     _elementSetter(this, 'error', onerror);
   }
 }
-module.exports.HTMLLoadableElement = HTMLLoadableElement;
 
 class HTMLHeadElement extends HTMLElement {
   constructor(window) {
@@ -1577,7 +1567,6 @@ class HTMLBodyElement extends HTMLElement {
   }
   set clientHeight(clientHeight) {}
 }
-module.exports.HTMLBodyElement = HTMLBodyElement;
 
 class HTMLStyleElement extends HTMLLoadableElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -1632,7 +1621,6 @@ class HTMLStyleElement extends HTMLLoadableElement {
     return running ? _loadPromise(this) : Promise.resolve();
   }
 }
-module.exports.HTMLStyleElement = HTMLStyleElement;
 
 class HTMLLinkElement extends HTMLLoadableElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -1723,7 +1711,6 @@ class HTMLLinkElement extends HTMLLoadableElement {
     return Promise.resolve();
   }
 }
-module.exports.HTMLLinkElement = HTMLLinkElement;
 
 const _mapUrl = (u, window) => {
   const v = window[symbols.optionsSymbol].replacements[u];
@@ -1902,7 +1889,6 @@ class HTMLScriptElement extends HTMLLoadableElement {
     }
   }
 }
-module.exports.HTMLScriptElement = HTMLScriptElement;
 
 class HTMLSrcableElement extends HTMLLoadableElement {
   constructor(window, tagName = null, attrs = [], value = '', location = null) {
@@ -1926,7 +1912,6 @@ class HTMLSrcableElement extends HTMLLoadableElement {
     return Promise.resolve();
   }
 }
-module.exports.HTMLSrcableElement = HTMLSrcableElement;
 
 class HTMLMediaElement extends HTMLSrcableElement {
   constructor(window, tagName = null, attrs = [], value = '', location = null) {
@@ -2026,17 +2011,14 @@ HTMLMediaElement.HAVE_METADATA = 1;
 HTMLMediaElement.HAVE_CURRENT_DATA = 2;
 HTMLMediaElement.HAVE_FUTURE_DATA = 3;
 HTMLMediaElement.HAVE_ENOUGH_DATA = 4;
-module.exports.HTMLMediaElement = HTMLMediaElement;
 
 class HTMLSourceElement extends HTMLSrcableElement {
   constructor(window, attrs = [], value = '', location = null) {
     super(window, 'SOURCE', attrs, value, location);
   }
 }
-module.exports.HTMLSourceElement = HTMLSourceElement;
 
 class SVGElement {}
-module.exports.SVGElement = SVGElement;
 
 const _parseVector = s => {
   if (Array.isArray(s)) {
@@ -2467,7 +2449,6 @@ class HTMLIFrameElement extends HTMLSrcableElement {
     } */
   }
 }
-module.exports.HTMLIFrameElement = HTMLIFrameElement;
 
 class HTMLCanvasElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -2614,7 +2595,6 @@ class HTMLCanvasElement extends HTMLElement {
     return {}; // XXX
   }
 }
-module.exports.HTMLCanvasElement = HTMLCanvasElement;
 
 class HTMLTemplateElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -2656,7 +2636,6 @@ class HTMLTemplateElement extends HTMLElement {
     super.innerHTML = innerHTML;
   }
 }
-module.exports.HTMLTemplateElement = HTMLTemplateElement;
 
 class HTMLTextareaElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -2684,7 +2663,6 @@ class HTMLTextareaElement extends HTMLElement {
     this.textContent = htmlUnescape(innerHTML);
   }
 }
-module.exports.HTMLTextareaElement = HTMLTextareaElement;
 
 class CharacterNode extends Node {
   constructor(window, value) {
@@ -2728,7 +2706,6 @@ class CharacterNode extends Node {
     fn(this);
   }
 }
-module.exports.CharacterNode = CharacterNode;
 
 class Text extends CharacterNode {
   constructor(window, value) {
@@ -2765,7 +2742,6 @@ class Text extends CharacterNode {
     return JSON.stringify(this.value);
   }
 }
-module.exports.Text = Text;
 
 class Comment extends CharacterNode {
   constructor(window, value) {
@@ -2793,7 +2769,6 @@ class Comment extends CharacterNode {
     return `<!--${this.value}-->`;
   }
 }
-module.exports.Comment = Comment;
 
 class HTMLImageElement extends HTMLSrcableElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -2912,7 +2887,6 @@ class HTMLImageElement extends HTMLSrcableElement {
   }
   set data(data) {}
 };
-module.exports.HTMLImageElement = HTMLImageElement;
 
 class TimeRanges {
   constructor(ranges) {
@@ -2932,7 +2906,6 @@ class TimeRanges {
   }
   set length(length) {}
 }
-module.exports.TimeRanges = TimeRanges;
 
 class HTMLAudioElement extends HTMLMediaElement {
   constructor(window, attrs = [], value = '') {
@@ -3069,7 +3042,6 @@ class HTMLAudioElement extends HTMLMediaElement {
   }
 
 };
-module.exports.HTMLAudioElement = HTMLAudioElement;
 
 class HTMLVideoElement extends HTMLMediaElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -3184,7 +3156,6 @@ class HTMLVideoElement extends HTMLMediaElement {
     }
   }
 }
-module.exports.HTMLVideoElement = HTMLVideoElement;
 
 /*
 class HTMLVideoElement extends HTMLMediaElement {
@@ -3379,35 +3350,30 @@ function createImageBitmap(src, x, y, w, h, options) {
   );
   return Promise.resolve(imageBitmap);
 }
-module.exports.createImageBitmap = createImageBitmap;
 
 class HTMLDivElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
     super(window, 'DIV', attrs, value, location);
   }
 }
-module.exports.HTMLDivElement = HTMLDivElement;
 
 class HTMLUListElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
     super(window, 'ULIST', attrs, value, location);
   }
 }
-module.exports.HTMLUListElement = HTMLUListElement;
 
 class HTMLLIElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
     super(window, 'LI', attrs, value, location);
   }
 }
-module.exports.HTMLLIElement = HTMLLIElement;
 
 class HTMLTableElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
     super(window, 'TABLE', attrs, value, location);
   }
 }
-module.exports.HTMLTableElement = HTMLTableElement;
 
 function _hash(s) {
   let result = 0;
@@ -3451,4 +3417,41 @@ const getBoundDOMElements = window => {
     Comment: bind(Comment, b => function Comment() { return b.apply(this, arguments); }),
   };
 };
-module.exports.getBoundDOMElements = getBoundDOMElements;
+
+export {
+  DOMRect,
+  DOMPoint,
+  NodeList,
+  HTMLCollection,
+  Node,
+  DOMTokenList,
+  Element,
+  HTMLElement,
+  HTMLAnchorElement,
+  HTMLLoadableElement,
+  HTMLBodyElement,
+  HTMLStyleElement,
+  HTMLLinkElement,
+  HTMLScriptElement,
+  HTMLSrcableElement,
+  HTMLMediaElement,
+  HTMLSourceElement,
+  SVGElement,
+  HTMLIFrameElement,
+  HTMLCanvasElement,
+  HTMLTemplateElement,
+  HTMLTextareaElement,
+  CharacterNode,
+  Text,
+  Comment,
+  HTMLImageElement,
+  TimeRanges,
+  HTMLAudioElement,
+  HTMLVideoElement,
+  createImageBitmap,
+  HTMLDivElement,
+  HTMLUListElement,
+  HTMLLIElement,
+  HTMLTableElement,
+  getBoundDOMElements,
+};

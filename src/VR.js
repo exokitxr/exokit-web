@@ -1,19 +1,19 @@
-const {EventEmitter} = require('events');
-const {parentPort} = require('worker_threads');
+// const {EventEmitter} = require('events');
+// const {parentPort} = require('worker_threads');
 
-const {Event} = require('./Event');
+import {Event} from './Event.js';
 
-const symbols = require('./symbols');
-const THREE = require('../lib/three-min.js');
-const {
+import symbols from './symbols.js';
+import THREE from '../lib/three-min.js';
+/* const {
   nativeWindow,
   nativeOculusVR,
   nativeOpenVR,
   nativeOculusMobileVr,
   nativeMl,
-} = require('./native-bindings.js');
-const {defaultEyeSeparation, maxNumTrackers} = require('./constants.js');
-const GlobalContext = require('./GlobalContext');
+} = require('./native-bindings.js'); */
+import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
+import GlobalContext from './GlobalContext.js';
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();

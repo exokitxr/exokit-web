@@ -1,12 +1,12 @@
-const {EventEmitter} = require('events');
-const {Event, EventTarget} = require('./Event');
-const {getHMDType} = require('./VR');
-const GlobalContext = require('./GlobalContext');
-const THREE = require('../lib/three-min.js');
-const {defaultCanvasSize} = require('./constants');
-const symbols = require('./symbols');
-const {maxNumTrackers} = require('./constants');
-const {_elementGetter, _elementSetter} = require('./utils');
+// const {EventEmitter} = require('events');
+import {Event, EventTarget} from './Event.j';
+import {getHMDType} from './VR.js';
+import GlobalContext from './GlobalContext.js';
+import THREE from '../lib/three-min.js';
+import {defaultCanvasSize} from './constants.js';
+import symbols from './symbols.js';
+import {maxNumTrackers} from './constants.js';
+import {_elementGetter, _elementSetter} from './utils.js';
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();

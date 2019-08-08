@@ -1,13 +1,13 @@
-const {process} = global;
+// const {process} = global;
 
-const parse5 = require('parse5');
+import parse5 from '../node_modules/parse5/dist/index.js';
 
-const DOM = require('./DOM');
-const {Event, EventTarget} = require('./Event');
-const GlobalContext = require('./GlobalContext');
-const nativeBindings = require('./native-bindings');
-const symbols = require('./symbols');
-const utils = require('./utils');
+import DOM from './DOM.js';
+import {Event, EventTarget} from './Event.js';
+import GlobalContext from './GlobalContext.js';
+import nativeBindings from './native-bindings.js';
+import symbols from './symbols.js';
+import utils from './utils.js';
 
 const _parseDocument = (s, window) => {
   const ast = parse5.parse(s, {
