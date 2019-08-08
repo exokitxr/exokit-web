@@ -1,98 +1,5 @@
-const {EventEmitter} = require('events');
-const USKeyboardLayout = require('./USKeyboardLayout');
-const GlobalContext = require('./GlobalContext');
-
-class EventTarget extends EventEmitter {
-  constructor() {
-    super();
-
-    this.setMaxListeners(Infinity);
-
-    this.on('error', err => {
-      console.warn(err);
-    });
-  }
-
-  addEventListener(event, listener, options) {
-    if (typeof listener === 'function') {
-      if (!this.listeners(event).includes(listener)) {
-        if (options && options.once) {
-          this.once(event, listener);
-        } else {
-          this.on(event, listener);
-        }
-      }
-    }
-  }
-  removeEventListener(event, listener) {
-    if (typeof listener === 'function') {
-      this.removeListener(event, listener);
-    }
-  }
-
-  dispatchEvent(event) {
-    event.target = this;
-    global.event = event;
-
-    const _emit = (node, event) => {
-      event.currentTarget = this;
-
-      try {
-        node._emit(event.type, event);
-      } catch (err) {
-        console.warn(err);
-      }
-
-      event.currentTarget = null;
-    };
-    const _recurse = (node, event) => {
-      _emit(node, event);
-      if (event.bubbles && node instanceof GlobalContext.Document) {
-        _emit(node.defaultView, event);
-      }
-
-      if (event.bubbles && !event.propagationStopped && node.parentNode) {
-        _recurse(node.parentNode, event);
-      }
-    };
-    _recurse(this, event);
-    
-    global.event = null;
-  }
-
-  _emit() { // need to call this instead of EventEmitter.prototype.emit because some frameworks override HTMLElement.prototype.emit()
-    return EventEmitter.prototype.emit.apply(this, arguments);
-  }
-}
-module.exports.EventTarget = EventTarget;
-
-class Event {
-  constructor(type, init = {}) {
-    this.type = type;
-    this.target = init.target !== undefined ? init.target : null;
-    this.bubbles = init.bubbles !== undefined ? init.bubbles : false;
-    this.cancelable = init.cancelable !== undefined ? init.cancelable : false;
-
-    this.defaultPrevented = false;
-    this.propagationStopped = false;
-    this.currentTarget = null;
-  }
-
-  preventDefault() {
-    this.defaultPrevented = true;
-  }
-
-  stopPropagation() {
-    this.propagationStopped = true;
-  }
-
-  initEvent(type = '', bubbles = false, cancelable = false) {
-    this.type = type;
-    this.bubbles = bubbles;
-    this.cancelable = cancelable;
-  }
-}
-module.exports.Event = Event;
+import USKeyboardLayout from './USKeyboardLayout.js';
+import GlobalContext from './GlobalContext.js';
 
 class KeyboardEvent extends Event {
   constructor(type, init = {}) {
@@ -154,7 +61,6 @@ class KeyboardEvent extends Event {
     });
   }
 }
-module.exports.KeyboardEvent = KeyboardEvent;
 
 class MouseEvent extends Event {
   constructor(type, init = {}) {
@@ -202,7 +108,6 @@ class MouseEvent extends Event {
     });
   }
 }
-module.exports.MouseEvent = MouseEvent;
 
 class WheelEvent extends MouseEvent {
   constructor(type, init = {}) {
@@ -219,7 +124,6 @@ class WheelEvent extends MouseEvent {
 WheelEvent.DOM_DELTA_PIXEL = 0x00;
 WheelEvent.DOM_DELTA_LINE = 0x01;
 WheelEvent.DOM_DELTA_PAGE = 0x02;
-module.exports.WheelEvent = WheelEvent;
 
 class DragEvent extends MouseEvent {
   constructor(type, init = {}) {
@@ -232,34 +136,6 @@ class DragEvent extends MouseEvent {
     this.dataTransfer = init.dataTransfer !== undefined ? init.dataTransfer : null;
   }
 }
-module.exports.DragEvent = DragEvent;
-
-class MessageEvent extends Event {
-  constructor(type, init = {}) {
-    super(type, init);
-
-    MessageEvent.prototype.init.call(this, init);
-  }
-  
-  init(init = {}) {
-    this.data = init.data !== undefined ? init.data : null;
-  }
-}
-module.exports.MessageEvent = MessageEvent;
-
-class ErrorEvent extends Event {
-  constructor(type, init = {}) {
-    super(type, init);
-  }
-}
-module.exports.ErrorEvent = ErrorEvent;
-
-class PromiseRejectionEvent extends Event {
-  constructor(type, init = {}) {
-    super(type, init);
-  }
-}
-module.exports.PromiseRejectionEvent = PromiseRejectionEvent;
 
 class SpatialEvent extends Event {
   constructor(type, init = {}) {
@@ -272,13 +148,11 @@ class SpatialEvent extends Event {
     }
   }
 }
-module.exports.SpatialEvent = SpatialEvent;
 
-class CustomEvent extends Event {
-  constructor(type, init = {}) {
-    super(type, init);
-
-    this.detail = init.detail !== undefined ? init.detail : null;
-  }
-}
-module.exports.CustomEvent = CustomEvent;
+export {
+  KeyboardEvent,
+  MouseEvent,
+  WheelEvent,
+  DragEvent,
+  SpatialEvent,
+};

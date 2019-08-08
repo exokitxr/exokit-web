@@ -1,6 +1,6 @@
-const os = require('os');
+// const os = require('os');
 
-const {
+/* const {
   getGamepads,
   getHMDType,
 } = require('./VR.js');
@@ -12,9 +12,9 @@ const {
     VideoDevice,
   },
   nativeWindow,
-} = require('./native-bindings');
-const symbols = require('./symbols');
-const GlobalContext = require('./GlobalContext');
+} = require('./native-bindings'); */
+import symbols from './symbols.js';
+import GlobalContext from './GlobalContext.js';
 
 function getUserMedia(constraints) {
   if (constraints.audio) {
@@ -45,7 +45,6 @@ class MediaDevices {
     ]);
   }
 }
-module.exports.MediaDevices = MediaDevices;
 
 class Clipboard {
   read() {
@@ -66,14 +65,13 @@ class Clipboard {
     });
   }
 }
-module.exports.Clipboard = Clipboard;
 
 class Navigator {
   constructor() {
     this.userAgent = `Mozilla/5.0 (OS) AppleWebKit/999.0 (KHTML, like Gecko) Chrome/999.0.0.0 Safari/999.0 Exokit/${GlobalContext.version}`;
     this.vendor = 'Exokit';
-    this.platform = os.platform();
-    this.hardwareConcurrency = os.cpus().length;
+    this.platform = 'Win32';
+    this.hardwareConcurrency = 4;
     this.appCodeName = 'Mozilla';
     this.appName = 'Netscape';
     this.appVersion = '5.0';
@@ -89,4 +87,9 @@ class Navigator {
     return getGamepads();
   }
 }
-module.exports.Navigator = Navigator;
+
+export {
+  MediaDevices,
+  Clipboard,
+  Navigator,
+};

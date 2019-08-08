@@ -1,7 +1,7 @@
-const {EventEmitter} = require('events');
-const url = require('url');
+// const {EventEmitter} = require('events');
+// const url = require('url');
 
-const {
+/* const {
   workerData: {
     args: {
       options: {
@@ -9,19 +9,19 @@ const {
       },
     },
   },
-} = require('worker_threads');
+} = require('worker_threads'); */
 
-class Location extends EventEmitter {
+class Location extends EventTarget {
   constructor(u) {
     super();
 
-    this._url = new url.URL(u);
+    this._url = new URL(u);
   }
   // triggers navigation
   get href() { return this._url.href || ''; }
   set href(href) {
     const oldUrl = this._url;
-    const newUrl = new url.URL(href, baseUrl);
+    const newUrl = new URL(href, baseUrl);
     this._url = newUrl;
     if (
       newUrl.origin !== oldUrl.origin ||
@@ -74,7 +74,11 @@ class Location extends EventEmitter {
     this._url.href = u;
   }
   update() {
-    this.emit('update', this.href);
+    this.dispatchEvent(new CustomEvemt('update', {
+      detail: {
+        href: this.href,
+      },
+    }));
   }
 }
-module.exports.Location = Location;
+export {Location};

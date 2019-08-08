@@ -15,8 +15,147 @@ body {
     <canvas id="canvas2"></canvas>
     <canvas id="canvas3"></canvas>
     <script src="three.js"></script>
-    <script>
+    <script type="module">
+import {defaultEyeSeparation, maxNumTrackers} from './src/constants.js';
 (async () => {
+const options = (() => {
+  const options = {};
+  options.url = options.url || 'http://127.0.0.1/';
+  options.baseUrl = options.baseUrl || options.url;
+  // options.dataPath = options.dataPath || __dirname;
+  options.args = options.args || {};
+  options.htmlString = `<html></html>`;
+  // options.replacements = options.replacements || {};
+  return options;
+})();
+const xrState = (() => {
+  const _makeSab = size => {
+    const sab = new SharedArrayBuffer(size);
+    let index = 0;
+    return (c, n) => {
+      const result = new c(sab, index, n);
+      index += result.byteLength;
+      return result;
+    };
+  };
+  const _makeTypedArray = _makeSab(32*1024);
+
+  const result = {};
+  result.isPresenting = _makeTypedArray(Uint32Array, 1);
+  result.renderWidth = _makeTypedArray(Float32Array, 1);
+  result.renderWidth[0] = 1920/2;
+  result.renderHeight = _makeTypedArray(Float32Array, 1);
+  result.renderHeight[0] = 1080;
+  result.metrics = _makeTypedArray(Uint32Array, 2);
+  result.devicePixelRatio = _makeTypedArray(Uint32Array, 1);
+  result.depthNear = _makeTypedArray(Float32Array, 1);
+  result.depthNear[0] = 0.1;
+  result.depthFar = _makeTypedArray(Float32Array, 1);
+  result.depthFar[0] = 10000.0;
+  result.position = _makeTypedArray(Float32Array, 3);
+  result.orientation = _makeTypedArray(Float32Array, 4);
+  result.orientation[3] = 1;
+  result.leftViewMatrix = _makeTypedArray(Float32Array, 16);
+  result.leftViewMatrix.set(Float32Array.from([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
+  result.rightViewMatrix = _makeTypedArray(Float32Array, 16);
+  result.rightViewMatrix.set(result.leftViewMatrix);
+  result.leftProjectionMatrix = _makeTypedArray(Float32Array, 16);
+  result.leftProjectionMatrix.set(Float32Array.from([0.5625000000000001, 0, 0, 0, 0, 1.0000000000000002, 0, 0, 0, 0, -1.0002000200020003, -1, 0, 0, -0.20002000200020004, 0]));
+  result.rightProjectionMatrix = _makeTypedArray(Float32Array, 16);
+  result.rightProjectionMatrix.set(result.leftProjectionMatrix);
+  result.leftOffset = _makeTypedArray(Float32Array, 3);
+  result.leftOffset.set(Float32Array.from([-defaultEyeSeparation/2, 0, 0]));
+  result.rightOffset = _makeTypedArray(Float32Array, 3);
+  result.leftOffset.set(Float32Array.from([defaultEyeSeparation/2, 0, 0]));
+  result.leftFov = _makeTypedArray(Float32Array, 4);
+  result.leftFov.set(Float32Array.from([45, 45, 45, 45]));
+  result.rightFov = _makeTypedArray(Float32Array, 4);
+  result.rightFov.set(result.leftFov);
+  const _makeGamepad = () => ({
+    connected: _makeTypedArray(Uint32Array, 1),
+    position: _makeTypedArray(Float32Array, 3),
+    orientation: (() => {
+      const result = _makeTypedArray(Float32Array, 4);
+      result[3] = 1;
+      return result;
+    })(),
+    direction: (() => { // derived
+      const result = _makeTypedArray(Float32Array, 4);
+      result[2] = -1;
+      return result;
+    })(),
+    transformMatrix: (() => { // derived
+      const result = _makeTypedArray(Float32Array, 16);
+      result.set(Float32Array.from([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
+      return result;
+    })(),
+    buttons: (() => {
+      const result = Array(10);
+      for (let i = 0; i < result.length; i++) {
+        result[i] = {
+          pressed: _makeTypedArray(Uint32Array, 1),
+          touched: _makeTypedArray(Uint32Array, 1),
+          value: _makeTypedArray(Float32Array, 1),
+        };
+      }
+      return result;
+    })(),
+    axes: _makeTypedArray(Float32Array, 10),
+    bones: _makeTypedArray(Float32Array, 31*16),
+  });
+  result.gamepads = (() => {
+    const result = Array(2 + maxNumTrackers);
+    for (let i = 0; i < result.length; i++) {
+      result[i] = _makeGamepad();
+    }
+    return result;
+  })();
+  result.hands = (() => {
+    const result = Array(2);
+    for (let i = 0; i < result.length; i++) {
+      const hand = _makeGamepad();
+      hand.wrist = (() => {
+        const result = Array(4);
+        for (let i = 0; i < result.length; i++) {
+          result[i] = _makeTypedArray(Float32Array, 3);
+        }
+        return result;
+      })();
+      hand.fingers = (() => {
+        const result = Array(5);
+        for (let i = 0; i < result.length; i++) {
+          result[i] = (() => {
+            const result = Array(4);
+            for (let i = 0; i < result.length; i++) {
+              result[i] = _makeTypedArray(Float32Array, 3);
+            }
+            return result;
+          })();
+        }
+        return result;
+      })();
+      result[i] = hand;
+    }
+    return result;
+  })();
+  result.eye = _makeGamepad();
+  result.id = _makeTypedArray(Uint32Array, 1);
+  result.hmdType = _makeTypedArray(Uint32Array, 1);
+  result.tex = _makeTypedArray(Uint32Array, 1);
+  result.depthTex = _makeTypedArray(Uint32Array, 1);
+  result.msTex = _makeTypedArray(Uint32Array, 1);
+  result.msDepthTex = _makeTypedArray(Uint32Array, 1);
+  result.aaEnabled = _makeTypedArray(Uint32Array, 1);
+  result.fakeVrDisplayEnabled = _makeTypedArray(Uint32Array, 1);
+  result.meshing = _makeTypedArray(Uint32Array, 1);
+  result.planeTracking = _makeTypedArray(Uint32Array, 1);
+  result.handTracking = _makeTypedArray(Uint32Array, 1);
+  result.eyeTracking = _makeTypedArray(Uint32Array, 1);
+  result.blobId = _makeTypedArray(Uint32Array, 1);
+
+  return result;
+})();
+
 let t, screenQuadVBO, shaderProgram, imageBitmap = null;
 
 const worker = new Worker('iframe-worker.js', {
@@ -32,6 +171,11 @@ const context = canvas3.getContext('webgl');
 
 worker.postMessage({
   canvas: offscreenCanvas,
+  args: {
+    initModule: './Window.js',
+    options,
+    xrState,
+  },
 }, [offscreenCanvas]);
 
 const _onmessage = () => {

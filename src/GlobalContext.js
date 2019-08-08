@@ -1,1 +1,1 @@
-// Place to dump global variables.
+export default {}; // Place to dump global variables.

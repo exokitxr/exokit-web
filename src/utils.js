@@ -1,11 +1,12 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+import path from '../node_modules/path-browserify/index.js';
+// const fs = require('fs');
+// const url = require('url');
 
-const mkdirp = require('mkdirp');
-const parseIntStrict = require('parse-int');
+import parseIntStrict from '../node_modules/parse-int/dist/index.js';
 
-const symbols = require('./symbols');
+import symbols from './symbols.js';
+
+const module = {exports: {}};
 
 function _getBaseUrl(u, currentBaseUrl = '') {
   let result;
@@ -86,3 +87,5 @@ const _elementSetter = (self, attribute, cb) => {
   }
 };
 module.exports._elementSetter = _elementSetter;
+
+export default module.exports;

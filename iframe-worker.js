@@ -1,8 +1,6 @@
 // importScripts('worker-bootstrap.js');
 // self.window = self;
 // const THREE = require('three.js');
-import 'src/WindowBase.js';
-import THREE from 'three.js';
 
 let canvas, renderer, context, scene, camera, cubeMesh;
 
@@ -16,9 +14,18 @@ function animate() {
   // console.log('worker render 2');
 }
 
-const _onmessage = m => {
+const _onmessage = async m => {
   console.log('got message 1 1', m.data);
+
+  self.initModule = m.data.initModule;
+  self.args = m.data.args;
+  self.parentPort = self;
   canvas = m.data.canvas;
+
+  const [_, THREE] = await Promise.all([
+    import('./src/WindowBase.js'),
+    import('./three.module.js'),
+  ]);
 
   renderer = new THREE.WebGLRenderer({
     canvas,
@@ -53,21 +60,21 @@ const _onmessage = m => {
 
   console.log('got message 1 2');
 
-  window.postMessage({
+  self.postMessage({
     ready: true,
   });
 
-  window.removeEventListener('message', _onmessage);
-  window.addEventListener('message', _onmessage2);
+  self.removeEventListener('message', _onmessage);
+  self.addEventListener('message', _onmessage2);
 };
-window.addEventListener('message', _onmessage);
+self.addEventListener('message', _onmessage);
 
 const _onmessage2 = m => {
   const {viewMatrices, projectionMatrices} = m.data;
   // console.log('render message');
   animate();
   const imageBitmap = canvas.transferToImageBitmap();
-  window.postMessage({
+  self.postMessage({
     imageBitmap,
   }, [imageBitmap]);
 };

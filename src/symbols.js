@@ -1,3 +1,4 @@
+const module = {exports: {}};
 module.exports.windowSymbol = Symbol('windowSymbol');
 module.exports.addRunSymbol = Symbol('addRunSymbol');
 module.exports.computedStyleSymbol = Symbol('computedStyleSymbol');
@@ -19,3 +20,5 @@ module.exports.runSymbol = Symbol('runSymbol');
 module.exports.runningSymbol = Symbol('runningSymbol');
 module.exports.timeoutSymbol = Symbol('timeoutSymbol');
 module.exports.rafCbsSymbol = Symbol('rafCbsSymbol');
+
+export default module.exports;

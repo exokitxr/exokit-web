@@ -1,38 +1,41 @@
 // const {Console} = require('console');
-import {EventEmitter} from 'node_modules/events-browserify/events.js';
-import stream from 'node_modules/stream-browserify/index.js';
-import path from 'node_modules/path-browserify/index.js';
+// import {EventEmitter} from '../node_modules/events-browserify/events.js';
+import events from '../node_modules/events-browserify/events.js';
+const {EventEmitter} = events;
+import stream from '../node_modules/stream-browserify/dist/index.js';
+import path from '../node_modules/path-browserify/index.js';
 // const fs = require('fs');
 // import url from 'url';
 // const {URL} = url;
 // const vm = require('vm');
-import util from 'node_modules/util/util.js';
-const crypto = require('crypto');
+import util from '../node_modules/util/dist/util.js';
+
+// const crypto = require('crypto');
 // const {performance} = require('perf_hooks');
-const {
+/* const {
   Worker: WorkerBase,
   workerData: {
     initModule,
     args,
   },
   parentPort,
-} = require('worker_threads');
+} = require('worker_threads'); */
 
 // const {Buffer} = global;
 
-// const {CustomEvent, DragEvent, ErrorEvent, Event, EventTarget, KeyboardEvent, MessageEvent, MouseEvent, WheelEvent, PromiseRejectionEvent} = require('./Event');
-// const {MediaDevices, Clipboard, Navigator} = require('./Navigator');
-// const {Location} = require('./Location');
+import {DragEvent, KeyboardEvent, MouseEvent, WheelEvent} from './Event.js';
+import {MediaDevices, Clipboard, Navigator} from './Navigator.js';
+import {Location} from './Location.js';
 // const {FileReader} = require('./File');
 // const {XMLHttpRequest, FormData} = require('window-xhr');
-const {fetch} = require('./fetch');
-const {Request, Response, Headers, Blob} = fetch;
-const WebSocket = require('ws/lib/websocket');
+// const {fetch} = require('./fetch');
+// const {Request, Response, Headers, Blob} = fetch;
+// const WebSocket = require('ws/lib/websocket');
 
-const {WorkerVm} = require('./WindowVm');
-const GlobalContext = require('./GlobalContext');
+// const {WorkerVm} = require('./WindowVm');
+import GlobalContext from './GlobalContext.js';
 
-const utils = require('./utils');
+import utils from './utils.js';
 
 // const btoa = s => Buffer.from(s, 'binary').toString('base64');
 // const atob = s => Buffer.from(s, 'base64').toString('binary');
@@ -42,11 +45,11 @@ const utils = require('./utils');
 /* const {
   nativeConsole,
 } = require('./native-bindings'); */
-const {process} = global;
+// const {process} = global;
 
 GlobalContext.xrState = args.xrState;
 
-const consoleStream = new stream.Writable();
+/* const consoleStream = new stream.Writable();
 consoleStream._write = (chunk, encoding, callback) => {
   nativeConsole.Log(chunk);
   callback();
@@ -57,11 +60,11 @@ consoleStream._writev = (chunks, callback) => {
   }
   callback();
 };
-global.console = new Console(consoleStream);
+global.console = new Console(consoleStream); */
 
 // global initialization
 
-for (const k in EventEmitter.prototype) {
+/* for (const k in EventEmitter.prototype) {
   global[k] = EventEmitter.prototype[k];
 }
 EventEmitter.call(global);
@@ -124,23 +127,17 @@ class Worker extends EventTarget {
   set onerror(onerror) {
     this.on('error', onerror);
   }
-}
+} */
 
 (self => {
-  self.btoa = btoa;
-  self.atob = atob;
+  // self.btoa = btoa;
+  // self.atob = atob;
 
-  self.Event = Event;
   self.KeyboardEvent = KeyboardEvent;
   self.MouseEvent = MouseEvent;
   self.WheelEvent = WheelEvent;
   self.DragEvent = DragEvent;
-  self.MessageEvent = MessageEvent;
-  self.PromiseRejectionEvent = PromiseRejectionEvent;
-  self.CustomEvent = CustomEvent;
-  self.EventTarget = EventTarget;
 
-  self.URL = URL;
   self.Location = Location;
   const location = new Location(args.options.url);
   Object.defineProperty(self, 'location', {
@@ -154,9 +151,14 @@ class Worker extends EventTarget {
   });
 
   self.Navigator = Navigator;
-  self.navigator = new Navigator();
+  const navigator = new Navigator();
+  Object.defineProperty(self, 'navigator', {
+    get() {
+      return navigator;
+    },
+  });
 
-  self.fetch = fetch;
+  /* self.fetch = fetch;
   self.Request = Request;
   self.Response = Response;
   self.Headers = Headers;
@@ -184,11 +186,11 @@ class Worker extends EventTarget {
     }
     return WebSocket;
   })(WebSocket);
-  self.FileReader = FileReader;
+  self.FileReader = FileReader; */
 
-  self.performance = performance;
+  // self.performance = performance;
 
-  self.crypto = {
+  /* self.crypto = {
     getRandomValues(typedArray) {
       crypto.randomFillSync(Buffer.from(typedArray.buffer, typedArray.byteOffset, typedArray.byteLength));
       return typedArray;
@@ -221,14 +223,14 @@ class Worker extends EventTarget {
         return Promise.resolve(result);
       },
     },
-  };
+  }; */
 
-  self.Worker = Worker;
+  // self.Worker = Worker;
 
-  self.MediaDevices = MediaDevices;
-  self.Clipboard = Clipboard;
+  /* self.MediaDevices = MediaDevices;
+  self.Clipboard = Clipboard; */
 
-  self.postMessage = (message, transferList) => parentPort.postMessage({
+  /* self.postMessage = (message, transferList) => parentPort.postMessage({
     method: 'postMessage',
     message,
   }, transferList);
@@ -239,8 +241,8 @@ class Worker extends EventTarget {
     set(onmessage) {
       self.on('message', onmessage);
     },
-  });
-})(global);
+  }); */
+})(self);
 
 const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
 
@@ -289,7 +291,7 @@ function importScripts() {
 }
 global.importScripts = importScripts; */
 
-parentPort.on('message', m => {
+self.addEventListener('message', m => {
   switch (m.method) {
     case 'runRepl': {
       let result, err;
@@ -298,7 +300,7 @@ parentPort.on('message', m => {
       } catch(e) {
         err = e.stack;
       }
-      parentPort.postMessage({
+      self.postMessage({
         method: 'response',
         requestKey: m.requestKey,
         result,
@@ -316,14 +318,14 @@ parentPort.on('message', m => {
       if (!err) {
         Promise.resolve(result)
           .then(result => {
-            parentPort.postMessage({
+            self.postMessage({
               method: 'response',
               requestKey: m.requestKey,
               result,
             });
           });
       } else {
-        parentPort.postMessage({
+        self.postMessage({
           method: 'response',
           requestKey: m.requestKey,
           error: err,
@@ -346,38 +348,19 @@ parentPort.on('message', m => {
   }
 });
 
-function close() {
-  global.onexit && global.onexit();
-  process.exit(); // thread exit
-};
-global.close = close;
-parentPort.on('close', close);
-
 // run init module
 
 /* if (workerData.args) {
   global.args = workerData.args;
 } */
 
-process.on('uncaughtException', err => {
+/* process.on('uncaughtException', err => {
   console.warn('uncaught exception:', (err && err.stack) || err);
 });
 process.on('unhandledRejection', err => {
   console.warn('unhandled rejection:', (err && err.stack) || err);
-});
+}); */
 
 if (initModule) {
-  require(initModule);
+  import(initModule);
 }
-
-// Run a script for each new JS context before the page/worker JS loads
-const onbeforeload = args.args.onbeforeload;
-if (onbeforeload) {
-  const finalScript = path.resolve(process.cwd(), onbeforeload);
-  require(finalScript);
-}
-
-if (!args.require) {
-  global.require = undefined;
-}
-global.process = undefined;
