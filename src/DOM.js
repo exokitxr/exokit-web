@@ -14,7 +14,7 @@ import parseIntStrict from '../node_modules/parse-int/dist/index.js';
 import selector from '../node_modules/window-selector/selector.js';
 // const {fetch} = require('./fetch');
 // const {Blob} = fetch;
-import htmlUnescape from '../node_modules/unescape/index.js';
+// import htmlUnescape from '../node_modules/unescape/index.js';
 
 // const bindings = require('./native-bindings');
 import {MouseEvent} from './Event.js';
@@ -2660,7 +2660,7 @@ class HTMLTextareaElement extends HTMLElement {
     return this.textContent;
   }
   set innerHTML(innerHTML) {
-    this.textContent = htmlUnescape(innerHTML);
+    this.textContent = unescape(innerHTML);
   }
 }
 
