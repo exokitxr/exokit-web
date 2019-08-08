@@ -1,14 +1,13 @@
-const {EventEmitter} = require('events');
-const path = require('path');
-const {Worker} = require('worker_threads');
-const GlobalContext = require('./GlobalContext');
+// const {EventEmitter} = require('events');
+import path from '../modules/path-browserify.js';
+// const {Worker} = require('worker_threads');
+import GlobalContext from './GlobalContext.js';
 
-const windowBasePath = path.join(__dirname, 'WindowBase.js');
-class WorkerVm extends EventEmitter {
+class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
-    const worker = new Worker(windowBasePath, {
+    const worker = new Worker('WindowBase.js', {
       workerData: {
         initModule: options.initModule,
         args: options.args,
@@ -136,7 +135,6 @@ class WorkerVm extends EventEmitter {
     this.on('exit', onexit);
   }
 }
-module.exports.WorkerVm = WorkerVm;
 
 const _clean = o => {
   const result = {};
@@ -228,4 +226,8 @@ const _makeWindow = (options = {}, handlers = {}) => {
 
   return window;
 };
-module.exports._makeWindow = _makeWindow;
+
+export {
+  WorkerVm,
+  _makeWindow,
+};

@@ -8,7 +8,7 @@ const {nativeWindow} = exokitNode;
 
 const webGlToOpenGl = require('webgl-to-opengl');
 const symbols = require('./symbols');
-const GlobalContext = require('./GlobalContext');
+const GlobalContext = require('./GlobalContext4');
 
 const bindings = {};
 for (const k in exokitNode) {

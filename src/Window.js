@@ -1,12 +1,12 @@
-import events from 'events';
-const {EventEmitter} = events;
-import path from '../node_modules/path-browserify/index.js';
+// import events from '../events-browserify.js';
+// const {EventEmitter} = events;
+import path from '../modules/path-browserify.js';
 // const fs = require('fs');
 // const http = require('http');
 // const https = require('https');
 // const os = require('os');
 // const {parentPort} = require('worker_threads');
-import util from '../node_modules/util/dist/util.js';
+import util from '../modules/util.js';
 // const {TextEncoder, TextDecoder} = util;
 // const {performance} = require('perf_hooks');
 /* const {
@@ -21,12 +21,9 @@ import util from '../node_modules/util/dist/util.js';
 } = require('worker_threads'); */
 
 import {SpatialEvent} from './Event.js';
-import {XRRigidTransform} from './XR.js';
 
 // const mkdirp = require('mkdirp');
 // const ws = require('ws');
-
-// const core = require('./core.js');
 
 /* const {
   RTCIceCandidate,
@@ -42,7 +39,7 @@ import {XRRigidTransform} from './XR.js';
 
 // const {LocalStorage} = require('window-ls');
 // const indexedDB = require('fake-indexeddb');
-import parseXml from '../node_modules/@rgrove/parse-xml/dist/commonjs/index.js';
+import parseXml from '../modules/parse-xml.js';
 import THREE from '../lib/three-min.js';
 import {
   VRDisplay,
@@ -64,7 +61,7 @@ GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 
-import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document';
+import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document.js';
 import {
   HTMLElement,
   getBoundDOMElements,
@@ -75,8 +72,8 @@ import {
   DOMPoint,
   createImageBitmap,
 } from './DOM.js';
-import {History} from './History.js';
-import XR from './XR.js';
+import History from './History.js';
+import * as XR from './XR.js';
 // const DevTools = require('./DevTools');
 import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
@@ -343,7 +340,7 @@ class Screen {
   set availHeight(availHeight) {}
 }
 
-class MediaRecorder extends EventEmitter {
+class MediaRecorder extends EventTarget {
   constructor() {
     super();
   }
@@ -404,10 +401,10 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
 };
 
 (window => {
-  for (const k in EventEmitter.prototype) {
+  /* for (const k in EventEmitter.prototype) {
     window[k] = EventEmitter.prototype[k];
   }
-  EventEmitter.call(window);
+  EventEmitter.call(window); */
 
   window.window = window;
   window.self = window;
@@ -1300,7 +1297,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
 
   window.document = _parseDocument(options.htmlString, window);
   window.document.hidden = options.hidden || false;
-  window.document.xrOffset = options.xrOffsetBuffer ? new XRRigidTransform(options.xrOffsetBuffer) : new XRRigidTransform();
+  window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
 })(global);
 
 global.onrunasync = req => {

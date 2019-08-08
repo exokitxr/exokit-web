@@ -1,12 +1,12 @@
 // const {EventEmitter} = require('events');
-import {Event, EventTarget} from './Event.j';
+// import {Event, EventTarget} from './Event.js';
 import {getHMDType} from './VR.js';
 import GlobalContext from './GlobalContext.js';
 import THREE from '../lib/three-min.js';
-import {defaultCanvasSize} from './constants.js';
 import symbols from './symbols.js';
 import {maxNumTrackers} from './constants.js';
-import {_elementGetter, _elementSetter} from './utils.js';
+import utils from './utils.js';
+const {_elementGetter, _elementSetter} = utils;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -15,7 +15,7 @@ const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 const localMatrix2 = new THREE.Matrix4();
 
-class XR extends EventEmitter {
+class XR extends EventTarget {
   constructor(window) {
     super();
 
@@ -79,7 +79,6 @@ class XR extends EventEmitter {
     _elementSetter(this, 'vrdevicechange', onvrdevicechange);
   }
 };
-module.exports.XR = XR;
 
 /* class XRDevice { // non-standard
   constructor(xr) {
@@ -92,8 +91,7 @@ module.exports.XR = XR;
   requestSession(opts) {
     return this.xr.requestSession();
   }
-}
-module.exports.XRDevice = XRDevice; */
+} */
 
 class XRSession extends EventTarget {
   constructor({exclusive = false, outputContext = null} = {}, window) {
@@ -298,7 +296,6 @@ class XRSession extends EventTarget {
     _elementSetter(this, 'selectend', onselectend);
   }
 }
-module.exports.XRSession = XRSession;
 
 class XRRenderState {
   constructor() {
@@ -344,7 +341,6 @@ class XRRenderState {
     }
   }
 };
-module.exports.XRRenderState = XRRenderState;
 
 class XRWebGLLayer {
   constructor(session, context, options = {}) {
@@ -391,7 +387,6 @@ class XRWebGLLayer {
   }
   set framebufferHeight(framebufferHeight) {}
 }
-module.exports.XRWebGLLayer = XRWebGLLayer;
 
 const _applyXrOffsetToPose = (pose, xrOffset, inverse, premultiply) => {
   if (xrOffset) {
@@ -440,7 +435,6 @@ class XRFrame {
     return inputSource._inputPose;
   }
 }
-module.exports.XRFrame = XRFrame;
 
 class XRView {
   constructor(eye = 'left') {
@@ -456,7 +450,6 @@ class XRView {
     this.viewMatrix = this.transform.inverse.matrix; // non-standard
   }
 }
-module.exports.XRView = XRView;
 
 class XRViewport {
   constructor(eye) {
@@ -479,7 +472,6 @@ class XRViewport {
   }
   set height(height) {}
 }
-module.exports.XRViewport = XRViewport;
 
 class XRPose {
   constructor() {
@@ -491,7 +483,6 @@ class XRPose {
     this.transform.inverse.matrix = this._localViewMatrix;
   }
 }
-module.exports.XRPose = XRPose;
 
 class XRViewerPose extends XRPose {
   constructor(frame) {
@@ -526,7 +517,6 @@ class XRViewerPose extends XRPose {
     return view._localViewMatrix;
   }
 }
-module.exports.XRViewerPose = XRViewerPose;
 
 class XRInputSource {
   constructor(handedness, targetRayMode, xrStateGamepad) {
@@ -554,7 +544,6 @@ class XRInputSource {
     this._xrStateGamepad.connected[0] = connected ? 1 : 0;
   }
 }
-module.exports.XRInputSource = XRInputSource;
 
 class XRRay { // non-standard
   constructor() {
@@ -563,7 +552,6 @@ class XRRay { // non-standard
     this.transformMatrix = Float32Array.from([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   }
 }
-module.exports.XRRay = XRRay;
 
 class XRInputPose { // non-standard
   constructor() {
@@ -571,7 +559,6 @@ class XRInputPose { // non-standard
     this.gripTransform = new XRRigidTransform();
   }
 }
-module.exports.XRInputPose = XRInputPose;
 
 class XRInputSourceEvent extends Event {
   constructor(type, init = {}) {
@@ -581,7 +568,6 @@ class XRInputSourceEvent extends Event {
     this.inputSource = init.inputSource !== undefined ? init.inputSource : null;
   }
 }
-module.exports.XRInputSourceEvent = XRInputSourceEvent;
 GlobalContext.XRInputSourceEvent = XRInputSourceEvent;
 
 class XRRigidTransform {
@@ -699,7 +685,6 @@ class XRRigidTransform {
     localVector2.toArray(this.scaleInverse);
   }
 }
-module.exports.XRRigidTransform = XRRigidTransform;
 
 class XRSpace extends EventTarget {
   constructor() {
@@ -708,7 +693,6 @@ class XRSpace extends EventTarget {
     this._pose = new XRPose();
   }
 }
-module.exports.XRSpace = XRSpace;
 
 class XRReferenceSpace extends XRSpace {
   getOffsetReferenceSpace(originOffset) {
@@ -721,7 +705,6 @@ class XRReferenceSpace extends XRSpace {
     _elementSetter(this, 'reset', onreset);
   }
 }
-module.exports.XRReferenceSpace = XRReferenceSpace;
 
 class XRBoundedReferenceSpace extends XRReferenceSpace {
   constructor() {
@@ -736,4 +719,24 @@ class XRBoundedReferenceSpace extends XRReferenceSpace {
     this.emulatedHeight = 0;
   }
 }
-module.exports.XRBoundedReferenceSpace = XRBoundedReferenceSpace;
+
+export {
+  XR,
+  // XRDevice,
+  XRSession,
+  XRRenderState,
+  XRWebGLLayer,
+  XRFrame,
+  XRView,
+  XRViewport,
+  XRPose,
+  XRViewerPose,
+  XRInputSource,
+  XRRay,
+  XRInputPose,
+  XRInputSourceEvent,
+  XRRigidTransform,
+  XRSpace,
+  XRReferenceSpace,
+  XRBoundedReferenceSpace,
+};

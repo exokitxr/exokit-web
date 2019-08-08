@@ -1,14 +1,14 @@
 // const {Console} = require('console');
-// import {EventEmitter} from '../node_modules/events-browserify/events.js';
-import events from '../node_modules/events-browserify/events.js';
+// const {EventEmitter} = require('../node_modules/events-browserify/events.js');
+import events from '../modules/events-browserify.js';
 const {EventEmitter} = events;
-import stream from '../node_modules/stream-browserify/dist/index.js';
-import path from '../node_modules/path-browserify/index.js';
+import stream from '../modules/stream-browserify.js';
+import path from '../modules/path-browserify.js';
 // const fs = require('fs');
 // import url from 'url';
 // const {URL} = url;
 // const vm = require('vm');
-import util from '../node_modules/util/dist/util.js';
+import util from '../modules/util.js';
 
 // const crypto = require('crypto');
 // const {performance} = require('perf_hooks');

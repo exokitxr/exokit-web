@@ -7,7 +7,7 @@ const os = require('os');
 const packageJson = require('../package.json');
 const bugsnag = require('bugsnag');
 
-const GlobalContext = require('./GlobalContext');
+const GlobalContext = require('./GlobalContext3');
 
 const bugsnagApiKey = (() => {
   try {

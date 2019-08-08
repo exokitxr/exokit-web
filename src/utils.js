@@ -1,8 +1,8 @@
-import path from '../node_modules/path-browserify/index.js';
+import path from '../modules/path-browserify.js';
 // const fs = require('fs');
 // const url = require('url');
 
-import parseIntStrict from '../node_modules/parse-int/dist/index.js';
+import parseIntStrict from '../modules/parse-int.js';
 
 import symbols from './symbols.js';
 

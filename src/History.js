@@ -1,11 +1,11 @@
 // const {EventEmitter} = require('events');
-const {createMemoryHistory} = require('history');
+import history from '../modules/history.js';
 
-class History extends EventEmitter {
+class History extends EventTarget {
   constructor(u) {
     super();
 
-    this._history = createMemoryHistory({
+    this._history = history.createMemoryHistory({
       initialEntries: [u],
     });
     this._history.listen((location, action) => {
@@ -43,4 +43,4 @@ class History extends EventEmitter {
   }
   set state(state) {}
 }
-module.exports.History = History;
+export default History;

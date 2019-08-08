@@ -1,27 +1,28 @@
-import path from '../node_modules/path-browserify/index.js';
+import path from '../modules/path-browserify.js';
 // const fs = require('fs');
 // const url = require('url');
 // const vm = require('vm');
-import util from '../node_modules/util/dist/util.js';
+import util from '../modules/util.js';
 // const {parentPort} = require('worker_threads');
 
 // const {process} = global;
 
-import css from '../node_modules/css/index.js';
-import he from '../node_modules/he/he.js';
-import parse5 from '../node_modules/parse5/dist/index.js';
-import parseIntStrict from '../node_modules/parse-int/dist/index.js';
-import selector from '../node_modules/window-selector/selector.js';
+import css from '../modules/css.js';
+import he from '../modules/he.js';
+console.log('got he', he);
+import parse5 from '../modules/parse5.js';
+import parseIntStrict from '../modules/parse-int.js';
+import selector from '../modules/window-selector.js';
 // const {fetch} = require('./fetch');
 // const {Blob} = fetch;
-// import htmlUnescape from '../node_modules/unescape/index.js';
 
 // const bindings = require('./native-bindings');
 import {MouseEvent} from './Event.js';
 import {_makeWindow} from './WindowVm.js';
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
-import {_elementGetter, _elementSetter, _normalizeUrl} from './utils.js';
+import utils from './utils.js';
+const {_elementGetter, _elementSetter, _normalizeUrl} = utils;
 import {XRRigidTransform} from './XR.js';
 // const {ElectronVm} = require('./electron-vm.js');
 

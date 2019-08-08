@@ -16,6 +16,7 @@ body {
     <canvas id="canvas3"></canvas>
     <script src="three.js"></script>
     <script type="module">
+import {_makeWindow} from './src/WindowVm.js';
 import {defaultEyeSeparation, maxNumTrackers} from './src/constants.js';
 (async () => {
 const options = (() => {
@@ -183,9 +184,9 @@ worker.postMessage({
   canvas: offscreenCanvas,
   args: {
     initModule: './Window.js',
-    id,
-    args: GlobalContext.args,
-    version: GlobalContext.version,
+    id: 1,
+    args: {},
+    version: '0.0.1',
     options: _clean(options),
     xrState,
   },

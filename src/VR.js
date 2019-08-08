@@ -1,7 +1,4 @@
-// const {EventEmitter} = require('events');
 // const {parentPort} = require('worker_threads');
-
-import {Event} from './Event.js';
 
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
@@ -173,7 +170,7 @@ class VRStageParameters {
   } */
 }
 
-class VRDisplay extends EventEmitter {
+class VRDisplay extends EventTarget {
   constructor(displayName, window) {
     super();
 
@@ -359,7 +356,7 @@ class VRDisplay extends EventEmitter {
   }
 }
 
-class FakeMesher extends EventEmitter {
+class FakeMesher extends EventTarget {
   constructor() {
     super();
 
@@ -504,7 +501,7 @@ class FakeMesher extends EventEmitter {
   }
 }
 
-class FakePlaneTracker extends EventEmitter {
+class FakePlaneTracker extends EventTarget {
   constructor() {
     super();
 
@@ -781,7 +778,7 @@ function clearGamepads() {
 }
 GlobalContext.clearGamepads = clearGamepads;
 
-module.exports = {
+export {
   VRDisplay,
   VRFrameData,
   VRPose,
@@ -795,5 +792,5 @@ module.exports = {
   lookupHMDTypeString,
   lookupHMDTypeIndex,
   createFakeXRDisplay,
-  getGamepads
+  getGamepads,
 };

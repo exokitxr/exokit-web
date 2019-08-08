@@ -1,18 +1,15 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
 const {URL} = url;
-const vm = require('vm');
+// const vm = require('vm');
 const {
   workerData: {
     args,
   },
 } = require('worker_threads');
 
-const {createImageBitmap} = require('./DOM.js');
-const WebSocket = require('ws/lib/websocket');
-const {FileReader} = require('./File.js');
-const GlobalContext = require('./GlobalContext');
+import {createImageBitmap} from './DOM.js';
+// const WebSocket = require('ws/lib/websocket');
+// const {FileReader} = require('./File.js');
+import GlobalContext from './GlobalContext.js';
 
 const {src, baseUrl} = args;
 GlobalContext.baseUrl = baseUrl;
@@ -26,32 +23,32 @@ const _normalizeUrl = src => {
 };
 const filename = _normalizeUrl(src);
 
-global.self = global;
-global.addEventListener = (type, fn) => global.on(type, fn);
-global.removeEventListener = (type, fn) => global.removeListener(type, fn);
-global.location = url.parse(filename);
-global.WebSocket = WebSocket;
-global.importScripts = importScripts;
-global.createImageBitmap = createImageBitmap;
-global.FileReader = FileReader;
+// global.self = global;
+// global.addEventListener = (type, fn) => global.on(type, fn);
+// global.removeEventListener = (type, fn) => global.removeListener(type, fn);
+self.location = url.parse(filename);
+// global.WebSocket = WebSocket;
+// global.importScripts = importScripts;
+self.createImageBitmap = createImageBitmap;
+// global.FileReader = FileReader;
 
-global.on('error', err => {
+/* global.on('error', err => {
   const {onerror} = global;
   onerror && onerror(err);
-});
+}); */
 
-const _handleError = err => {
+/* const _handleError = err => {
   if (global.onerror) {
     global.onerror(err);
   }
 };
 process.on('uncaughtException', _handleError);
-process.on('unhandledRejection', _handleError);
+process.on('unhandledRejection', _handleError); */
 
 /* const exp = getScript(filename);
 vm.runInThisContext(exp, {
   filename: /^https?:/.test(filename) ? filename : 'data-url://',
 }); */
-process.nextTick(() => { // importScripts will block, so make sure we are done setup first
+// process.nextTick(() => { // importScripts will block, so make sure we are done setup first
   importScripts(filename);
-});
+// });

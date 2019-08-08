@@ -12,7 +12,7 @@ const bindings = require('./native-bindings');
 const electron = !bindings.nativePlatform ? require('electron') : null;
 const keycode = require('keycode');
 
-const GlobalContext = require('./GlobalContext');
+const GlobalContext = require('./GlobalContext6');
 
 const {process} = global;
 

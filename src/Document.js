@@ -1,11 +1,11 @@
 // const {process} = global;
 
-import parse5 from '../node_modules/parse5/dist/index.js';
+import parse5 from '../modules/parse5.js';
 
-import DOM from './DOM.js';
-import {Event, EventTarget} from './Event.js';
+import * as DOM from './DOM.js';
+// import {Event, EventTarget} from './Event.js';
 import GlobalContext from './GlobalContext.js';
-import nativeBindings from './native-bindings.js';
+// import nativeBindings from './native-bindings.js';
 import symbols from './symbols.js';
 import utils from './utils.js';
 
@@ -16,14 +16,12 @@ const _parseDocument = (s, window) => {
   ast.tagName = 'document';
   return _parseDocumentAst(ast, window, true);
 };
-module.exports._parseDocument = _parseDocument;
 GlobalContext._parseDocument = _parseDocument;
 
 const _parseDocumentAst = (ast, window, uppercase) => {
   const document = _fromAST(ast, window, null, null, uppercase);
   return initDocument(document, window);
 };
-module.exports._parseDocumentAst = _parseDocumentAst;
 
 /**
  * Initialize document instance with properties and methods.
@@ -213,7 +211,6 @@ function initDocument (document, window) {
 
   return document;
 }
-module.exports.initDocument = initDocument;
 
 const maxParallelResources = 8;
 class Resource {
@@ -393,7 +390,6 @@ const _fromAST = (node, window, parentNode, document, uppercase) => {
     return element;
   }
 };
-module.exports._fromAST = _fromAST;
 GlobalContext._fromAST = _fromAST;
 
 function _upgradeElement(window, el, upgradeTagName) {
@@ -442,11 +438,9 @@ const _runHtml = (element, window) => {
     return Promise.resolve();
   }
 };
-module.exports._runHtml = _runHtml;
 GlobalContext._runHtml = _runHtml;
 
 class DocumentType {}
-module.exports.DocumentType = DocumentType;
 
 class DOMImplementation {
   constructor(window) {
@@ -469,7 +463,6 @@ class DOMImplementation {
     return false;
   }
 }
-module.exports.DOMImplementation = DOMImplementation;
 
 class Document extends DOM.HTMLLoadableElement {
   constructor(window) {
@@ -514,7 +507,6 @@ class Document extends DOM.HTMLLoadableElement {
     return this.defaultView.top === this.defaultView;
   }
 }
-module.exports.Document = Document;
 // FIXME: Temporary until refactor out into modules more and not have circular dependencies.
 GlobalContext.Document = Document;
 
@@ -527,7 +519,6 @@ class DocumentFragment extends DOM.HTMLElement {
     return DOM.Node.DOCUMENT_FRAGMENT_NODE;
   }
 }
-module.exports.DocumentFragment = DocumentFragment;
 GlobalContext.DocumentFragment = DocumentFragment;
 
 class Range extends DocumentFragment {
@@ -583,7 +574,6 @@ class Range extends DocumentFragment {
     return fragment;
   }
 }
-module.exports.Range = Range;
 
 const getBoundDocumentElements = window => {
   const bind = (OldClass, makeClass) => {
@@ -598,4 +588,17 @@ const getBoundDocumentElements = window => {
     Range: bind(Range, b => function Range() { return b.apply(this, arguments); }),
   };
 };
-module.exports.getBoundDocumentElements = getBoundDocumentElements;
+
+export {
+  _parseDocument,
+  _parseDocumentAst,
+  initDocument,
+  _fromAST,
+  _runHtml,
+  DocumentType,
+  DOMImplementation,
+  Document,
+  DocumentFragment,
+  Range,
+  getBoundDocumentElements,
+};

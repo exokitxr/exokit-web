@@ -3,7 +3,7 @@ const stream = require('stream');
 const utils = require('./utils');
 const windowFetch = require('window-fetch');
 const {Response} = windowFetch;
-const GlobalContext = require('./GlobalContext');
+const GlobalContext = require('./GlobalContext7');
 
 const protocols = {};
 ['http', 'https', 'file', 'data', 'blob'].forEach(p => {

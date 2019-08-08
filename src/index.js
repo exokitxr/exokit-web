@@ -31,7 +31,7 @@ const {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} = require('
 
 const nativeBindings = require(path.join(__dirname, 'native-bindings.js'));
 
-const GlobalContext = require('./GlobalContext');
+const GlobalContext = require('./GlobalContext5');
 GlobalContext.args = {};
 GlobalContext.version = '';
 GlobalContext.commands = [];
