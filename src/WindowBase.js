@@ -80,7 +80,7 @@ class Worker extends EventTarget {
         src,
         options: {
           url: src,
-          baseUrl: utils._getBaseUrl(src, GlobalContext.baseUrl),
+          baseUrl: utils._getBaseUrl(src, args.options.baseUrl),
         },
         args: args.options.args,
         xrState: args.xrState,
@@ -120,10 +120,10 @@ class Worker extends EventTarget {
   }
 } */
 
-const _oninitmessage = m => {
+const _oninitmessage = e => {
   self.removeEventListener('message', _oninitmessage);
 
-  const {workerData} = m.data;
+  const {workerData} = e.data;
   const {
     initModule,
     args,
@@ -247,7 +247,7 @@ const _oninitmessage = m => {
     },
   }); */
 
-  // const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
+  // const _normalizeUrl = src => utils._normalizeUrl(src, args.options.baseUrl);
 
   /* const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
   function getScript(url) {
@@ -265,7 +265,7 @@ const _oninitmessage = m => {
       const int32Array = new Int32Array(sab);
       const worker = new WorkerBase(path.join(__dirname, 'request.js'), {
         workerData: {
-          url: _normalizeUrl(url),
+          url: _normalizeUrl(url, args.options.baseUrl),
           int32Array,
         },
       });
@@ -294,7 +294,9 @@ const _oninitmessage = m => {
   }
   global.importScripts = importScripts; */
 
-  self.addEventListener('message', m => {
+  self.addEventListener('message', e => {
+    const {data: m} = e;
+    // console.log('got event', e, e.data);
     switch (m.method) {
       case 'runRepl': {
         let result, err;
@@ -314,7 +316,7 @@ const _oninitmessage = m => {
       case 'runAsync': {
         let result, err;
         try {
-          result = global.onrunasync ? global.onrunasync(m.request) : null;
+          result = self.onrunasync ? self.onrunasync(m.request) : null;
         } catch(e) {
           err = e.stack;
         }

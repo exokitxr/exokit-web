@@ -17,7 +17,8 @@ class WorkerVm extends EventTarget {
         args: options.args,
       },
     });
-    const _message = m => {
+    const _message = e => {
+      const {data: m} = e;
       switch (m.method) {
         case 'request': {
           this.dispatchEvent(new CustomEvent('request', {

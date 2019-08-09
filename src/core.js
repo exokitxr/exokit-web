@@ -26,9 +26,10 @@ exokit.make = (htmlString, options) => {
   return _makeWindow(options);
 };
 exokit.load = (src, options = {}) => {
-  /* if (!/^[a-z]+:/.test(src)) {
-    src = location.protocol + src;
-  } */
+  if (!/^[a-z]+:/.test(src)) {
+    const {href} = location;
+    src = href + (!/\/$/.test(href) ? '/' : '') + src;
+  }
   options.args = options.args || {};
   options.replacements = options.replacements || {};
 

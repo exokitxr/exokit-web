@@ -6,7 +6,7 @@ import {createImageBitmap} from './DOM.js';
 // const {FileReader} = require('./File.js');
 import GlobalContext from './GlobalContext.js';
 
-const {src, baseUrl} = GlobalContext.workerData.args;
+const {src, options: {baseUrl}} = GlobalContext.workerData.args;
 GlobalContext.baseUrl = baseUrl;
 
 const _normalizeUrl = src => {

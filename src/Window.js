@@ -9,7 +9,7 @@ import util from '../modules/util.js';
 // const {TextEncoder, TextDecoder} = util;
 // const {performance} = require('perf_hooks');
 
-import {SpatialEvent} from './Event.js';
+import {KeyboardEvent, SpatialEvent} from './Event.js';
 
 // const mkdirp = require('mkdirp');
 // const ws = require('ws');
@@ -404,7 +404,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   EventEmitter.call(window); */
 
   window.window = window;
-  window.self = window;
+  // window.self = window;
   window.parent = options.parent || window;
   window.top = options.top || window;
 
@@ -1295,14 +1295,14 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.document = _parseDocument(options.htmlString, window);
   window.document.hidden = options.hidden || false;
   window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
-})(global);
+})(self);
 
-global.onrunasync = req => {
+self.onrunasync = req => {
   const {method} = req;
 
   switch (method) {
     case 'tickAnimationFrame':
-      return global.tickAnimationFrame(req);
+      return self.tickAnimationFrame(req);
     case 'response': {
       const {keypath} = req;
 
@@ -1339,7 +1339,7 @@ global.onrunasync = req => {
         case 'keyup': {
           if (vrPresentState.glContext) {
             const {canvas} = vrPresentState.glContext;
-            canvas.dispatchEvent(new global.KeyboardEvent(event.type, event));
+            canvas.dispatchEvent(new KeyboardEvent(event.type, event));
           }
           break;
         }
