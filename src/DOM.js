@@ -255,7 +255,7 @@ class Node extends EventTarget {
         if (this.ownerDocument.readyState === 'complete') {
           this.ownerDocument.removeEventListener('readystatechange', _readystatechange);
 
-          process.nextTick(() => {
+          Promise.resolve().then(() => {
             const el = args[0].target;
             el.dispatchEvent.apply(el, args);
           });
@@ -1279,7 +1279,7 @@ class Element extends Node {
     if (this.ownerDocument[symbols.pointerLockElementSymbol] === null) {
       this.ownerDocument[symbols.pointerLockElementSymbol] = this;
 
-      process.nextTick(() => {
+      Promise.resolve().then(() => {
         this.ownerDocument._emit('pointerlockchange');
       });
     }
@@ -1289,7 +1289,7 @@ class Element extends Node {
     /* if (this.ownerDocument[symbols.fullscreenElementSymbol] === null) { // XXX
       this.ownerDocument[symbols.fullscreenElementSymbol] = this;
 
-      process.nextTick(() => {
+      Promise.resolve().then(() => {
         this.ownerDocument._emit('fullscreenchange');
       });
     } */
@@ -2160,7 +2160,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                   });
                   browser.once('load', _load);
                 } else {
-                  process.nextTick(_load); // XXX make this an actual event
+                  Promise.resolve().then(_load); // XXX make this an actual event
                 }
               } else {
                 throw new Error('iframe owner document does not have a WebGL context');
@@ -2574,7 +2574,7 @@ class HTMLCanvasElement extends HTMLElement {
   }
 
   toBlob(cb, type, encoderOptions) {
-    process.nextTick(() => {
+    Promise.resolve().then(() => {
       const arrayBuffer = this.toArrayBuffer(type, encoderOptions);
       const blob = new Blob();
       blob.buffer = new Buffer(arrayBuffer);
