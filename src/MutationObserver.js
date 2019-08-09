@@ -16,7 +16,6 @@ class MutationRecord {
     this.oldValue = oldValue;
   }
 }
-module.exports.MutationRecord = MutationRecord;
 
 class MutationObserver {
   constructor(callback) {
@@ -173,4 +172,8 @@ class MutationObserver {
     });
   }
 }
-module.exports.MutationObserver = MutationObserver;
+
+export {
+  MutationRecord,
+  MutationObserver,
+};

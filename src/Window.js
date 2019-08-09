@@ -11,6 +11,8 @@ import util from '../modules/util.js';
 
 import {KeyboardEvent, SpatialEvent} from './Event.js';
 
+import {MutationObserver} from './MutationObserver.js';
+
 // const mkdirp = require('mkdirp');
 // const ws = require('ws');
 
@@ -26,7 +28,7 @@ import {KeyboardEvent, SpatialEvent} from './Event.js';
   RTCTrackEvent,
 } = require('./RTC/index.js'); */
 
-// const {LocalStorage} = require('window-ls');
+import LocalStorage from '../modules/window-lsm.js';
 // const indexedDB = require('fake-indexeddb');
 import parseXml from '../modules/parse-xml.js';
 import THREE from '../lib/three-min.js';
@@ -495,9 +497,9 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   })(clearInterval);
   window.event = null;
-  window.localStorage = new LocalStorage(path.join(options.dataPath, '.localStorage'));
-  window.sessionStorage = new LocalStorage(path.join(options.dataPath, '.sessionStorage'));
-  window.indexedDB = indexedDB;
+  window.localStorage = new LocalStorage();
+  window.sessionStorage = new LocalStorage();
+  // window.indexedDB = indexedDB;
   window.screen = new Screen(window);
   window.scrollTo = function(x = 0, y = 0) {
     this.scrollX = x;
@@ -606,7 +608,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   };
 
-  window.RTCPeerConnection = RTCPeerConnection;
+  /* window.RTCPeerConnection = RTCPeerConnection;
   window.webkitRTCPeerConnection = RTCPeerConnection; // for feature detection
   window.RTCSessionDescription = RTCSessionDescription;
   window.RTCIceCandidate = RTCIceCandidate;
@@ -616,11 +618,11 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.RTCDataChannelMessageEvent = RTCDataChannelMessageEvent;
   window.RTCTrackEvent = RTCTrackEvent;
 
-  window.RTCRtpTransceiver = RTCRtpTransceiver;
+  window.RTCRtpTransceiver = RTCRtpTransceiver; */
 
   window.customElements = new CustomElementRegistry(window);
   window.CustomElementRegistry = CustomElementRegistry;
-  window.MutationObserver = require('./MutationObserver').MutationObserver;
+  window.MutationObserver = MutationObserver;
   window.DOMRect = DOMRect;
   window.DOMPoint = DOMPoint;
   window.getComputedStyle = el => {
@@ -654,7 +656,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
     return styleSpec.style;
   };
-  window.browser = {
+  /* window.browser = {
     devTools: DevTools,
     http,
     // https,
@@ -735,7 +737,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         }
       }
     },
-  };
+  }; */
   window.DOMParser = class DOMParser {
     parseFromString(htmlString, type) {
       const _recurse = node => {
@@ -786,11 +788,11 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.ImageBitmap = ImageBitmap;
   window.Path2D = Path2D;
   window.CanvasGradient = CanvasGradient;
-  window.CanvasRenderingContext2D = CanvasRenderingContext2D;
-  window.WebGLRenderingContext = WebGLRenderingContext;
+  window.CanvasRenderingContext2D = OffscreenCanvasRenderingContext2D;
+  /* window.WebGLRenderingContext = WebGLRenderingContext;
   if (options.args.webgl !== '1') {
     window.WebGL2RenderingContext = WebGL2RenderingContext;
-  }
+  } */
   window.Audio = HTMLAudioElement;
   window.MediaRecorder = MediaRecorder;
   window.DataTransfer = DataTransfer;
@@ -834,8 +836,8 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.AnalyserNode = AnalyserNode;
   window.PannerNode = PannerNode;
   window.StereoPannerNode = StereoPannerNode;
-  window.createImageBitmap = createImageBitmap;
-  window.Worker = Worker;
+  // window.createImageBitmap = createImageBitmap;
+  // window.Worker = Worker;
   window.PaymentRequest = PaymentRequest;
   window.requestAnimationFrame = _makeRequestAnimationFrame(window);
   window.cancelAnimationFrame = id => {
