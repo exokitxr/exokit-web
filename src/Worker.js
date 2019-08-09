@@ -1,17 +1,12 @@
-const {URL} = url;
+// const {URL} = url;
 // const vm = require('vm');
-const {
-  workerData: {
-    args,
-  },
-} = require('worker_threads');
 
 import {createImageBitmap} from './DOM.js';
 // const WebSocket = require('ws/lib/websocket');
 // const {FileReader} = require('./File.js');
 import GlobalContext from './GlobalContext.js';
 
-const {src, baseUrl} = args;
+const {src, baseUrl} = GlobalContext.workerData.args;
 GlobalContext.baseUrl = baseUrl;
 
 const _normalizeUrl = src => {

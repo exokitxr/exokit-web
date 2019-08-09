@@ -5,20 +5,9 @@ import path from '../modules/path-browserify.js';
 // const http = require('http');
 // const https = require('https');
 // const os = require('os');
-// const {parentPort} = require('worker_threads');
 import util from '../modules/util.js';
 // const {TextEncoder, TextDecoder} = util;
 // const {performance} = require('perf_hooks');
-/* const {
-  workerData: {
-    args: {
-      options,
-      id,
-      args,
-      version,
-    },
-  },
-} = require('worker_threads'); */
 
 import {SpatialEvent} from './Event.js';
 
@@ -56,6 +45,14 @@ import {maxNumTrackers} from './constants.js';
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
 
+const {
+  args: {
+    options,
+    id,
+    args,
+    version,
+  },
+} = GlobalContext.workerData;
 GlobalContext.id = id;
 GlobalContext.args = args;
 GlobalContext.version = version;
@@ -260,7 +257,7 @@ class PaymentRequest {
 
     const listeners = window.listeners('paymentrequest');
     if (listeners.length > 0) {
-      parentPort.postMessage({
+      self.postMessage({
         method: 'paymentRequest',
         event: {
           methodData,
@@ -914,7 +911,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       window._emit('beforeunload');
       window._emit('unload');
 
-      parentPort.postMessage({
+      self.postMessage({
         method: 'emit',
         type: 'navigate',
         event: {
@@ -1154,7 +1151,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          parentPort.postMessage({
+          self.postMessage({
             method: 'request',
             type: 'requestPresent',
             keypath: [],
@@ -1188,7 +1185,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          parentPort.postMessage({
+          self.postMessage({
             method: 'request',
             type: 'exitPresent',
             keypath: [],
@@ -1238,7 +1235,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         }
       });
 
-      parentPort.postMessage({
+      self.postMessage({
         method: 'request',
         type: 'requestHitTest',
         keypath: [],

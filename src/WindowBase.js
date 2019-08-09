@@ -12,14 +12,6 @@ import util from '../modules/util.js';
 
 // const crypto = require('crypto');
 // const {performance} = require('perf_hooks');
-/* const {
-  Worker: WorkerBase,
-  workerData: {
-    initModule,
-    args,
-  },
-  parentPort,
-} = require('worker_threads'); */
 
 // const {Buffer} = global;
 
@@ -47,7 +39,6 @@ import utils from './utils.js';
 } = require('./native-bindings'); */
 // const {process} = global;
 
-GlobalContext.xrState = args.xrState;
 
 /* const consoleStream = new stream.Writable();
 consoleStream._write = (chunk, encoding, callback) => {
@@ -129,7 +120,20 @@ class Worker extends EventTarget {
   }
 } */
 
-(self => {
+const _oninitmessage = m => {
+  self.removeEventListener('message', _oninitmessage);
+
+  const {workerData} = m.data;
+  const {
+    initModule,
+    args,
+  } = workerData;
+  GlobalContext.workerData = {
+    initModule,
+    args,
+  };
+  GlobalContext.xrState = args.xrState;
+
   // self.btoa = btoa;
   // self.atob = atob;
 
@@ -230,7 +234,7 @@ class Worker extends EventTarget {
   /* self.MediaDevices = MediaDevices;
   self.Clipboard = Clipboard; */
 
-  /* self.postMessage = (message, transferList) => parentPort.postMessage({
+  /* self.postMessage = (message, transferList) => self.postMessage({
     method: 'postMessage',
     message,
   }, transferList);
@@ -242,125 +246,124 @@ class Worker extends EventTarget {
       self.on('message', onmessage);
     },
   }); */
-})(self);
 
-// const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
+  // const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
 
-/* const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
-function getScript(url) {
-  let match;
-  if (match = url.match(/^data:.+?(;base64)?,(.*)$/)) {
-    if (match[1]) {
-      return Buffer.from(match[2], 'base64').toString('utf8');
-    } else {
-      return match[2];
-    }
-  } else if (match = url.match(/^file:\/\/(.*)$/)) {
-    return fs.readFileSync(match[1], 'utf8');
-  } else {
-    const sab = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT*3 + SYNC_REQUEST_BUFFER_SIZE);
-    const int32Array = new Int32Array(sab);
-    const worker = new WorkerBase(path.join(__dirname, 'request.js'), {
-      workerData: {
-        url: _normalizeUrl(url),
-        int32Array,
-      },
-    });
-    worker.on('error', err => {
-      console.warn(err.stack);
-    });
-    Atomics.wait(int32Array, 0, 0);
-    const status = new Uint32Array(sab, Int32Array.BYTES_PER_ELEMENT*1, 1)[0];
-    const length = new Uint32Array(sab, Int32Array.BYTES_PER_ELEMENT*2, 1)[0];
-    const result = Buffer.from(sab, Int32Array.BYTES_PER_ELEMENT*3, length).toString('utf8');
-    if (status >= 200 && status < 300) {
-      return result;
-    } else {
-      throw new Error(`fetch ${url} failed (${JSON.stringify(status)}): ${result}`);
-    }
-  }
-}
-function importScripts() {
-  for (let i = 0; i < arguments.length; i++) {
-    const importScriptPath = arguments[i];
-    const importScriptSource = getScript(importScriptPath);
-    vm.runInThisContext(importScriptSource, global, {
-      filename: /^https?:/.test(importScriptPath) ? importScriptPath : 'data-url://',
-    });
-  }
-}
-global.importScripts = importScripts; */
-
-self.addEventListener('message', m => {
-  switch (m.method) {
-    case 'runRepl': {
-      let result, err;
-      try {
-        result = util.inspect(eval(m.jsString));
-      } catch(e) {
-        err = e.stack;
-      }
-      self.postMessage({
-        method: 'response',
-        requestKey: m.requestKey,
-        result,
-        error: err,
-      });
-      break;
-    }
-    case 'runAsync': {
-      let result, err;
-      try {
-        result = global.onrunasync ? global.onrunasync(m.request) : null;
-      } catch(e) {
-        err = e.stack;
-      }
-      if (!err) {
-        Promise.resolve(result)
-          .then(result => {
-            self.postMessage({
-              method: 'response',
-              requestKey: m.requestKey,
-              result,
-            });
-          });
+  /* const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
+  function getScript(url) {
+    let match;
+    if (match = url.match(/^data:.+?(;base64)?,(.*)$/)) {
+      if (match[1]) {
+        return Buffer.from(match[2], 'base64').toString('utf8');
       } else {
+        return match[2];
+      }
+    } else if (match = url.match(/^file:\/\/(.*)$/)) {
+      return fs.readFileSync(match[1], 'utf8');
+    } else {
+      const sab = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT*3 + SYNC_REQUEST_BUFFER_SIZE);
+      const int32Array = new Int32Array(sab);
+      const worker = new WorkerBase(path.join(__dirname, 'request.js'), {
+        workerData: {
+          url: _normalizeUrl(url),
+          int32Array,
+        },
+      });
+      worker.on('error', err => {
+        console.warn(err.stack);
+      });
+      Atomics.wait(int32Array, 0, 0);
+      const status = new Uint32Array(sab, Int32Array.BYTES_PER_ELEMENT*1, 1)[0];
+      const length = new Uint32Array(sab, Int32Array.BYTES_PER_ELEMENT*2, 1)[0];
+      const result = Buffer.from(sab, Int32Array.BYTES_PER_ELEMENT*3, length).toString('utf8');
+      if (status >= 200 && status < 300) {
+        return result;
+      } else {
+        throw new Error(`fetch ${url} failed (${JSON.stringify(status)}): ${result}`);
+      }
+    }
+  }
+  function importScripts() {
+    for (let i = 0; i < arguments.length; i++) {
+      const importScriptPath = arguments[i];
+      const importScriptSource = getScript(importScriptPath);
+      vm.runInThisContext(importScriptSource, global, {
+        filename: /^https?:/.test(importScriptPath) ? importScriptPath : 'data-url://',
+      });
+    }
+  }
+  global.importScripts = importScripts; */
+
+  self.addEventListener('message', m => {
+    switch (m.method) {
+      case 'runRepl': {
+        let result, err;
+        try {
+          result = util.inspect(eval(m.jsString));
+        } catch(e) {
+          err = e.stack;
+        }
         self.postMessage({
           method: 'response',
           requestKey: m.requestKey,
+          result,
           error: err,
         });
+        break;
       }
-      break;
-    }
-    case 'postMessage': {
-      try {
-        const e = new MessageEvent('messge', {
-          data: m.message,
-        });
-        global.emit('message', e);
-      } catch(err) {
-        console.warn(err.stack);
+      case 'runAsync': {
+        let result, err;
+        try {
+          result = global.onrunasync ? global.onrunasync(m.request) : null;
+        } catch(e) {
+          err = e.stack;
+        }
+        if (!err) {
+          Promise.resolve(result)
+            .then(result => {
+              self.postMessage({
+                method: 'response',
+                requestKey: m.requestKey,
+                result,
+              });
+            });
+        } else {
+          self.postMessage({
+            method: 'response',
+            requestKey: m.requestKey,
+            error: err,
+          });
+        }
+        break;
       }
-      break;
+      case 'postMessage': {
+        try {
+          const e = new MessageEvent('messge', {
+            data: m.message,
+          });
+          global.emit('message', e);
+        } catch(err) {
+          console.warn(err.stack);
+        }
+        break;
+      }
+      default: throw new Error(`invalid method: ${JSON.stringify(m.method)}`);
     }
-    default: throw new Error(`invalid method: ${JSON.stringify(m.method)}`);
-  }
-});
+  });
 
-// run init module
+  // run init module
 
-/* if (workerData.args) {
-  global.args = workerData.args;
-} */
+  /* if (workerData.args) {
+    global.args = workerData.args;
+  } */
 
-/* process.on('uncaughtException', err => {
-  console.warn('uncaught exception:', (err && err.stack) || err);
-});
-process.on('unhandledRejection', err => {
-  console.warn('unhandled rejection:', (err && err.stack) || err);
-}); */
+  /* process.on('uncaughtException', err => {
+    console.warn('uncaught exception:', (err && err.stack) || err);
+  });
+  process.on('unhandledRejection', err => {
+    console.warn('unhandled rejection:', (err && err.stack) || err);
+  }); */
 
-// if (initModule) {
   import(initModule);
-// }
+};
+self.addEventListener('message', _oninitmessage);

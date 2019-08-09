@@ -1,6 +1,8 @@
 const path = require('path');
 const {URL} = require('url');
-const {isMainThread, parentPort} = require('worker_threads');
+const {
+  isMainThread,
+} = require('worker_threads');
 const {process} = global;
 
 const exokitNode = require(path.join(__dirname, '..', 'build', 'Release', 'exokit.node'));
@@ -304,7 +306,7 @@ const _onGl3DConstruct = (gl, canvas, attrs) => {
       tex,
       depthTex,
     };
-    parentPort.postMessage({
+    self.postMessage({
       method: 'emit',
       type: 'framebuffer',
       event: gl.framebuffer,
@@ -323,7 +325,7 @@ const _onGl3DConstruct = (gl, canvas, attrs) => {
           tex: newTex,
           depthTex: newDepthTex,
         };
-        parentPort.postMessage({
+        self.postMessage({
           method: 'emit',
           type: 'framebuffer',
           event: gl.framebuffer,

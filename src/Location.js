@@ -1,16 +1,6 @@
 // const {EventEmitter} = require('events');
 // const url = require('url');
 
-/* const {
-  workerData: {
-    args: {
-      options: {
-        baseUrl,
-      },
-    },
-  },
-} = require('worker_threads'); */
-
 class Location extends EventTarget {
   constructor(u) {
     super();

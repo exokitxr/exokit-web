@@ -3,7 +3,6 @@ import path from '../modules/path-browserify.js';
 // const url = require('url');
 // const vm = require('vm');
 import util from '../modules/util.js';
-// const {parentPort} = require('worker_threads');
 
 // const {process} = global;
 
@@ -2202,10 +2201,10 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                     this.setAttribute('src', href);
                   },
                   onrequest(req) {
-                    parentPort.postMessage(req);
+                    self.postMessage(req);
                   },
                   onhapticpulse(event) {
-                    parentPort.postMessage({
+                    self.postMessage({
                       method: 'emit',
                       type: 'hapticPulse',
                       event,
@@ -2217,7 +2216,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                         detail: event,
                       }));
                     } else {
-                      parentPort.postMessage({
+                      self.postMessage({
                         method: 'emit',
                         type: 'paymentRequest',
                         event,

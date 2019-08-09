@@ -1,5 +1,3 @@
-// const {parentPort} = require('worker_threads');
-
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 /* const {
@@ -112,7 +110,7 @@ class GamepadHapticActuator {
   }
   set type(type) {}
   pulse(value, duration) {
-    parentPort.postMessage({
+    self.postMessage({
       method: 'emit',
       type: 'hapticPulse',
       event: {

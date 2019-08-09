@@ -1,6 +1,5 @@
 // const {EventEmitter} = require('events');
 import path from '../modules/path-browserify.js';
-// const {Worker} = require('worker_threads');
 import GlobalContext from './GlobalContext.js';
 
 class WorkerVm extends EventTarget {
@@ -10,6 +9,9 @@ class WorkerVm extends EventTarget {
     const worker = new Worker('src/WindowBase.js', {
       type: 'module',
       // name: 'WorkerVm@',
+    });
+    worker.postMessage({
+      method: 'init',
       workerData: {
         initModule: options.initModule,
         args: options.args,
