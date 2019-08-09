@@ -738,13 +738,18 @@ const _startTopRenderLoop = () => {
       return Promise.resolve([]);
     })
     .then(newFrames => {
-      frames.push.apply(newFrames);
+      frames.push.apply(frames, newFrames);
     });
   const _tickAnimationFrames = () => Promise.all(windows.map(_tickAnimationFrame));
   const _submitFrame = async () => {
     if (topVrPresentState.hmdType) {
       // _blitXrFbo();
     }
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+      frame.close();
+    }
+    frames.length = 0;
   };
   let animating = false;
   const _topRenderLoop = async () => {

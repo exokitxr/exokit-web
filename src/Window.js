@@ -477,7 +477,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   }
 
   window.alert = console.log;
-  window.setTimeout = (setTimeout => (fn, timeout, args) => {
+  /* window.setTimeout = (setTimeout => (fn, timeout, args) => {
     fn = fn.bind.apply(fn, [window].concat(args));
     const id = _findFreeSlot(timeouts, 1);
     timeouts[id] = fn;
@@ -507,7 +507,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       clearInterval(fn[symbols.timeoutSymbol]);
       intervals[id] = null;
     }
-  })(clearInterval);
+  })(clearInterval); */
   window.event = null;
   window.localStorage = new LocalStorage();
   window.sessionStorage = new LocalStorage();
@@ -937,10 +937,9 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
 
   const rafCbs = [];
   window[symbols.rafCbsSymbol] = rafCbs;
-  const timeouts = [null];
-  const intervals = [null];
+  /* const timeouts = [null];
+  const intervals = [null]; */
   const localCbs = [];
-  const prevSyncs = [];
   const _cacheLocalCbs = cbs => {
     for (let i = 0; i < cbs.length; i++) {
       localCbs[i] = cbs[i];
@@ -954,62 +953,9 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       localCbs[i] = null;
     }
   };
-  const _clearPrevSyncs = () => {
-    for (let i = 0; i < prevSyncs.length; i++) {
-      nativeWindow.deleteSync(prevSyncs[i]);
-    }
-    prevSyncs.length = 0;
-  };
-  const _bindXrFramebuffer = layered => {
-    if (vrPresentState.glContext) {
-      nativeWindow.setCurrentWindowContext(vrPresentState.glContext.getWindowHandle());
-
-      if (layered) {
-        if (GlobalContext.xrState.aaEnabled[0]) {
-          vrPresentState.glContext.setDefaultFramebuffer(vrPresentState.msFbo);
-          nativeWindow.bindVrChildMsFbo(vrPresentState.glContext, vrPresentState.msFbo, GlobalContext.xrState.msTex[0], GlobalContext.xrState.msDepthTex[0]);
-        } else {
-          vrPresentState.glContext.setDefaultFramebuffer(vrPresentState.fbo);
-          nativeWindow.bindVrChildFbo(vrPresentState.glContext, vrPresentState.fbo, GlobalContext.xrState.tex[0], GlobalContext.xrState.depthTex[0]);
-        }
-        
-        vrPresentState.glContext.setClearEnabled(false);
-      } else {
-        if (GlobalContext.xrState.aaEnabled[0]) {
-          vrPresentState.glContext.setDefaultFramebuffer(vrPresentState.glContext.framebuffer.msFbo);
-          nativeWindow.bindVrChildFbo(vrPresentState.glContext, vrPresentState.glContext.framebuffer.msFbo, vrPresentState.glContext.framebuffer.msTex, vrPresentState.glContext.framebuffer.msDepthTex);
-        } else {
-          vrPresentState.glContext.setDefaultFramebuffer(vrPresentState.glContext.framebuffer.fbo);
-          nativeWindow.bindVrChildFbo(vrPresentState.glContext, vrPresentState.glContext.framebuffer.fbo, vrPresentState.glContext.framebuffer.tex, vrPresentState.glContext.framebuffer.depthTex);
-        }
-
-        vrPresentState.glContext.setClearEnabled(true);
-      }
-    }
-  };
   const _emitXrEvents = () => {
     if (window[symbols.mrDisplaysSymbol].xrSession.isPresenting) {
       window[symbols.mrDisplaysSymbol].xrSession.update();
-    }
-  };
-  const _waitLocalSyncs = syncs => {
-    if (vrPresentState.glContext) {
-      nativeWindow.setCurrentWindowContext(vrPresentState.glContext.getWindowHandle());
-      for (let i = 0; i < syncs.length; i++) {
-        const sync = syncs[i];
-        nativeWindow.waitSync(sync);
-        prevSyncs.push(sync);
-      }
-      return [];
-    } else {
-      if (nativeWindow.hasCurrentWindowContext()) {
-        for (let i = 0; i < syncs.length; i++) {
-          nativeWindow.deleteSync(syncs[i]);
-        }
-        return [];
-      } else {
-        return syncs;
-      }
     }
   };
   const _tickLocalRafs = () => {
@@ -1034,129 +980,39 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       _clearLocalCbs(); // release garbage
     }
   };
-  const _composeXrContext = (context, windowHandle, layered) => {
-    // compose non-window layers
-    if (vrPresentState.glContext) {
-      nativeWindow.composeLayers(vrPresentState.glContext, vrPresentState.layers, GlobalContext.xrState);
-    }
-
-    // downsample unlayered framebuffers
-    if (!layered && GlobalContext.xrState.aaEnabled[0]) {
-      const width = GlobalContext.xrState.renderWidth[0]*2;
-      const height = GlobalContext.xrState.renderHeight[0];
-      const {msTex, msDepthTex, tex, depthTex} = vrPresentState.glContext.framebuffer;
-
-      nativeWindow.blitChildFrameBuffer(context, msTex, msDepthTex, true, tex, depthTex, false, width, height, width, height);
-    }
-
-    // blit to window
-    if (!context.canvas.ownerDocument.hidden) {
-      if (vrPresentState.hmdType === 'fake' || vrPresentState.hmdType === 'oculus' || vrPresentState.hmdType === 'openvr') {
-        const width = GlobalContext.xrState.renderWidth[0]*2;
-        const height = GlobalContext.xrState.renderHeight[0];
-        const {width: dWidth, height: dHeight} = nativeWindow.getFramebufferSize(windowHandle);
-        nativeWindow.blitChildFrameBuffer(context, GlobalContext.xrState.tex[0], 0, false, 0, 0, false, width, height, dWidth, dHeight);
-      }
-      
-      _swapBuffers(context, windowHandle);
-    }
-  };
-  const _composeNormalContext = (context, windowHandle) => {
-    if (!context.canvas.ownerDocument.hidden) {
-      const {canvas: {width, height}, framebuffer: {msFbo, msTex}} = context;
-      if (msFbo !== 0) {
-        nativeWindow.blitChildFrameBuffer(context, msTex, 0, true, 0, 0, false, width, height, width, height);
-      }
-      _swapBuffers(context, windowHandle);
-    }
-  };
-  const _swapBuffers = (context, windowHandle) => {
-    if (isMac) {
-      context.bindFramebufferRaw(context.FRAMEBUFFER, null);
-    }
-    nativeWindow.swapBuffers(windowHandle);
-  };
-  const _composeLocalLayers = layered => {
-    const syncs = [];
-
-    for (let i = 0; i < contexts.length; i++) {
-      const context = contexts[i];
-      const isDirty = (!!context.isDirty && context.isDirty()) || context === vrPresentState.glContext;
-      if (isDirty) {
-        // if (layered) {
-          const windowHandle = context.getWindowHandle();
-
-          nativeWindow.setCurrentWindowContext(windowHandle);
-          if (isMac) {
-            context.flush();
-          }
-
-          if (context === vrPresentState.glContext) {
-            _composeXrContext(context, windowHandle, layered);
-          } else {
-            _composeNormalContext(context, windowHandle);
-          }
-
-          if (isMac) {
-            const drawFramebuffer = context.getBoundFramebuffer(context.DRAW_FRAMEBUFFER);
-            if (drawFramebuffer) {
-              context.bindFramebuffer(context.DRAW_FRAMEBUFFER, drawFramebuffer);
-            }
-
-            const readFramebuffer = context.getBoundFramebuffer(context.READ_FRAMEBUFFER);
-            if (readFramebuffer) {
-              context.bindFramebuffer(context.READ_FRAMEBUFFER, readFramebuffer);
-            }
-          }
-        // }
-        
-        context.clearDirty();
-
-        if (context.finish) {
-          syncs.push(nativeWindow.getSync());
-        }
-      }
-    }
-
-    return syncs;
-  };
-  const _renderLocal = (syncs, layered) => {
-    syncs = _waitLocalSyncs(syncs);
+  const _renderLocal = layered => {
     _tickLocalRafs();
-    syncs.push.apply(syncs, _composeLocalLayers(layered));
-    return Promise.resolve(syncs);
+    const localFrames = contexts.map(context => context.transferToImageBitmap());
+    return Promise.resolve(localFrames);
   };
-  const _makeRenderChild = window => (syncs, layered) => window.runAsync({
+  const _makeRenderChild = window => layered => window.runAsync({
     method: 'tickAnimationFrame',
-    syncs,
     layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
   });
   const _collectRenders = () => windows.map(_makeRenderChild).concat([_renderLocal]);
-  const _render = (syncs, layered) => new Promise((accept, reject) => {
+  const _render = layered => new Promise((accept, reject) => {
     const renders = _collectRenders();
+    const frames = [];
     const _recurse = i => {
       if (i < renders.length) {
-        renders[i](syncs, layered)
-          .then(newSyncs => {
-            syncs = newSyncs;
+        renders[i](layered)
+          .then(newFrames => {
+            frames.push.apply(frames, newFrames);
             _recurse(i+1);
           })
           .catch(err => {
-            console.warn('failed to render child', err);
-            syncs = [];
+            console.warn('failed to render window', err);
             _recurse(i+1);
           });
       } else {
-        accept(syncs);
+        accept(frames);
       }
     };
     _recurse(0);
   });
-  window.tickAnimationFrame = async ({syncs = [], layered = false}) => {
-    _clearPrevSyncs();
-    _bindXrFramebuffer(layered);
+  window.tickAnimationFrame = ({layered = false}) => {
     _emitXrEvents(); 
-    return _render(syncs, layered);
+    return _render(layered);
   };
 
   const _makeMrDisplays = () => {
@@ -1187,7 +1043,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         vrPresentState.msFbo = context.createFramebuffer().id;
         // vrPresentState.glContext.setClearEnabled(false);
 
-        window.document.emit('domchange'); // open mirror window
+        window.document.dispatchEvent(new CustomEvent('domchange')); // open mirror window
       }
 
       return {
