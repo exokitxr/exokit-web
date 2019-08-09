@@ -1,13 +1,14 @@
-const url = require('url');
-const {URL} = url;
+// const url = require('url');
+// const {URL} = url;
 
-const {fetch} = require('./fetch');
-const GlobalContext = require('./GlobalContext2');
-const symbols = require('./symbols');
-const {_getBaseUrl} = require('./utils');
-const {_makeWindow} = require('./WindowVm');
+// const {fetch} = require('./fetch');
+import GlobalContext from './GlobalContext.js';
+import symbols from './symbols.js';
+import utils from './utils.js';
+const {_getBaseUrl} = utils;
+import {_makeWindow} from './WindowVm.js';
 
-const exokit = module.exports;
+const exokit = {};
 exokit.make = (htmlString, options) => {
   if (typeof htmlString === 'object') {
     options = htmlString;
@@ -18,23 +19,21 @@ exokit.make = (htmlString, options) => {
 
   options.url = options.url || 'http://127.0.0.1/';
   options.baseUrl = options.baseUrl || options.url;
-  options.dataPath = options.dataPath || __dirname;
+  // options.dataPath = options.dataPath || __dirname;
   options.args = options.args || {};
   options.htmlString = htmlString;
   options.replacements = options.replacements || {};
   return _makeWindow(options);
 };
 exokit.load = (src, options = {}) => {
-  if (!url.parse(src).protocol) {
-    src = 'http://' + src;
-  }
+  /* if (!/^[a-z]+:/.test(src)) {
+    src = location.protocol + src;
+  } */
   options.args = options.args || {};
   options.replacements = options.replacements || {};
 
-  let redirectCount = 0;
-  const _fetchTextFollow = src => fetch(src, {
-    redirect: 'manual',
-  })
+  // let redirectCount = 0;
+  const _fetchText = src => fetch(src)
     .then(res => {
       if (res.status >= 200 && res.status < 300) {
         return res.text()
@@ -42,7 +41,7 @@ exokit.load = (src, options = {}) => {
             src,
             htmlString,
           }));
-      } else if (res.status >= 300 && res.status < 400) {
+      /* } else if (res.status >= 300 && res.status < 400) {
         const l = res.headers.get('Location');
         if (l) {
           if (redirectCount < 10) {
@@ -53,12 +52,12 @@ exokit.load = (src, options = {}) => {
           }
         } else {
           return Promise.reject(new Error('fetch got redirect with no location header: ' + res.status + ' : ' + src));
-        }
+        } */
       } else {
         return Promise.reject(new Error('fetch got invalid status code: ' + res.status + ' : ' + src));
       }
     });
-  return _fetchTextFollow(src)
+  return _fetchText(src)
     .then(({src, htmlString}) => {
       let baseUrl;
       if (options.baseUrl) {
@@ -85,10 +84,12 @@ exokit.setVersion = newVersion => {
   GlobalContext.version = newVersion;
 };
 
-if (require.main === module) {
+/* if (require.main === module) {
   if (process.argv.length === 3) {
     const baseUrl = 'file://' + __dirname + '/';
     const u = new URL(process.argv[2], baseUrl).href;
     exokit.load(u);
   }
-}
+} */
+
+export default exokit;

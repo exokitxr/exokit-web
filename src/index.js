@@ -1,37 +1,30 @@
-#!/usr/bin/env node
-
-if (require.main === module && !/^1[12]\./.test(process.versions.node)) {
-  throw new Error('node 11 or 12 required');
-}
 // const cwd = process.cwd();
 // process.chdir(__dirname); // needed for global bin to find libraries
 
-const events = require('events');
-const {EventEmitter} = events;
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
-const net = require('net');
-const child_process = require('child_process');
-const os = require('os');
-const util = require('util');
-const repl = require('repl');
+import path from '../modules/path-browserify.js';
+// const fs = require('fs');
+// const url = require('url');
+// const net = require('net');
+// const child_process = require('child_process');
+// const os = require('os');
+import util from '../modules/util.js';
+// const repl = require('repl');
 
-const core = require('./core.js');
-const mkdirp = require('mkdirp');
+import core from './core.js';
+// const mkdirp = require('mkdirp');
 // const replHistory = require('repl.history');
-const minimist = require('minimist');
+import minimist from '../modules/minimist.js';
 
-const {version} = require('../package.json');
-const {defaultEyeSeparation, maxNumTrackers} = require('./constants.js');
-const symbols = require('./symbols');
-const THREE = require('../lib/three-min.js');
+const version = '0.0.1'; // const {version} = require('../package.json');
+import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
+import symbols from './symbols.js';
+import THREE from '../lib/three-min.js';
 
-const {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} = require('./VR.js');
+import {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
 
-const nativeBindings = require(path.join(__dirname, 'native-bindings.js'));
+// const nativeBindings = require(path.join(__dirname, 'native-bindings.js'));
 
-const GlobalContext = require('./GlobalContext5');
+import GlobalContext from './GlobalContext.js';
 GlobalContext.args = {};
 GlobalContext.version = '';
 GlobalContext.commands = [];
@@ -85,82 +78,82 @@ const projectionArray = new Float32Array(16 * 2);
 const controllersArray = new Float32Array((1 + 3 + 4 + 6) * 2);
 
 const args = (() => {
-  if (require.main === module) {
-    const minimistArgs = minimist(process.argv.slice(2), {
-      boolean: [
-        'version',
-        'home',
-        'log',
-        'perf',
-        'performance',
-        'frame',
-        'minimalFrame',
-        'tab',
-        'quit',
-        'blit',
-        'require',
-        'nogl',
-        'headless',
-        'uncapped',
-      ],
-      string: [
-        'webgl',
-        'xr',
-        'size',
-        'replace',
-        'onbeforeload'
-      ],
-      alias: {
-        v: 'version',
-        h: 'home',
-        l: 'log',
-        w: 'webgl',
-        x: 'xr',
-        p: 'performance',
-        perf: 'performance',
-        s: 'size',
-        f: 'frame',
-        m: 'minimalFrame',
-        t: 'tab',
-        q: 'quit',
-        b: 'blit',
-        r: 'replace',
-        u: 'require',
-        n: 'nogl',
-        e: 'headless',
-        c: 'uncapped',
-      },
-    });
-    return {
-      version: minimistArgs.version,
-      url: minimistArgs._[0] || '',
-      home: minimistArgs.home,
-      log: minimistArgs.log,
-      webgl: minimistArgs.webgl || '2',
-      xr: minimistArgs.xr || 'all',
-      performance: !!minimistArgs.performance,
-      size: minimistArgs.size,
-      frame: minimistArgs.frame,
-      minimalFrame: minimistArgs.minimalFrame,
-      tab: minimistArgs.tab,
-      quit: minimistArgs.quit,
-      blit: minimistArgs.blit,
-      replace: Array.isArray(minimistArgs.replace) ? minimistArgs.replace : ((minimistArgs.replace !== undefined) ? [minimistArgs.replace] : []),
-      require: minimistArgs.require,
-      nogl: minimistArgs.nogl,
-      headless: minimistArgs.headless,
-      uncapped: minimistArgs.uncapped,
-      onbeforeload: minimistArgs.onbeforeload
-    };
-  } else {
-    return {};
-  }
+  const process = {
+    argv: ['node', '.', 'example.html'],
+  };
+  const minimistArgs = minimist(process.argv.slice(2), {
+    boolean: [
+      'version',
+      'home',
+      'log',
+      'perf',
+      'performance',
+      'frame',
+      'minimalFrame',
+      'tab',
+      'quit',
+      'blit',
+      'require',
+      'nogl',
+      'headless',
+      'uncapped',
+    ],
+    string: [
+      'webgl',
+      'xr',
+      'size',
+      'replace',
+      'onbeforeload'
+    ],
+    alias: {
+      v: 'version',
+      h: 'home',
+      l: 'log',
+      w: 'webgl',
+      x: 'xr',
+      p: 'performance',
+      perf: 'performance',
+      s: 'size',
+      f: 'frame',
+      m: 'minimalFrame',
+      t: 'tab',
+      q: 'quit',
+      b: 'blit',
+      r: 'replace',
+      u: 'require',
+      n: 'nogl',
+      e: 'headless',
+      c: 'uncapped',
+    },
+  });
+  return {
+    version: minimistArgs.version,
+    url: minimistArgs._[0] || '',
+    home: minimistArgs.home,
+    log: minimistArgs.log,
+    webgl: minimistArgs.webgl || '2',
+    xr: minimistArgs.xr || 'all',
+    performance: !!minimistArgs.performance,
+    size: minimistArgs.size,
+    frame: minimistArgs.frame,
+    minimalFrame: minimistArgs.minimalFrame,
+    tab: minimistArgs.tab,
+    quit: minimistArgs.quit,
+    blit: minimistArgs.blit,
+    replace: Array.isArray(minimistArgs.replace) ? minimistArgs.replace : ((minimistArgs.replace !== undefined) ? [minimistArgs.replace] : []),
+    require: minimistArgs.require,
+    nogl: minimistArgs.nogl,
+    headless: minimistArgs.headless,
+    uncapped: minimistArgs.uncapped,
+    onbeforeload: minimistArgs.onbeforeload
+  };
 })();
 
 core.setArgs(args);
 core.setVersion(version);
 
-const dataPath = (() => {
+const dataPath = null;
+/* const dataPath = (() => {
   const candidatePathPrefixes = [
     os.homedir(),
     __dirname,
@@ -183,7 +176,7 @@ const dataPath = (() => {
     }
   }
   return null;
-})();
+})(); */
 
 const windows = [];
 GlobalContext.windows = windows;
@@ -603,7 +596,7 @@ const _startTopRenderLoop = () => {
   let lastFrameTime = Date.now();
   const prevSyncs = [];
 
-  if (nativeBindings.nativeWindow.pollEvents) {
+  /* if (nativeBindings.nativeWindow.pollEvents) {
     setInterval(() => {
       nativeBindings.nativeWindow.pollEvents();
     }, 1000/60); // XXX make this run at the native frame rate
@@ -612,7 +605,7 @@ const _startTopRenderLoop = () => {
     setInterval(() => {
       nativeBindings.nativeBrowser.Browser.pollEvents();
     }, 1000/60);
-  }
+  } */
 
   const _waitGetPoses = () => {
     if (topVrPresentState.hmdType === 'oculus') {
@@ -1035,7 +1028,7 @@ const _startTopRenderLoop = () => {
   };
   const _waitGetPosesFake = async () => {
     if (!args.uncapped) {
-      const fps = nativeBindings.nativeWindow.getRefreshRate();
+      const fps = 60;// nativeBindings.nativeWindow.getRefreshRate();
       const expectedTimeDiff = 1000 / fps;
 
       const now = Date.now();
@@ -1289,7 +1282,7 @@ const _startTopRenderLoop = () => {
     }
 
     // update events
-    nativeBindings.nativeVideo.Video.updateAll();
+    // nativeBindings.nativeVideo.Video.updateAll();
     // nativeBindings.nativeBrowser && nativeBindings.nativeBrowser.Browser.updateAll(); // XXX unlock when oculus mobile supports it
 
     if (args.performance) {
@@ -1331,13 +1324,13 @@ const _startTopRenderLoop = () => {
     }
 
     // wait for next frame
-    immediate = setImmediate(_topRenderLoop);
+    immediate = Promise.resolve().then(_topRenderLoop);
   };
-  let immediate = setImmediate(_topRenderLoop);
+  let immediate = Promise.resolve().then(_topRenderLoop);
 
   return {
     stop() {
-      clearImmediate(immediate);
+      clearImmediate(immediate); // XXX cancel the Promise instead
       immediate = null;
     },
   };
@@ -1371,7 +1364,7 @@ const _startFakePlaneTracker = () => {
   topVrPresentState.planeTracker = planeTracker;
 };
 
-const _prepare = () => Promise.all([
+const _prepare = () => Promise.resolve();/*Promise.all([
   (() => {
     if (!process.env['DISPLAY']) {
       process.env['DISPLAY'] = ':0.0';
@@ -1447,9 +1440,9 @@ const _prepare = () => Promise.all([
       }
     });
   }),
-]);
+]); */
 
-const realityTabsUrl = 'file://' + path.join(__dirname, '..', 'examples', 'realitytabs.html');
+const realityTabsUrl = path.join('..', 'examples', 'realitytabs.html');
 const _start = () => {
   let {url: u} = args;
   if (!u && args.home) {
@@ -1464,16 +1457,16 @@ const _start = () => {
       // u = u.replace(/\/?$/, '/');
       u = `${realityTabsUrl}?t=${encodeURIComponent(u)}`
     }
-    if (u && !url.parse(u).protocol) {
-      u = 'file://' + path.resolve(process.cwd(), u);
-    }
+    /* if (u && !/^[a-z]+:/.test(u)) {
+      u = window.location.protocol + '//' + u;
+    } */
     const replacements = (() => {
       const result = {};
       for (let i = 0; i < args.replace.length; i++) {
         const replaceArg = args.replace[i];
         const replace = replaceArg.split(' ');
         if (replace.length === 2) {
-          result[replace[0]] = 'file://' + path.resolve(process.cwd(), replace[1]);
+          result[replace[0]] = window.location.protocol + '://' + replace[1];
         } else {
           console.warn(`invalid replace argument: ${replaceArg}`);
         }
@@ -1586,7 +1579,7 @@ const _start = () => {
   }
 };
 
-if (require.main === module) {
+// if (require.main === module) {
   /* if (!nativeBindings.nativePlatform) { // not a mobile platform
     require(path.join(__dirname, 'bugsnag'));
     require('fault-zone').registerHandler((stack, stackLen) => {
@@ -1600,23 +1593,22 @@ if (require.main === module) {
       process.exit(1);
     });
   } */
-  if (args.log) {
+  /* if (args.log) {
     const RedirectOutput = require('redirect-output').default;
     new RedirectOutput({
       flags: 'a',
     }).write(path.join(dataPath, 'log.txt'));
-  }
+  } */
 
-  const _logStack = err => {
+  /* const _logStack = err => {
     console.warn(err);
   };
   process.on('uncaughtException', _logStack);
-  process.on('unhandledRejection', _logStack);
-  EventEmitter.defaultMaxListeners = 100;
+  process.on('unhandledRejection', _logStack); */
 
   if (args.version) {
     console.log(version);
-    process.exit(0);
+    // process.exit(0);
   }
   if (args.size) {
     const match = args.size.match(/^([0-9]+)x([0-9]+)$/);
@@ -1629,7 +1621,7 @@ if (require.main === module) {
       }
     }
   }
-  if (args.frame || args.minimalFrame) {
+  /* if (args.frame || args.minimalFrame) {
     nativeBindings.nativeGl = (OldWebGLRenderingContext => {
       function WebGLRenderingContext() {
         const result = Reflect.construct(OldWebGLRenderingContext, arguments);
@@ -1652,7 +1644,7 @@ if (require.main === module) {
       }
       return WebGLRenderingContext;
     })(nativeBindings.nativeGl);
-  }
+  } */
 
   _prepare()
     .then(() => _start())
@@ -1660,6 +1652,6 @@ if (require.main === module) {
       console.warn(err.stack);
       process.exit(1);
     });
-}
+// }
 
-module.exports = core;
+// module.exports = core;

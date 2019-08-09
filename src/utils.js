@@ -15,12 +15,17 @@ function _getBaseUrl(u, currentBaseUrl = '') {
   } else if (/^(?:data|blob):/.test(u)) {
     result = currentBaseUrl;
   } else {
-    const parsedUrl = url.parse(u);
-    result = url.format({
+    if (!/^[a-z]+:/.test(u)) {
+      u = location.href + '/' + u;
+    }
+    const parsedUrl = new URL(u);
+    parsedUrl.pathname = parsedUrl.pathname.replace(/\/[^\/]*\.[^\/]*$/, '') || '/';
+    result = parsedUrl.href;
+    /* result = url.format({
       protocol: parsedUrl.protocol || 'http:',
       host: parsedUrl.host || '127.0.0.1',
       pathname: parsedUrl.pathname.replace(/\/[^\/]*\.[^\/]*$/, '') || '/',
-    });
+    }); */
   }
   if (!/\/$/.test(result) && !/\/[^\/]*?\.[^\/]*?$/.test(result)) {
     result += '/';
@@ -32,6 +37,9 @@ module.exports._getBaseUrl = _getBaseUrl;
 function _normalizeUrl(src, baseUrl) {
   if (/^\/\//.test(src)) {
     src = new URL(baseUrl).protocol + src;
+  }
+  if (!/^[a-z]+:/.test(src)) {
+    src = baseUrl + (!/\/$/.test(baseUrl) ? '/' : '') + src;
   }
   if (!/^(?:https?|data|blob):/.test(src)) {
     return new URL(src, baseUrl).href

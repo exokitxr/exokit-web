@@ -1,9 +1,9 @@
 // const {Console} = require('console');
 // const {EventEmitter} = require('../node_modules/events-browserify/events.js');
-import events from '../modules/events-browserify.js';
-const {EventEmitter} = events;
-import stream from '../modules/stream-browserify.js';
-import path from '../modules/path-browserify.js';
+// import events from '../modules/events-browserify.js';
+// const {EventEmitter} = events;
+// import stream from '../modules/stream-browserify.js';
+// import path from '../modules/path-browserify.js';
 // const fs = require('fs');
 // import url from 'url';
 // const {URL} = url;
@@ -244,7 +244,7 @@ class Worker extends EventTarget {
   }); */
 })(self);
 
-const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
+// const _normalizeUrl = src => utils._normalizeUrl(src, GlobalContext.baseUrl);
 
 /* const SYNC_REQUEST_BUFFER_SIZE = 5 * 1024 * 1024; // TODO: we can make this unlimited with a streaming buffer + atomics loop
 function getScript(url) {
@@ -361,6 +361,6 @@ process.on('unhandledRejection', err => {
   console.warn('unhandled rejection:', (err && err.stack) || err);
 }); */
 
-if (initModule) {
+// if (initModule) {
   import(initModule);
-}
+// }

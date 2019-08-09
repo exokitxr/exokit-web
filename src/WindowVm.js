@@ -7,7 +7,9 @@ class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
-    const worker = new Worker('WindowBase.js', {
+    const worker = new Worker('src/WindowBase.js', {
+      type: 'module',
+      // name: 'WorkerVm@',
       workerData: {
         initModule: options.initModule,
         args: options.args,
@@ -16,7 +18,9 @@ class WorkerVm extends EventTarget {
     const _message = m => {
       switch (m.method) {
         case 'request': {
-          this.emit('request', m);
+          this.dispatchEvent(new CustomEvent('request', {
+            detail: m,
+          }));
           break;
         }
         case 'response': {
@@ -31,11 +35,15 @@ class WorkerVm extends EventTarget {
           break;
         }
         case 'postMessage': {
-          this.emit('message', m);
+          this.dispatchEvent(new CustomEvent('message', {
+            detail: m,
+          }));
           break;
         }
         case 'emit': {
-          this.emit(m.type, m.event);
+          this.dispatchEvent(new CustomEvent(m.type, {
+            detail: m.event,
+          }));
           break;
         }
         default: {
@@ -44,15 +52,14 @@ class WorkerVm extends EventTarget {
         }
       }
     };
-    worker.on('message', _message);
-    worker.on('error', err => {
-      this.emit('error', err);
-    });
-    worker.on('exit', () => {
-      this.emit('exit');
+    worker.addEventListener('message', _message);
+    worker.addEventListener('error', err => {
+      this.dispatchEvent(new ErrorEvent({
+        error: err,
+      }));
     });
     worker.cleanup = () => {
-      worker.removeListener('message', _message);
+      worker.removeEventListener('message', _message);
     };
     this.worker = worker;
 
@@ -106,34 +113,22 @@ class WorkerVm extends EventTarget {
   }
   
   destroy() {
-    const symbols = Object.getOwnPropertySymbols(this.worker);
-    const publicPortSymbol = symbols.find(s => s.toString() === 'Symbol(kPublicPort)');
-    const publicPort = this.worker[publicPortSymbol];
-    publicPort.close();
-
+    this.worker.terminate();
     this.worker.cleanup();
   }
 
   get onmessage() {
-    return this.listeners('message')[0];
+    return this.worker.onmessage;
   }
   set onmessage(onmessage) {
-    this.on('message', onmessage);
+    this.worker.onmessage = onmessage;
   }
-
   get onerror() {
-    return this.listeners('error')[0];
+    return this.worker.onerror;
   }
   set onerror(onerror) {
-    this.on('error', onerror);
-  }
-  
-  get onexit() {
-    return this.listeners('exit')[0];
-  }
-  set onexit(onexit) {
-    this.on('exit', onexit);
-  }
+    this.worker.onerror = onerror;
+  } 
 }
 
 const _clean = o => {
@@ -149,7 +144,7 @@ const _clean = o => {
 const _makeWindow = (options = {}, handlers = {}) => {
   const id = Atomics.add(GlobalContext.xrState.id, 0, 1) + 1;
   const window = new WorkerVm({
-    initModule: path.join(__dirname, 'Window.js'),
+    initModule: './Window.js',
     args: {
       options: _clean(options),
       id,
@@ -176,7 +171,7 @@ const _makeWindow = (options = {}, handlers = {}) => {
     // console.log('got framebuffer', framebuffer);
     window.document.framebuffer = framebuffer;
   }); */
-  window.on('navigate', ({href}) => {
+  window.addEventListener('navigate', ({href}) => {
     window.destroy()
       .then(() => {
         options.onnavigate && options.onnavigate(href);
@@ -185,20 +180,20 @@ const _makeWindow = (options = {}, handlers = {}) => {
         console.warn(err.stack);
       });
   });
-  window.on('request', req => {
+  window.addEventListener('request', req => {
     req.keypath.push(id);
     options.onrequest && options.onrequest(req);
   });
-  window.on('framebuffer', e => {
+  window.addEventListener('framebuffer', e => {
     window.framebuffer = e;
   });
-  window.on('hapticPulse', e => {
+  window.addEventListener('hapticPulse', e => {
     options.onhapticpulse && options.onhapticpulse(e);
   });
-  window.on('paymentRequest', e => {
+  window.addEventListener('paymentRequest', e => {
     options.onpaymentrequest && options.onpaymentrequest(e);
   });
-  window.on('error', err => {
+  window.addEventListener('error', err => {
     console.warn(err.stack);
   });
   window.destroy = (destroy => function() {
@@ -213,13 +208,7 @@ const _makeWindow = (options = {}, handlers = {}) => {
     }
     window.queue = null;
 
-    return new Promise((accept, reject) => {
-      window.on('exit', () => {
-        accept();
-      });
-
-      destroy.apply(this, arguments);
-    });
+    return Promise.resolve();
   })(window.destroy);
   
   GlobalContext.windows.push(window);
