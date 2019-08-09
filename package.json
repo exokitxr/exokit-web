@@ -10,6 +10,7 @@
     "events-browserify": "0.0.1",
     "he": "^1.2.0",
     "history": "^4.9.0",
+    "localstorage-memory": "^1.0.3",
     "minimist": "^1.2.0",
     "parse-int": "^1.0.3",
     "parse5": "^5.1.0",
