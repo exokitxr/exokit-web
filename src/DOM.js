@@ -2262,10 +2262,10 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                     this.setAttribute('src', href);
                   },
                   onrequest(req) {
-                    self.postMessage(req);
+                    self._postMessage(req);
                   },
                   onhapticpulse(event) {
-                    self.postMessage({
+                    self._postMessage({
                       method: 'emit',
                       type: 'hapticPulse',
                       event,
@@ -2277,7 +2277,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                         detail: event,
                       }));
                     } else {
-                      self.postMessage({
+                      self._postMessage({
                         method: 'emit',
                         type: 'paymentRequest',
                         event,

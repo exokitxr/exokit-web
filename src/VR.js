@@ -110,7 +110,7 @@ class GamepadHapticActuator {
   }
   set type(type) {}
   pulse(value, duration) {
-    self.postMessage({
+    self._postMessage({
       method: 'emit',
       type: 'hapticPulse',
       event: {

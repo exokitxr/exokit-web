@@ -271,7 +271,7 @@ class PaymentRequest {
 
     const listeners = window.listeners('paymentrequest');
     if (listeners.length > 0) {
-      self.postMessage({
+      self._postMessage({
         method: 'paymentRequest',
         event: {
           methodData,
@@ -858,15 +858,15 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       rafCbs[index] = null;
     }
   };
-  window.postMessage = (postMessage => function(data) {
+  window.postMessage = function(data, targetOrigin, transfer) {
     if (window.top === window) {
-      setImmediate(() => {
+      Promise.resolve().then(() => {
         window.dispatchEvent(new MessageEvent('message', {data}));
       });
     } else {
-      postMessage.apply(this, arguments);
+      window._postMessage(data, transfer);
     }
-  })(window.postMessage);
+  };
   /*
     Treat function onload() as a special case that disables automatic event attach for onload, because this is how browsers work. E.g.
       <!doctype html><html><head><script>
@@ -925,7 +925,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       window.dispatchEvent(new CustomEvent('beforeunload'));
       window.dispatchEvent(new CustomEvent('unload'));
 
-      self.postMessage({
+      self._postMessage({
         method: 'emit',
         type: 'navigate',
         event: {
@@ -1165,7 +1165,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          self.postMessage({
+          self._postMessage({
             method: 'request',
             type: 'requestPresent',
             keypath: [],
@@ -1199,7 +1199,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          self.postMessage({
+          self._postMessage({
             method: 'request',
             type: 'exitPresent',
             keypath: [],
@@ -1249,7 +1249,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         }
       });
 
-      self.postMessage({
+      self._postMessage({
         method: 'request',
         type: 'requestHitTest',
         keypath: [],

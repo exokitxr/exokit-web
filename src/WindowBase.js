@@ -120,6 +120,10 @@ class Worker extends EventTarget {
   }
 } */
 
+self._postMessage = (postMessage => function(data, transfer) {
+  return postMessage.call(this, data, transfer);
+})(self.postMessage);
+
 const _oninitmessage = e => {
   self.removeEventListener('message', _oninitmessage);
 
@@ -305,7 +309,7 @@ const _oninitmessage = e => {
         } catch(e) {
           err = e.stack;
         }
-        self.postMessage({
+        self._postMessage({
           method: 'response',
           requestKey: m.requestKey,
           result,
@@ -323,14 +327,14 @@ const _oninitmessage = e => {
         if (!err) {
           Promise.resolve(result)
             .then(result => {
-              self.postMessage({
+              self._postMessage({
                 method: 'response',
                 requestKey: m.requestKey,
                 result,
               });
             });
         } else {
-          self.postMessage({
+          self._postMessage({
             method: 'response',
             requestKey: m.requestKey,
             error: err,
