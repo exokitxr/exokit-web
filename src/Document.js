@@ -159,7 +159,7 @@ function initDocument (document, window) {
     });
   }
 
-  process.nextTick(async () => {
+  Promise.resolve().then(async () => {
     if (body) {
       const bodyChildNodes = body.childNodes;
       body.childNodes = new window.NodeList();

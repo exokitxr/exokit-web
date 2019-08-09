@@ -10,7 +10,19 @@ import util from '../modules/util.js';
 // const {performance} = require('perf_hooks');
 
 import {KeyboardEvent, SpatialEvent} from './Event.js';
-
+import {
+  AudioContext,
+  AudioNode,
+  AudioBufferSourceNode,
+  OscillatorNode,
+  AudioDestinationNode,
+  AudioParam,
+  AudioListener,
+  GainNode,
+  AnalyserNode,
+  PannerNode,
+  StereoPannerNode,
+} from './Audio.js';
 import {MutationObserver} from './MutationObserver.js';
 
 // const mkdirp = require('mkdirp');
@@ -898,7 +910,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     },
   });
 
-  window.history.on('popstate', (u, state) => {
+  window.history.addEventListener('popstate', (u, state) => {
     window.location.set(u);
 
     const event = new Event('popstate');
@@ -906,7 +918,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     window.dispatchEvent(event);
   });
   let loading = false;
-  window.location.on('update', href => {
+  window.location.addEventListener('update', href => {
     if (!loading) {
       loading = true;
 
@@ -1413,7 +1425,7 @@ self.onrunasync = req => {
       return Promise.reject(new Error(`invalid window async request: ${JSON.stringify(req)}`));
   }
 };
-global.onexit = () => {
+/* global.onexit = () => {
   const localContexts = contexts.slice();
   for (let i = 0; i < localContexts.length; i++) {
     localContexts[i].destroy();
@@ -1421,5 +1433,5 @@ global.onexit = () => {
   
   AudioContext.Destroy();
   nativeWindow.destroyThreadPool();
-};
+}; */
 // global.setImmediate = undefined; // need this for the TLS implementation

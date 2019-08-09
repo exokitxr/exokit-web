@@ -724,7 +724,7 @@ class Element extends Node {
     this._classList = null;
     this._dataset = null;
 
-    this.on('attribute', (name, value) => {
+    this.addEventListener('attribute', ({detail: {name, value}}) => {
       if (name === 'id') {
         if (this.ownerDocument.defaultView[value] === undefined) {
           _defineId(this.ownerDocument.defaultView, value, this);
@@ -733,7 +733,7 @@ class Element extends Node {
         _resetClassList(this._classList, value);
       }
     });
-    this.on('children', (addedNodes, removedNodes, previousSibling, nextSiblings) => {
+    this.addEventListener('children', ({detail: {addedNodes, removedNodes, previousSibling, nextSiblings}}) => {
       for (let i = 0; i < addedNodes.length; i++) {
         addedNodes[i]._emit('attached');
       }
@@ -817,8 +817,7 @@ class Element extends Node {
     if (this._children) { this._children.update(); }
 
     // Notify observers.
-    this._emit('children', newChildren, EMPTY_ARRAY,
-               this.childNodes[this.childNodes.length - 2] || null, null);
+    this._emit('children', newChildren, EMPTY_ARRAY, this.childNodes[this.childNodes.length - 2] || null, null);
     this.ownerDocument._emit('domchange');
 
     return childNode;
@@ -1367,7 +1366,7 @@ class HTMLElement extends Element {
     this._style = null;
     this[symbols.computedStyleSymbol] = null;
 
-    this.on('attribute', (name, value) => {
+    this.addEventListener('attribute', ({detail: {name, value}}) => {
       if (name === 'class' && this._classList) {
         _resetClassList(this._classList, value);
       } else if (name === 'style') {
