@@ -8,7 +8,6 @@ import util from '../modules/util.js';
 
 import css from '../modules/css.js';
 import he from '../modules/he.js';
-console.log('got he', he);
 import parse5 from '../modules/parse5.js';
 import parseIntStrict from '../modules/parse-int.js';
 import selector from '../modules/window-selector.js';
