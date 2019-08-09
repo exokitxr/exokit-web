@@ -861,7 +861,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.postMessage = (postMessage => function(data) {
     if (window.top === window) {
       setImmediate(() => {
-        window._emit('message', new MessageEvent('message', {data}));
+        window.dispatchEvent(new MessageEvent('message', {data}));
       });
     } else {
       postMessage.apply(this, arguments);
@@ -876,7 +876,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
         window.onload = onload;
       </script></head></html>
   */
-  window[symbols.disabledEventsSymbol] = {
+  /* window[symbols.disabledEventsSymbol] = {
     load: undefined,
     error: undefined,
   };
@@ -884,7 +884,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     if (!this[symbols.disabledEventsSymbol][type]) {
       Node.prototype._emit.apply(this, arguments);
     }
-  };
+  }; */
   Object.defineProperty(window, 'onload', {
     get() {
       return _elementGetter(window, 'load');
@@ -922,8 +922,8 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     if (!loading) {
       loading = true;
 
-      window._emit('beforeunload');
-      window._emit('unload');
+      window.dispatchEvent(new CustomEvent('beforeunload'));
+      window.dispatchEvent(new CustomEvent('unload'));
 
       self.postMessage({
         method: 'emit',

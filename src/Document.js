@@ -171,7 +171,14 @@ function initDocument (document, window) {
       }
 
       body.childNodes = bodyChildNodes;
-      body._emit('children', Array.from(bodyChildNodes), [], null, null);
+      body.dispatchEvent(new CustomEvent('children', {
+        detail: {
+          addedNodes: Array.from(bodyChildNodes),
+          removedNodes: [],
+          previousSibling: null,
+          nextSibling: null,
+        },
+      }));
 
       try {
         await GlobalContext._runHtml(document.body, window);
@@ -407,7 +414,7 @@ const _runHtml = (element, window) => {
       element.traverse(el => {
         const {id} = el;
         if (id) {
-          el._emit('attribute', 'id', id);
+          el.dispatchEvent('attribute', {name: 'id', value: id});
         }
 
         if (el[symbols.runSymbol]) {
@@ -490,7 +497,7 @@ class Document extends DOM.HTMLLoadableElement {
       this[symbols.pointerLockElementSymbol] = null;
 
       process.nextTick(() => {
-        this._emit('pointerlockchange');
+        this.dispatchEvent(new CustomEvent('pointerlockchange'));
       });
     }
   }
@@ -499,7 +506,7 @@ class Document extends DOM.HTMLLoadableElement {
       this[symbols.fullscreenElementSymbol] = null;
 
       process.nextTick(() => {
-        this._emit('fullscreenchange');
+        this.dispatchEvent(new CustomEvent('fullscreenchange'));
       });
     }
   }
