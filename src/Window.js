@@ -963,7 +963,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   };
   const _renderLocal = layered => {
     _tickLocalRafs();
-    const localFrames = contexts.map(context => context.transferToImageBitmap());
+    const localFrames = contexts.map(context => context._exokitGetFrame());
     return Promise.resolve(localFrames);
   };
   const _makeRenderChild = window => layered => window.runAsync({
@@ -1153,7 +1153,10 @@ self.onrunasync = req => {
 
   switch (method) {
     case 'tickAnimationFrame':
-      return self.tickAnimationFrame(req).then(result => Promise.resolve([result, result]));
+      return self.tickAnimationFrame(req).then(frames => {
+        const transfers = frames.flatMap(frame => ([frame.color, frame.depth]));
+        return Promise.resolve([frames, transfers]);
+      });
     case 'response': {
       const {keypath} = req;
 

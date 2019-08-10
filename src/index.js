@@ -755,22 +755,44 @@ const _startTopRenderLoop = () => {
     if (topVrPresentState.hmdType) {
       // _blitXrFbo();
     }
+    let index = 0;
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
-      let canvas = canvases[i];
-      if (!canvas) {
-        canvas = canvases[i] = document.createElement('canvas');
-        canvas.ctx = canvas.getContext('bitmaprenderer');
-        document.body.appendChild(canvas);
+      const {color, depth} = frame;
+      {
+        const j = index++;
+        let canvas = canvases[j];
+        if (!canvas) {
+          canvas = canvases[j] = document.createElement('canvas');
+          canvas.ctx = canvas.getContext('bitmaprenderer');
+          document.body.appendChild(canvas);
+        }
+        const expectedWidth = Math.floor(color.width / window.devicePixelRatio);
+        const expectedHeight = Math.floor(color.height / window.devicePixelRatio);
+        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+          canvas.width = expectedWidth;
+          canvas.height = expectedHeight;
+        }
+        canvas.ctx.transferFromImageBitmap(color);
+        // color.close();
       }
-      const expectedWidth = Math.floor(frame.width / window.devicePixelRatio);
-      const expectedHeight = Math.floor(frame.height / window.devicePixelRatio);
-      if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-        canvas.width = expectedWidth;
-        canvas.height = expectedHeight;
+      {
+        const j = index++;
+        let canvas = canvases[j];
+        if (!canvas) {
+          canvas = canvases[j] = document.createElement('canvas');
+          canvas.ctx = canvas.getContext('bitmaprenderer');
+          document.body.appendChild(canvas);
+        }
+        const expectedWidth = Math.floor(depth.width / window.devicePixelRatio);
+        const expectedHeight = Math.floor(depth.height / window.devicePixelRatio);
+        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+          canvas.width = expectedWidth;
+          canvas.height = expectedHeight;
+        }
+        canvas.ctx.transferFromImageBitmap(depth);
+        // depth.close();
       }
-      canvas.ctx.transferFromImageBitmap(frame);
-      // frame.close();
     }
     frames.length = 0;
   };
