@@ -214,19 +214,17 @@ function animate() {
     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
 
-    var verts = [
-      // First triangle:
+    var VERTS = Float32Array.from([
        1.0,  1.0,
       -1.0,  1.0,
       -1.0, -1.0,
-      // Second triangle:
       -1.0, -1.0,
        1.0, -1.0,
-       1.0,  1.0
-    ];
+       1.0,  1.0,
+    ]);
     screenQuadVBO = context.createBuffer();
     context.bindBuffer(context.ARRAY_BUFFER, screenQuadVBO);
-    context.bufferData(context.ARRAY_BUFFER, new Float32Array(verts), context.STATIC_DRAW);
+    context.bufferData(context.ARRAY_BUFFER, VERTS, context.STATIC_DRAW);
 
     shaderProgram = context.createProgram();
 
