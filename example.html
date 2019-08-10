@@ -15,6 +15,13 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x3B3961);
 
+      const ambientLight = new THREE.AmbientLight(0x808080);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
+      directionalLight.position.set(1, 1, 1);
+      scene.add(directionalLight);
+
       cubeMesh = (() => {
         const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
         const material = new THREE.MeshPhongMaterial({
