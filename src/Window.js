@@ -24,6 +24,7 @@ import {
   StereoPannerNode,
 } from './Audio.js';
 import {MutationObserver} from './MutationObserver.js';
+import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext} from './Graphics.js';
 
 // const mkdirp = require('mkdirp');
 // const ws = require('ws');
@@ -772,19 +773,19 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       return _parseDocumentAst(htmlAst, window, false);
     }
   };
-  window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
+  /* window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
   window.removeEventListener = EventTarget.prototype.removeEventListener.bind(window);
-  window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window);
+  window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window); */
   window.Image = HTMLImageElement;
-  window.ImageData = ImageData;
+  /* window.ImageData = ImageData;
   window.ImageBitmap = ImageBitmap;
   window.Path2D = Path2D;
-  window.CanvasGradient = CanvasGradient;
-  window.CanvasRenderingContext2D = OffscreenCanvasRenderingContext2D;
-  /* window.WebGLRenderingContext = WebGLRenderingContext;
+  window.CanvasGradient = CanvasGradient; */
+  window.CanvasRenderingContext2D = CanvasRenderingContext2D;
+  window.WebGLRenderingContext = WebGLRenderingContext;
   if (options.args.webgl !== '1') {
     window.WebGL2RenderingContext = WebGL2RenderingContext;
-  } */
+  }
   window.Audio = HTMLAudioElement;
   window.MediaRecorder = MediaRecorder;
   window.DataTransfer = DataTransfer;

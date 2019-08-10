@@ -21,6 +21,7 @@ import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
 import utils from './utils.js';
 const {_elementGetter, _elementSetter, _normalizeUrl} = utils;
+import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext} from './Graphics.js';
 import {XRRigidTransform} from './XR.js';
 // const {ElectronVm} = require('./electron-vm.js');
 
@@ -2587,7 +2588,7 @@ class HTMLCanvasElement extends HTMLElement {
         this._context = null;
       }
 
-      this._context = new GlobalContext.CanvasRenderingContext2D(this);
+      this._context = new CanvasRenderingContext2D(this);
     } else if (contextType === 'webgl' || contextType === 'experimental-webgl' || contextType === 'webgl2' || contextType === 'xrpresent') {
       if (this._context) {
         this._context.destroy();
@@ -2598,13 +2599,13 @@ class HTMLCanvasElement extends HTMLElement {
 
       if (!window[symbols.optionsSymbol].args || window[symbols.optionsSymbol].args.webgl === '1') {
         if (contextType === 'webgl' || contextType === 'experimental-webgl' || contextType === 'xrpresent') {
-          this._context = new GlobalContext.WebGLRenderingContext(this, attrs);
+          this._context = new WebGLRenderingContext(this, attrs);
         }
       } else {
         if (contextType === 'webgl' || contextType === 'experimental-webgl') {
-          this._context = new GlobalContext.WebGLRenderingContext(this, attrs);
+          this._context = new WebGLRenderingContext(this, attrs);
         } else {
-          this._context = new GlobalContext.WebGL2RenderingContext(this, attrs);
+          this._context = new WebGL2RenderingContext(this, attrs);
         }
       }
     } else {
