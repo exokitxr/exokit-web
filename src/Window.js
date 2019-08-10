@@ -424,38 +424,18 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
 
   Object.defineProperty(window, 'innerWidth', {
     get() {
-      if (!GlobalContext.xrState.metrics[0]) {
-        const screenSize = nativeWindow.getScreenSize();
-        GlobalContext.xrState.metrics[0] = screenSize[0]/2;
-        // GlobalContext.xrState.metrics[1] = screenSize[1]/2;
-      }
       return GlobalContext.xrState.metrics[0];
-    },
-    set(innerWidth) {
-      GlobalContext.xrState.metrics[0] = innerWidth;
     },
   });
   Object.defineProperty(window, 'innerHeight', {
     get() {
-      if (!GlobalContext.xrState.metrics[1]) {
-        const screenSize = nativeWindow.getScreenSize();
-        // GlobalContext.xrState.metrics[0] = screenSize[0]/2;
-        GlobalContext.xrState.metrics[1] = screenSize[1]/2;
-      }
       return GlobalContext.xrState.metrics[1];
-    },
-    set(innerHeight) {
-      GlobalContext.xrState.metrics[1] = innerHeight;
     },
   });
   Object.defineProperty(window, 'devicePixelRatio', {
     get() {
-      if (!GlobalContext.xrState.devicePixelRatio[0]) {
-        GlobalContext.xrState.devicePixelRatio[0] = nativeWindow.getDevicePixelRatio();
-      }
       return GlobalContext.xrState.devicePixelRatio[0];
     },
-    set(devicePixelRatio) {},
   });
   window.document = null;
   window.history = new History(location.href);

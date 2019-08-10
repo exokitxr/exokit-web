@@ -201,7 +201,10 @@ const xrState = (() => {
   result.renderHeight = _makeTypedArray(Float32Array, 1);
   result.renderHeight[0] = 1080;
   result.metrics = _makeTypedArray(Uint32Array, 2);
+  result.metrics[0] = window.innerWidth;
+  result.metrics[1] = window.innerHeight;
   result.devicePixelRatio = _makeTypedArray(Uint32Array, 1);
+  result.devicePixelRatio[0] = window.devicePixelRatio;
   result.depthNear = _makeTypedArray(Float32Array, 1);
   result.depthNear[0] = 0.1;
   result.depthFar = _makeTypedArray(Float32Array, 1);
@@ -310,6 +313,12 @@ const xrState = (() => {
   return result;
 })();
 GlobalContext.xrState = xrState;
+
+window.addEventListener('resize', () => {
+  result.metrics[0] = window.innerWidth;
+  result.metrics[1] = window.innerHeight;
+  result.devicePixelRatio[0] = window.devicePixelRatio;
+});
 
 const topVrPresentState = {
   hmdType: null,
