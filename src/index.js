@@ -315,9 +315,9 @@ const xrState = (() => {
 GlobalContext.xrState = xrState;
 
 window.addEventListener('resize', () => {
-  result.metrics[0] = window.innerWidth;
-  result.metrics[1] = window.innerHeight;
-  result.devicePixelRatio[0] = window.devicePixelRatio;
+  xrState.metrics[0] = window.innerWidth;
+  xrState.metrics[1] = window.innerHeight;
+  xrState.devicePixelRatio[0] = window.devicePixelRatio;
 });
 
 const topVrPresentState = {
@@ -604,6 +604,7 @@ const _startTopRenderLoop = () => {
   // const TIMESTAMP_FRAMES = 100;
   // let lastFrameTime = Date.now();
   const frames = [];
+  const canvases = [];
 
   /* if (nativeBindings.nativeWindow.pollEvents) {
     setInterval(() => {
@@ -756,7 +757,16 @@ const _startTopRenderLoop = () => {
     }
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
-      frame.close();
+      let canvas = canvases[i];
+      if (!canvas) {
+        canvas = canvases[i] = document.createElement('canvas');
+        canvas.width = frame.width;
+        canvas.height = frame.height;
+        canvas.ctx = canvas.getContext('bitmaprenderer');
+        document.body.appendChild(canvas);
+      }
+      canvas.ctx.transferFromImageBitmap(frame);
+      // frame.close();
     }
     frames.length = 0;
   };

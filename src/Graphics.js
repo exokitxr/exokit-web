@@ -1,6 +1,10 @@
 import GlobalContext from './GlobalContext.js';
 
-const bannedInheritances = ['canvas', 'globalAlpha', 'globalCompositeOperation', 'filter', 'imageSmoothingEnabled', 'imageSmoothingQuality'];
+const {OffscreenCanvasRenderingContext2D, WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
+self.OffscreenCanvasRenderingContext2D = undefined;
+self.WebGLRenderingContext = undefined;
+self.WebGL2RenderingContext = undefined;
+
 const _inherit = (a, b) => {
   for (const k in b) {
     a[k] = b[k];
@@ -25,16 +29,22 @@ class CanvasRenderingContext2D {
     this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     this.backingCanvas = new OffscreenCanvas(width, height);
     this.backingContext = this.backingCanvas.getContext('2d');
-  }
 
+    GlobalContext.contexts.push(this);
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
   }
+  transferToImageBitmap() {
+    return this.backingCanvas.transferToImageBitmap();
+  }
+  destroy() {
+    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
+  }
 }
 _inherit(CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D);
 
-const {WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
 class WebGLRenderingContext {
   constructor(canvasEl) {
     const {width, height} = canvasEl;
@@ -42,11 +52,18 @@ class WebGLRenderingContext {
     this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     this.backingCanvas = new OffscreenCanvas(width, height);
     this.backingContext = this.backingCanvas.getContext('webgl');
-  }
 
+    GlobalContext.contexts.push(this);
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
+  }
+  transferToImageBitmap() {
+    return this.backingCanvas.transferToImageBitmap();
+  }
+  destroy() {
+    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
   }
 }
 _inherit(WebGLRenderingContext, OffscreenWebGLRenderingContext);
@@ -58,11 +75,18 @@ class WebGL2RenderingContext {
     this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     this.backingCanvas = new OffscreenCanvas(width, height);
     this.backingContext = this.backingCanvas.getContext('webgl2');
-  }
 
+    GlobalContext.contexts.push(this);
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
+  }
+  transferToImageBitmap() {
+    return this.backingCanvas.transferToImageBitmap();
+  }
+  destroy() {
+    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
   }
 }
 _inherit(WebGL2RenderingContext, OffscreenWebGL2RenderingContext);
