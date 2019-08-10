@@ -2347,7 +2347,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
   }
 
   get width() {
-    return parseInt(this.getAttribute('width') || bindings.nativeWindow.getScreenSize()[0]/2 + '', 10);
+    return parseInt(this.getAttribute('width') || (1280 + ''), 10);
   }
   set width(value) {
     if (typeof value === 'number' && isFinite(value)) {
@@ -2355,7 +2355,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
     }
   }
   get height() {
-    return parseInt(this.getAttribute('height') || bindings.nativeWindow.getScreenSize()[1]/2 + '', 10);
+    return parseInt(this.getAttribute('height') || (1024 + ''), 10);
   }
   set height(value) {
     if (typeof value === 'number' && isFinite(value)) {
@@ -2518,7 +2518,7 @@ class HTMLCanvasElement extends HTMLElement {
   }
 
   get width() {
-    return parseInt(this.getAttribute('width') || bindings.nativeWindow.getScreenSize()[0]/2 + '', 10);
+    return parseInt(this.getAttribute('width') || (1280 + ''), 10);
   }
   set width(value) {
     if (typeof value === 'number' && isFinite(value)) {
@@ -2526,7 +2526,7 @@ class HTMLCanvasElement extends HTMLElement {
     }
   }
   get height() {
-    return parseInt(this.getAttribute('height') || bindings.nativeWindow.getScreenSize()[1]/2 + '', 10);
+    return parseInt(this.getAttribute('height') || (1024 + ''), 10);
   }
   set height(value) {
     if (typeof value === 'number' && isFinite(value)) {
