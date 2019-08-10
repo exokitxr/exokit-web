@@ -13,6 +13,10 @@ const {
   },
   nativeWindow,
 } = require('./native-bindings'); */
+import {
+  getGamepads,
+  getHMDType,
+} from './VR.js';
 import symbols from './symbols.js';
 import GlobalContext from './GlobalContext.js';
 

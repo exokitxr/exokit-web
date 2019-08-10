@@ -646,24 +646,12 @@ class FakeXRDisplay {
 const getHMDType = () => {
   if (GlobalContext.xrState.fakeVrDisplayEnabled[0]) {
     return 'fake';
-  } else if (nativeOculusVR && nativeOculusVR.Oculus_IsHmdPresent()) {
-    return 'oculus';
-  } else if (nativeOpenVR && nativeOpenVR.VR_IsHmdPresent()) {
-    return 'openvr';
-  } else if (nativeOculusMobileVr && nativeOculusMobileVr.OculusMobile_IsHmdPresent()) {
-    return 'oculusMobile';
-  } else if (nativeMl && nativeMl.IsPresent()) {
-    return 'magicleap';
   } else {
     return null;
   }
 };
 const hmdTypes = [
   'fake',
-  'oculus',
-  'openvr',
-  'oculusMobile',
-  'magicleap',
 ];
 const hmdTypeIndexMap = (() => {
   const result = {};
