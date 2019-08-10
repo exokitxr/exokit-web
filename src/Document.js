@@ -113,7 +113,7 @@ function initDocument (document, window) {
         if (runElQueue.length > 0) {
           _addRun(runElQueue.shift());
         } else {
-          document.emit('flush');
+          document.dispatchEvent(new CustomEvent('flush'));
         }
       } else {
         runElQueue.push(fn);
@@ -331,9 +331,9 @@ class Resources extends EventTarget {
     } else {
       const _isDone = () => this.numRunning === 0 && this.queue.length === 0;
       if (_isDone()) {
-        process.nextTick(() => { // wait one tick for more resources before emitting drain
+        Promise.resolve().then(() => { // wait one tick for more resources before emitting drain
           if (_isDone()) {
-            this.emit('drain');
+            this.dispatchEvent(new CustomEvent('drain'));
           }
         });
       }
@@ -434,8 +434,10 @@ const _runHtml = (element, window) => {
         }
       });
       if (document[symbols.runningSymbol]) {
-        document.once('flush', () => {
+        document.addEventListener('flush', () => {
           accept();
+        }, {
+          once: true,
         });
       } else {
         accept();
@@ -496,7 +498,7 @@ class Document extends DOM.HTMLLoadableElement {
     if (this[symbols.pointerLockElementSymbol] !== null) {
       this[symbols.pointerLockElementSymbol] = null;
 
-      process.nextTick(() => {
+      Promise.resolve().then(() => {
         this.dispatchEvent(new CustomEvent('pointerlockchange'));
       });
     }
@@ -505,7 +507,7 @@ class Document extends DOM.HTMLLoadableElement {
     if (this[symbols.fullscreenElementSymbol] !== null) {
       this[symbols.fullscreenElementSymbol] = null;
 
-      process.nextTick(() => {
+      Promise.resolve().then(() => {
         this.dispatchEvent(new CustomEvent('fullscreenchange'));
       });
     }

@@ -1870,25 +1870,24 @@ class HTMLScriptElement extends HTMLLoadableElement {
     this.readyState = 'loading';
 
     return this.ownerDocument.resources.addResource((onprogress, cb) => {
-      const _getSrc = () => {
+      const _getSpec = () => {
         const innerHTML = this.childNodes.length > 0 ? this.childNodes[0].value : '';
         if (innerHTML) {
           const url = this.ownerDocument.defaultView.location.href;
           const isModule = this.isModule();
-          return Promise.resolve({
-            s: innerHTML,
+          return {
+            text: innerHTML,
             url,
             isModule,
-          });
+          };
         } else {
           const url = _mapUrl(this.src, this.ownerDocument.defaultView);
           const isModule = this.isModule();
-          return _fetch(url)
-            .then(s => ({
-              s,
-              url,
-              isModule,
-            }));
+          return {
+            text: null,
+            url,
+            isModule,
+          };
         }
       };
       const _fetch = async url => {
@@ -1899,31 +1898,24 @@ class HTMLScriptElement extends HTMLLoadableElement {
           throw new Error('script src got invalid status code: ' + res.status + ' : ' + url);
         }
       };
-
-      return _getSrc()
-        .then(async ({s, url, isModule}) => {
-          const opts = {
-            lineOffset : this.location && this.location.line !== null ? this.location.line - 1 : 0,
-            columnOffset: this.location && this.location.col !== null ? this.location.col - 1 : 0,
-          };
-
-          if (isModule) {
-            opts.url = url;
-            const script = new vm.SourceTextModule(s, opts);
-            await script.link(async (url, {url: baseUrl}) => {
-              url = _mapUrl(_normalizeUrl(url, baseUrl), this.ownerDocument.defaultView);
-              const s = await _fetch(url);
-              return new vm.SourceTextModule(s, {
-                url,
-              });
-            });
-            script.instantiate();
-            await script.evaluate();
+      const _runSpec = async ({text, url, isModule}) => {
+        if (isModule) {
+          if (text) {
+            await import('data:application/javascript;base64,' + btoa(text));
           } else {
-            opts.filename = url;
-            vm.runInThisContext(s, opts);
+            await import(url);
           }
-        })
+        } else {
+          if (!text) {
+            text = await _fetch(url);
+          }
+          (function() {
+            eval(text);
+          }).call(window);
+        }
+      };
+
+      return _runSpec(_getSpec())
         .then(() => {
           this.readyState = 'complete';
 
@@ -1934,10 +1926,9 @@ class HTMLScriptElement extends HTMLLoadableElement {
         .catch(err => {
           this.readyState = 'complete';
 
-          const e = new ErrorEvent('error', {target: this});
-          e.message = err.message;
-          e.stack = err.stack;
-          this.dispatchEvent(e);
+          this.dispatchEvent(new ErrorEvent('error', {
+            error: err,
+          }));
 
           cb(err);
         });
