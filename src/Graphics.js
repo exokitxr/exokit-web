@@ -94,8 +94,8 @@ class WebGLRenderingContext {
     // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_STENCIL, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_STENCIL, extensions.WEBGL_depth_texture.UNSIGNED_INT_24_8_WEBGL, null);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, this.defaultFramebuffer.depthTex, 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.defaultFramebuffer.depthTex, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -127,7 +127,7 @@ class WebGLRenderingContext {
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_STENCIL, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_STENCIL, extensions.WEBGL_depth_texture.UNSIGNED_INT_24_8_WEBGL, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
 
@@ -218,6 +218,15 @@ class WebGLRenderingContext {
 
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    /* const pixels = new Uint8Array(this.backingCanvas.width * this.backingCanvas.height * 4);
+    gl.readPixels(0, 0, this.backingCanvas.width, this.backingCanvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    let count = 0;
+    for (let i = 0; i < this.backingCanvas.width * this.backingCanvas.height * 4; i += 4) {
+      if (pixels[i] !== 0 || pixels[i+1] !== 0 || pixels[i+2] !== 0) {
+        count++;
+      }
+    }
+    console.log('load depth', count); */
     const depth = canvas.transferToImageBitmap();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
