@@ -36,8 +36,8 @@
       scene.add(cubeMesh);
 
       renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+      renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(800, 800);
       container.appendChild(renderer.domElement);
     }
 
