@@ -203,7 +203,7 @@ const xrState = (() => {
   result.metrics = _makeTypedArray(Uint32Array, 2);
   result.metrics[0] = window.innerWidth;
   result.metrics[1] = window.innerHeight;
-  result.devicePixelRatio = _makeTypedArray(Uint32Array, 1);
+  result.devicePixelRatio = _makeTypedArray(Float32Array, 1);
   result.devicePixelRatio[0] = window.devicePixelRatio;
   result.depthNear = _makeTypedArray(Float32Array, 1);
   result.depthNear[0] = 0.1;
@@ -760,10 +760,14 @@ const _startTopRenderLoop = () => {
       let canvas = canvases[i];
       if (!canvas) {
         canvas = canvases[i] = document.createElement('canvas');
-        canvas.width = frame.width;
-        canvas.height = frame.height;
         canvas.ctx = canvas.getContext('bitmaprenderer');
         document.body.appendChild(canvas);
+      }
+      const expectedWidth = Math.floor(frame.width / window.devicePixelRatio);
+      const expectedHeight = Math.floor(frame.height / window.devicePixelRatio);
+      if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+        canvas.width = expectedWidth;
+        canvas.height = expectedHeight;
       }
       canvas.ctx.transferFromImageBitmap(frame);
       // frame.close();

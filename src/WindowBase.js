@@ -326,12 +326,17 @@ const _oninitmessage = e => {
         }
         if (!err) {
           Promise.resolve(result)
-            .then(result => {
+            .then(resultSpec => {
+              let result, transfers;
+              if (resultSpec) {
+                result = resultSpec[0];
+                transfers = resultSpec[1];
+              }
               self._postMessage({
                 method: 'response',
                 requestKey: m.requestKey,
                 result,
-              });
+              }, transfers);
             });
         } else {
           self._postMessage({

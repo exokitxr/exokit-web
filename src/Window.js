@@ -1153,7 +1153,7 @@ self.onrunasync = req => {
 
   switch (method) {
     case 'tickAnimationFrame':
-      return self.tickAnimationFrame(req);
+      return self.tickAnimationFrame(req).then(result => Promise.resolve([result, result]));
     case 'response': {
       const {keypath} = req;
 
@@ -1257,7 +1257,7 @@ self.onrunasync = req => {
       break;
     }
     case 'eval': // used in tests
-      return Promise.resolve(eval(req.scriptString));
+      return Promise.resolve([eval(req.scriptString), []]);
     default:
       return Promise.reject(new Error(`invalid window async request: ${JSON.stringify(req)}`));
   }
