@@ -184,18 +184,20 @@ const _makeWindow = (options = {}, handlers = {}) => {
         console.warn(err.stack);
       });
   });
-  window.addEventListener('request', req => {
+  window.addEventListener('request', e => {
+    const {detail: req} = e;
     req.keypath.push(id);
     options.onrequest && options.onrequest(req);
   });
   window.addEventListener('framebuffer', e => {
-    window.framebuffer = e;
+    const {detail: framebuffer} = e;
+    window.framebuffer = framebuffer;
   });
   window.addEventListener('hapticPulse', e => {
-    options.onhapticpulse && options.onhapticpulse(e);
+    options.onhapticpulse && options.onhapticpulse(e.detail);
   });
   window.addEventListener('paymentRequest', e => {
-    options.onpaymentrequest && options.onpaymentrequest(e);
+    options.onpaymentrequest && options.onpaymentrequest(e.detail);
   });
   window.addEventListener('error', err => {
     console.warn(err.stack);
