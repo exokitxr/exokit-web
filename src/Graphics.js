@@ -77,6 +77,10 @@ class WebGLRenderingContext {
       colorProgram: null,
       depthVao: null,
       depthProgram: null,
+      decodeVao: null,
+      decodeProgram: null,
+      decodeColorTex: null,
+      decodeDepthTex: null,
     };
     this.enabled = {
       clear: false,
@@ -87,15 +91,14 @@ class WebGLRenderingContext {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
 
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.defaultFramebuffer.colorTex, 0);
+
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
@@ -130,7 +133,7 @@ class WebGLRenderingContext {
     this.backingCanvas.height = h;
 
     const {backingContext: gl, extensions} = this;
-    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+    // const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
     const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
@@ -138,21 +141,22 @@ class WebGLRenderingContext {
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
+    if (this.defaultFramebuffer.decodeColorTex) {
+      gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    }
+    if (this.defaultFramebuffer.decodeDepthTex) {
+      gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
+
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
     gl.bindTexture(gl.TEXTURE_2D, oldTexture);
   }
-  _exokitGetFrame() {
-    const {backingCanvas: canvas, backingContext: gl, extensions} = this;
-    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-    const oldActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-    gl.activeTexture(gl.TEXTURE0);
-    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
-    const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
-    const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-    const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-
+  _exokitEnsureShaders() {
+    const {backingContext: gl, extensions} = this;
     if (!this.defaultFramebuffer.buffer) {
       this.defaultFramebuffer.buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
@@ -186,10 +190,10 @@ class WebGLRenderingContext {
         {
           const fsh = `
             precision highp float;
-            uniform sampler2D uTex;
+            uniform sampler2D uColorTex;
             varying vec2 vTexCoords;
             void main() {
-              gl_FragColor = texture2D(uTex, vTexCoords);
+              gl_FragColor = texture2D(uColorTex, vTexCoords);
             }
           `;
           const shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -213,8 +217,8 @@ class WebGLRenderingContext {
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        const uTexLocation = gl.getUniformLocation(this.defaultFramebuffer.colorProgram, 'uTex');
-        gl.uniform1i(uTexLocation, 0);
+        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.colorProgram, 'uColorTex');
+        gl.uniform1i(uColorTexLocation, 0);
       }
 
       {
@@ -245,7 +249,7 @@ class WebGLRenderingContext {
         {
           const fsh = `
             precision highp float;
-            uniform sampler2D uTex;
+            uniform sampler2D uColorTex;
             varying vec2 vTexCoords;
             vec4 EncodeFloatRGBA(float v) {
               vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
@@ -257,7 +261,7 @@ class WebGLRenderingContext {
               return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
             }
             void main() {
-              gl_FragColor = EncodeFloatRGBA(texture2D(uTex, vTexCoords).r);
+              gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
             }
           `;
           const shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -281,10 +285,108 @@ class WebGLRenderingContext {
         gl.enableVertexAttribArray(positionLocation);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        const uTexLocation = gl.getUniformLocation(this.defaultFramebuffer.depthProgram, 'uTex');
-        gl.uniform1i(uTexLocation, 0);
+        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.depthProgram, 'uColorTex');
+        gl.uniform1i(uColorTexLocation, 0);
+      }
+
+      {
+        this.defaultFramebuffer.decodeVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.decodeVao);
+
+        this.defaultFramebuffer.decodeProgram = gl.createProgram();
+
+        {
+          const vsh = `
+            attribute vec2 position;
+            varying vec2 vTexCoords;
+            const vec2 scale = vec2(0.5, 0.5);
+            void main() {
+              vTexCoords  = position * scale + scale; // scale vertex attribute to [0,1] range
+              gl_Position = vec4(position, 0.0, 1.0);
+            }
+          `;
+          const shader = gl.createShader(gl.VERTEX_SHADER);
+          gl.shaderSource(shader, vsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log(`Error compiling vertex shader:`);
+            console.log(gl.getShaderInfoLog(shader));
+          }
+          gl.attachShader(this.defaultFramebuffer.decodeProgram, shader);
+        }
+        {
+          const fsh = `
+            precision highp float;
+            uniform sampler2D uColorTex;
+            uniform sampler2D uDepthTex;
+            varying vec2 vTexCoords;
+            vec4 EncodeFloatRGBA(float v) {
+              vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+              enc = fract(enc);
+              enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
+              return enc;
+            }
+            float DecodeFloatRGBA(vec4 rgba) {
+              return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+            }
+            void main() {
+              gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
+            }
+          `;
+          const shader = gl.createShader(gl.FRAGMENT_SHADER);
+          gl.shaderSource(shader, fsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log('Error compiling fragment shader:');
+            console.log(gl.getShaderInfoLog(shader));
+          }
+          gl.attachShader(this.defaultFramebuffer.decodeProgram, shader);
+        }
+
+        gl.linkProgram(this.defaultFramebuffer.decodeProgram);
+        if (!gl.getProgramParameter(this.defaultFramebuffer.decodeProgram, gl.LINK_STATUS)) {
+          console.log('Error linking shader program:');
+          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.decodeProgram));
+        }
+        gl.useProgram(this.defaultFramebuffer.decodeProgram)
+
+        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.decodeProgram, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.decodeProgram, 'uColorTex');
+        gl.uniform1i(uColorTexLocation, 0);
+
+        const uDepthTexLocation = gl.getUniformLocation(this.defaultFramebuffer.decodeProgram, 'uDepthTex');
+        gl.uniform1i(uDepthTexLocation, 1);
+
+        this.defaultFramebuffer.decodeColorTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        this.defaultFramebuffer.decodeDepthTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       }
     }
+  }
+  _exokitGetFrame() {
+    const {backingCanvas: canvas, backingContext: gl, extensions} = this;
+    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+    const oldActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+    gl.activeTexture(gl.TEXTURE0);
+    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
+    const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+    const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+
+    this._exokitEnsureShaders();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
@@ -316,15 +418,42 @@ class WebGLRenderingContext {
   _exokitPutFrame(frame) {
     const {color, depth} = frame;
 
-    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
-    color.close();
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, depth);
-    depth.close();
+    const {backingCanvas: canvas, backingContext: gl, extensions} = this;
+    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+    const oldActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+    gl.activeTexture(gl.TEXTURE0);
+    const oldTexture0 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    gl.activeTexture(gl.TEXTURE1);
+    const oldTexture1 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
+    const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+    const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
-    gl.bindTexture(gl.TEXTURE_2D, oldTexture);
+    this._exokitEnsureShaders();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
+
+    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthDecodeVao);
+    gl.useProgram(this.defaultFramebuffer.decodeProgram);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, depth);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, oldTexture0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, oldTexture1);
+    gl.activeTexture(oldActiveTexture);
+    extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
+    gl.useProgram(oldProgram);
   }
   _exokitClearEnabled(enabled) {
     this.enabled.clear = enabled;
