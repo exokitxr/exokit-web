@@ -7,7 +7,7 @@ class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
-    const worker = new Worker('src/WindowBase.js', {
+    const worker = new Worker('/src/WindowBase.js', {
       type: 'module',
       // name: 'WorkerVm@',
     });
