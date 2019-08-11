@@ -134,6 +134,25 @@ class WebGLRenderingContext {
       this.backingContext.clear(flags);
     }
   }
+  texImage2D(a, b, c, d, e, f, g, h, i) {
+    if (f && f.constructor && f.constructor.name === 'HTMLImageElement') {
+      f = f.imageBitmap;
+      return this.backingContext.texImage2D(a, b, c, d, e, f);
+    }
+    if (i && i.constructor && i.constructor.name === 'HTMLImageElement') {
+      i = i.imageBitmap;
+      return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
+    }
+    if (f && f.constructor && f.constructor.name === 'HTMLCanvasElement') {
+      f = f.backingCanvas;
+      return this.backingContext.texImage2D(a, b, c, d, e, f);
+    }
+    if (i && i.constructor && i.constructor.name === 'HTMLCanvasElement') {
+      i = i.backingCanvas;
+      return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
+    }
+    return this.backingContext.texImage2D.apply(this.backingContext, arguments);
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;

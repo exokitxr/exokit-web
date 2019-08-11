@@ -2841,7 +2841,7 @@ class HTMLImageElement extends HTMLSrcableElement {
     } else {
       super(window, 'IMG', attrs, value, location);
 
-      this.image = new bindings.nativeImage();
+      this.imageBitmap = null;;
 
       this.addEventListener('attribute', ({detail: {name, value}}) => {
         if (name === 'src' && value) {
@@ -2853,21 +2853,17 @@ class HTMLImageElement extends HTMLSrcableElement {
             this.ownerDocument.defaultView.fetch(src)
               .then(res => {
                 if (res.status >= 200 && res.status < 300) {
-                  return res.arrayBuffer();
+                  return res.blob();
                 } else {
                   return Promise.reject(new Error(`img src got invalid status code (url: ${JSON.stringify(src)}, code: ${res.status})`));
                 }
               })
-              .then(arrayBuffer => new Promise((accept, reject) => {
-                this.image.load(arrayBuffer, err => {
-                  if (!err) {
-                    accept();
-                  } else {
-                    reject(new Error(`failed to decode image: ${err.message} (url: ${JSON.stringify(src)}, size: ${arrayBuffer.byteLength}, message: ${err})`));
-                  }
-                });
+              .then(blob => createImageBitmap(blob, {
+                imageOrientation: 'flipY',
               }))
-              .then(() => {
+              .then(imageBitmap => {
+                this.imageBitmap = imageBitmap;
+
                 this.readyState = 'complete';
 
                 this._dispatchEventOnDocumentReady(new Event('load', {target: this}));
@@ -2875,14 +2871,13 @@ class HTMLImageElement extends HTMLSrcableElement {
                 cb();
               })
               .catch(err => {
-                console.warn('failed to load image:', src);
+                // console.warn('failed to load image:', src, err.stack);
 
                 this.readyState = 'complete';
 
-                const e = new ErrorEvent('error', {target: this});
-                e.message = err.message;
-                e.stack = err.stack;
-                this._dispatchEventOnDocumentReady(e);
+                this._dispatchEventOnDocumentReady(new ErrorEvent('error', {
+                  error: err,
+                }));
 
                 cb(err);
               });
@@ -2914,11 +2909,11 @@ class HTMLImageElement extends HTMLSrcableElement {
   }
 
   get width() {
-    return this.image.width;
+    return this.imageBitmap.width;
   }
   set width(width) {}
   get height() {
-    return this.image.height;
+    return this.imageBitmap.height;
   }
   set height(height) {}
 
@@ -2934,11 +2929,6 @@ class HTMLImageElement extends HTMLSrcableElement {
   getBoundingClientRect() {
     return new DOMRect(0, 0, this.width, this.height);
   }
-
-  get data() {
-    return this.image.data;
-  }
-  set data(data) {}
 };
 
 class TimeRanges {
@@ -3368,7 +3358,7 @@ class HTMLVideoElement extends HTMLMediaElement {
 }
 */
 
-function createImageBitmap(src, x, y, w, h, options) {
+/* function createImageBitmap(src, x, y, w, h, options) {
   let image;
   if (src.constructor.name === 'HTMLImageElement') {
     image = src.image;
@@ -3402,7 +3392,7 @@ function createImageBitmap(src, x, y, w, h, options) {
     flipY,
   );
   return Promise.resolve(imageBitmap);
-}
+} */
 
 class HTMLDivElement extends HTMLElement {
   constructor(window, attrs = [], value = '', location = null) {
@@ -3501,7 +3491,7 @@ export {
   TimeRanges,
   HTMLAudioElement,
   HTMLVideoElement,
-  createImageBitmap,
+  // createImageBitmap,
   HTMLDivElement,
   HTMLUListElement,
   HTMLLIElement,

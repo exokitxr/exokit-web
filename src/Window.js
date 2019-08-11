@@ -82,7 +82,7 @@ import {
   HTMLCollection,
   DOMRect,
   DOMPoint,
-  createImageBitmap,
+  // createImageBitmap,
 } from './DOM.js';
 import History from './History.js';
 import * as XR from './XR.js';

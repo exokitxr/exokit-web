@@ -1,7 +1,7 @@
 // const {URL} = url;
 // const vm = require('vm');
 
-import {createImageBitmap} from './DOM.js';
+// import {createImageBitmap} from './DOM.js';
 // const WebSocket = require('ws/lib/websocket');
 // const {FileReader} = require('./File.js');
 import GlobalContext from './GlobalContext.js';
@@ -24,7 +24,7 @@ const filename = _normalizeUrl(src);
 self.location = url.parse(filename);
 // global.WebSocket = WebSocket;
 // global.importScripts = importScripts;
-self.createImageBitmap = createImageBitmap;
+// self.createImageBitmap = createImageBitmap;
 // global.FileReader = FileReader;
 
 /* global.on('error', err => {
