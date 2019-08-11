@@ -916,6 +916,15 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   });
 
+  Object.defineProperty(window, 'layers', {
+    get() {
+      return vrPresentState.layers;
+    },
+    set(layers) {
+      vrPresentState.layers = layers;
+    },
+  });
+
   const rafCbs = [];
   window[symbols.rafCbsSymbol] = rafCbs;
   /* const timeouts = [null];
@@ -962,15 +971,20 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   };
   const _renderLocal = (frame, layered) => {
-    if (frame && contexts.length > 0) {
-      contexts[0]._exokitPutFrame(frame);
-      contexts._exokitClearEnabled(false);
+    for (let i = 0; i < contexts.length; i++) {
+      contexts[i]._exokitClearEnabled(true);
     }
-    for (let i = 1; i < contexts.length; i++) {
-      contexts._exokitClearEnabled(true);
+    const layerCanvas = layered ? layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context) : null;
+    const layerContext = layerCanvas && layerCanvas._context;
+    if (layerContext) {
+      layerContext._exokitPutFrame(frame);
+      frame = null;
+      layerContext._exokitClearEnabled(false);
     }
     _tickLocalRafs();
-    frame = contexts.length > 0 ? contexts[0]._exokitGetFrame() : null;
+    if (layerContext) {
+      frame = layerContext._exokitGetFrame();
+    }
     return Promise.resolve(frame);
   };
   const _makeRenderChild = window => (frame, layered) => window.runAsync({
