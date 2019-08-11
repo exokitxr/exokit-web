@@ -918,7 +918,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   });
 
-  Object.defineProperty(window, 'layers', {
+  Object.defineProperty(window, 'layers', { // XXX make this only happen on XR
     get() {
       return vrPresentState.layers;
     },
@@ -976,11 +976,13 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     for (let i = 0; i < contexts.length; i++) {
       contexts[i]._exokitClearEnabled(true);
     }
-    const layerCanvas = layered ? layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context) : null;
+    const layerCanvas = layered ? vrPresentState.layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context) : null;
     const layerContext = layerCanvas && layerCanvas._context;
     if (layerContext) {
-      layerContext._exokitPutFrame(frame);
-      frame = null;
+      if (frame) {
+        layerContext._exokitPutFrame(frame);
+        frame = null;
+      }
       layerContext._exokitClearEnabled(false);
     }
     _tickLocalRafs();
@@ -989,11 +991,13 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
     return Promise.resolve(frame);
   };
-  const _makeRenderChild = window => (frame, layered) => window.runAsync({
-    method: 'tickAnimationFrame',
-    frame,
-    layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
-  });
+  const _makeRenderChild = window => (frame, layered) => {
+    return window.runAsync({
+      method: 'tickAnimationFrame',
+      frame,
+      layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+    }, frame ? [frame.color, frame.depth] : undefined);
+  };
   const _collectRenders = () => windows.map(_makeRenderChild).concat([_renderLocal]);
   const _render = (frame, layered) => new Promise((accept, reject) => {
     const renders = _collectRenders();
@@ -1005,7 +1009,6 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
             _recurse(i+1);
           })
           .catch(err => {
-            console.warn('failed to render window', err);
             _recurse(i+1);
           });
       } else {
