@@ -603,7 +603,7 @@ const _startTopRenderLoop = () => {
   }; */
   // const TIMESTAMP_FRAMES = 100;
   // let lastFrameTime = Date.now();
-  const frames = [];
+  let frame = null;
   const canvases = [];
 
   /* if (nativeBindings.nativeWindow.pollEvents) {
@@ -747,8 +747,8 @@ const _startTopRenderLoop = () => {
       }
       return Promise.resolve([]);
     })
-    .then(newFrames => {
-      frames.push.apply(frames, newFrames);
+    .then(newFrame => {
+      frame = newFrame;
     });
   const _tickAnimationFrames = () => Promise.all(windows.map(_tickAnimationFrame));
   const _submitFrame = async () => {
@@ -756,8 +756,7 @@ const _startTopRenderLoop = () => {
       // _blitXrFbo();
     }
     let index = 0;
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
+    if (frame) {
       const {color, depth} = frame;
       {
         const j = index++;
@@ -794,7 +793,7 @@ const _startTopRenderLoop = () => {
         // depth.close();
       }
     }
-    frames.length = 0;
+    frame = null;
   };
   let animating = false;
   const _topRenderLoop = async () => {

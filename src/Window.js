@@ -961,24 +961,31 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       _clearLocalCbs(); // release garbage
     }
   };
-  const _renderLocal = layered => {
+  const _renderLocal = (frame, layered) => {
+    if (frame && contexts.length > 0) {
+      contexts[0]._exokitPutFrame(frame);
+      contexts._exokitClearEnabled(false);
+    }
+    for (let i = 1; i < contexts.length; i++) {
+      contexts._exokitClearEnabled(true);
+    }
     _tickLocalRafs();
-    const localFrames = contexts.map(context => context._exokitGetFrame());
-    return Promise.resolve(localFrames);
+    frame = contexts.length > 0 ? contexts[0]._exokitGetFrame() : null;
+    return Promise.resolve(frame);
   };
-  const _makeRenderChild = window => layered => window.runAsync({
+  const _makeRenderChild = window => (frame, layered) => window.runAsync({
     method: 'tickAnimationFrame',
+    frame,
     layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
   });
   const _collectRenders = () => windows.map(_makeRenderChild).concat([_renderLocal]);
-  const _render = layered => new Promise((accept, reject) => {
+  const _render = (frame, layered) => new Promise((accept, reject) => {
     const renders = _collectRenders();
-    const frames = [];
     const _recurse = i => {
       if (i < renders.length) {
-        renders[i](layered)
-          .then(newFrames => {
-            frames.push.apply(frames, newFrames);
+        renders[i](frame, layered)
+          .then(newFrame => {
+            frame = newFrame;
             _recurse(i+1);
           })
           .catch(err => {
@@ -986,14 +993,14 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
             _recurse(i+1);
           });
       } else {
-        accept(frames);
+        accept(frame);
       }
     };
     _recurse(0);
   });
-  window.tickAnimationFrame = ({layered = false}) => {
+  window.tickAnimationFrame = ({frame = null, layered = false}) => {
     _emitXrEvents(); 
-    return _render(layered);
+    return _render(frame, layered);
   };
 
   const _makeMrDisplays = () => {
@@ -1153,9 +1160,9 @@ self.onrunasync = req => {
 
   switch (method) {
     case 'tickAnimationFrame':
-      return self.tickAnimationFrame(req).then(frames => {
-        const transfers = frames.flatMap(frame => ([frame.color, frame.depth]));
-        return Promise.resolve([frames, transfers]);
+      return self.tickAnimationFrame(req).then(frame => {
+        const transfers = frame && [frame.color, frame.depth];
+        return Promise.resolve([frame, transfers]);
       });
     case 'response': {
       const {keypath} = req;
