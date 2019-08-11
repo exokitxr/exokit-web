@@ -166,14 +166,30 @@ const _oninitmessage = e => {
     },
   });
 
-  /* self.fetch = fetch;
-  self.Request = Request;
+  self.fetch = (_fetch => function fetch(u, opts) {
+    return _fetch(utils._normalizeUrl(u, GlobalContext.baseUrl), opts);
+  })(self.fetch);
+  /* self.Request = Request;
   self.Response = Response;
   self.Headers = Headers;
   self.Blob = Blob;
-  self.FormData = FormData;
-  self.XMLHttpRequest = XMLHttpRequest;
-  self.WebSocket = (Old => {
+  self.FormData = FormData; */
+  self.XMLHttpRequest = (Old => class XMLHttpRequest extends Old {
+    open(method, url, async, user, password) {
+      url = utils._normalizeUrl(url, GlobalContext.baseUrl);
+
+      if (password !== undefined) {
+        return super.open(method, url, async, user, password);
+      } else if (user !== undefined) {
+        return super.open(method, url, async, user);
+      } else if (async !== undefined) {
+        return super.open(method, url, async);
+      } else {
+        return super.open(method, url);
+      }
+    }
+  })(self.XMLHttpRequest);
+  /* self.WebSocket = (Old => {
     class WebSocket extends Old {
       constructor(url, protocols, options) {
         if (typeof protocols === 'string') {
