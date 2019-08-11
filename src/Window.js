@@ -974,13 +974,13 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   };
   const _renderLocal = (frame, layered) => {
     for (let i = 0; i < contexts.length; i++) {
-      contexts[i]._exokitClearEnabled(true);
+      const context = contexts[i];
+      context._exokitClearEnabled && context._exokitClearEnabled(true);
     }
-    const layerCanvas = layered ? vrPresentState.layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context) : null;
+    const layerCanvas = layered ? vrPresentState.layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context && ['WebGLRenderingContext', 'WebGL2RenderingContext'].includes(layer._context.constructor.name)) : null;
     const layerContext = layerCanvas && layerCanvas._context;
     if (layerContext) {
       if (frame) {
-        // console.log('layer in', GlobalContext.id, !!frame);
         layerContext._exokitPutFrame(frame);
         frame = null;
       } else {
@@ -991,7 +991,6 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     _tickLocalRafs();
     if (layerContext) {
       frame = layerContext._exokitGetFrame();
-      // console.log('layer out', GlobalContext.id, !!frame);
     }
     return Promise.resolve(frame);
   };
