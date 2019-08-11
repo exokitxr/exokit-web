@@ -72,12 +72,16 @@ class WebGLRenderingContext {
       colorTex: gl.createTexture(),
       depthTex: gl.createTexture(),
       vao: extensions.OES_vertex_array_object.createVertexArrayOES(),
-      programVao: null,
       buffer: null,
-      program: null,
-      positionLocation: null,
-      uTexLocation: null,
+      colorVao: null,
+      colorProgram: null,
+      depthVao: null,
+      depthProgram: null,
     };
+    this.enabled = {
+      clear: false,
+    };
+
     extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.vao);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
@@ -116,6 +120,11 @@ class WebGLRenderingContext {
       fbo = this.defaultFramebuffer.fbo;
     }
   }
+  clear(flags) {
+    if (this.enabled.clear) {
+      this.backingContext.clear(flags);
+    }
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
@@ -144,89 +153,152 @@ class WebGLRenderingContext {
     const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
     const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
-    if (!this.defaultFramebuffer.programVao) {
-      this.defaultFramebuffer.programVao = extensions.OES_vertex_array_object.createVertexArrayOES();
-      extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.programVao);
-
+    if (!this.defaultFramebuffer.buffer) {
       this.defaultFramebuffer.buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
       gl.bufferData(gl.ARRAY_BUFFER, VERTS, gl.STATIC_DRAW);
 
-      this.defaultFramebuffer.program = gl.createProgram();
+      {
+        this.defaultFramebuffer.colorVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.colorVao);
+
+        this.defaultFramebuffer.colorProgram = gl.createProgram();
+
+        {
+          const vsh = `
+            attribute vec2 position;
+            varying vec2 vTexCoords;
+            const vec2 scale = vec2(0.5, 0.5);
+            void main() {
+              vTexCoords  = position * scale + scale; // scale vertex attribute to [0,1] range
+              gl_Position = vec4(position, 0.0, 1.0);
+            }
+          `;
+          const shader = gl.createShader(gl.VERTEX_SHADER);
+          gl.shaderSource(shader, vsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log(`Error compiling vertex shader:`);
+            console.log(gl.getShaderInfoLog(shader));
+          }
+          gl.attachShader(this.defaultFramebuffer.colorProgram, shader);
+        }
+        {
+          const fsh = `
+            precision highp float;
+            uniform sampler2D uTex;
+            varying vec2 vTexCoords;
+            void main() {
+              gl_FragColor = texture2D(uTex, vTexCoords);
+            }
+          `;
+          const shader = gl.createShader(gl.FRAGMENT_SHADER);
+          gl.shaderSource(shader, fsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log('Error compiling fragment shader:');
+            console.log(gl.getShaderInfoLog(shader));
+          }
+          gl.attachShader(this.defaultFramebuffer.colorProgram, shader);
+        }
+
+        gl.linkProgram(this.defaultFramebuffer.colorProgram);
+        if (!gl.getProgramParameter(this.defaultFramebuffer.colorProgram, gl.LINK_STATUS)) {
+          console.log('Error linking shader program:');
+          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.colorProgram));
+        }
+        gl.useProgram(this.defaultFramebuffer.colorProgram)
+
+        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.colorProgram, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const uTexLocation = gl.getUniformLocation(this.defaultFramebuffer.colorProgram, 'uTex');
+        gl.uniform1i(uTexLocation, 0);
+      }
 
       {
-        const vsh = `
-          attribute vec2 position;
-          varying vec2 vTexCoords;
-          const vec2 scale = vec2(0.5, 0.5);
-          void main() {
-            vTexCoords  = position * scale + scale; // scale vertex attribute to [0,1] range
-            gl_Position = vec4(position, 0.0, 1.0);
+        this.defaultFramebuffer.depthVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthVao);
+
+        this.defaultFramebuffer.depthProgram = gl.createProgram();
+
+        {
+          const vsh = `
+            attribute vec2 position;
+            varying vec2 vTexCoords;
+            const vec2 scale = vec2(0.5, 0.5);
+            void main() {
+              vTexCoords  = position * scale + scale; // scale vertex attribute to [0,1] range
+              gl_Position = vec4(position, 0.0, 1.0);
+            }
+          `;
+          const shader = gl.createShader(gl.VERTEX_SHADER);
+          gl.shaderSource(shader, vsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log(`Error compiling vertex shader:`);
+            console.log(gl.getShaderInfoLog(shader));
           }
-        `;
-        const shader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(shader, vsh);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-          console.log(`Error compiling vertex shader:`);
-          console.log(gl.getShaderInfoLog(shader));
+          gl.attachShader(this.defaultFramebuffer.depthProgram, shader);
         }
-        gl.attachShader(this.defaultFramebuffer.program, shader);
-      }
-      {
-        const fsh = `
-          precision highp float;
-          uniform sampler2D uTex;
-          varying vec2 vTexCoords;
-          void main() {
-            gl_FragColor = texture2D(uTex, vTexCoords);
+        {
+          const fsh = `
+            precision highp float;
+            uniform sampler2D uTex;
+            varying vec2 vTexCoords;
+            vec4 EncodeFloatRGBA(float v) {
+              vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+              enc = fract(enc);
+              enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
+              return enc;
+            }
+            float DecodeFloatRGBA(vec4 rgba) {
+              return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+            }
+            void main() {
+              gl_FragColor = EncodeFloatRGBA(texture2D(uTex, vTexCoords).r);
+            }
+          `;
+          const shader = gl.createShader(gl.FRAGMENT_SHADER);
+          gl.shaderSource(shader, fsh);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.log('Error compiling fragment shader:');
+            console.log(gl.getShaderInfoLog(shader));
           }
-        `;
-        const shader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(shader, fsh);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-          console.log('Error compiling fragment shader:');
-          console.log(gl.getShaderInfoLog(shader));
+          gl.attachShader(this.defaultFramebuffer.depthProgram, shader);
         }
-        gl.attachShader(this.defaultFramebuffer.program, shader);
+
+        gl.linkProgram(this.defaultFramebuffer.depthProgram);
+        if (!gl.getProgramParameter(this.defaultFramebuffer.depthProgram, gl.LINK_STATUS)) {
+          console.log('Error linking shader program:');
+          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.depthProgram));
+        }
+        gl.useProgram(this.defaultFramebuffer.depthProgram)
+
+        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.depthProgram, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const uTexLocation = gl.getUniformLocation(this.defaultFramebuffer.depthProgram, 'uTex');
+        gl.uniform1i(uTexLocation, 0);
       }
-
-      gl.linkProgram(this.defaultFramebuffer.program);
-      if (!gl.getProgramParameter(this.defaultFramebuffer.program, gl.LINK_STATUS)) {
-        console.log('Error linking shader program:');
-        console.log(gl.getProgramInfoLog(this.defaultFramebuffer.program));
-      }
-      gl.useProgram(this.defaultFramebuffer.program);
-
-      this.defaultFramebuffer.positionLocation = gl.getAttribLocation(this.defaultFramebuffer.program, 'position');
-      gl.enableVertexAttribArray(this.defaultFramebuffer.positionLocation);
-      gl.vertexAttribPointer(this.defaultFramebuffer.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-      this.defaultFramebuffer.uTexLocation = gl.getUniformLocation(this.defaultFramebuffer.program, 'uTex');
-      gl.uniform1i(this.defaultFramebuffer.uTexLocation, 0);
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.programVao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
-    gl.useProgram(this.defaultFramebuffer.program);
 
+    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.colorVao);
+    gl.useProgram(this.defaultFramebuffer.colorProgram);
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     const color = canvas.transferToImageBitmap();
 
+    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthVao);
+    gl.useProgram(this.defaultFramebuffer.depthProgram);
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    /* const pixels = new Uint8Array(this.backingCanvas.width * this.backingCanvas.height * 4);
-    gl.readPixels(0, 0, this.backingCanvas.width, this.backingCanvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-    let count = 0;
-    for (let i = 0; i < this.backingCanvas.width * this.backingCanvas.height * 4; i += 4) {
-      if (pixels[i] !== 0 || pixels[i+1] !== 0 || pixels[i+2] !== 0) {
-        count++;
-      }
-    }
-    console.log('load depth', count); */
     const depth = canvas.transferToImageBitmap();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
@@ -240,6 +312,22 @@ class WebGLRenderingContext {
       color,
       depth,
     };
+  }
+  _exokitPutFrame(frame) {
+    const {color, depth} = frame;
+
+    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
+    color.close();
+    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, depth);
+    depth.close();
+
+    gl.bindTexture(gl.TEXTURE_2D, oldTexture);
+  }
+  _exokitClearEnabled(enabled) {
+    this.enabled.clear = enabled;
   }
   destroy() {
     GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
