@@ -980,23 +980,31 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     const layerContext = layerCanvas && layerCanvas._context;
     if (layerContext) {
       if (frame) {
+        // console.log('layer in', GlobalContext.id, !!frame);
         layerContext._exokitPutFrame(frame);
         frame = null;
+      } else {
+        layerContext._exokitClear();
       }
       layerContext._exokitClearEnabled(false);
     }
     _tickLocalRafs();
     if (layerContext) {
       frame = layerContext._exokitGetFrame();
+      // console.log('layer out', GlobalContext.id, !!frame);
     }
     return Promise.resolve(frame);
   };
   const _makeRenderChild = window => (frame, layered) => {
+    // console.log('child 1', GlobalContext.id, !!frame);
     return window.runAsync({
       method: 'tickAnimationFrame',
       frame,
       layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
-    }, frame ? [frame.color, frame.depth] : undefined);
+    }, frame ? [frame.color, frame.depth] : undefined).then(frame => {
+      // console.log('child 2', GlobalContext.id, !!frame);
+      return frame;
+    });
   };
   const _collectRenders = () => windows.map(_makeRenderChild).concat([_renderLocal]);
   const _render = (frame, layered) => new Promise((accept, reject) => {

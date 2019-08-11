@@ -15,17 +15,21 @@ const VERTS = Float32Array.from([
 ]);
 const _inherit = (a, b) => {
   for (const k in b) {
-    a[k] = b[k];
+    if (!(k in a)) {
+      a[k] = b[k];
+    }
   }
   for (const k in b.prototype) {
-    const o = Object.getOwnPropertyDescriptor(b.prototype, k);
-    if (o.get) {
-      Object.defineProperty(a.prototype, k, o);
-    } else {
-      const {value} = o;
-      a.prototype[k] = typeof value === 'function' ? function() {
-        return value.apply(this.backingContext, arguments);
-      } : value;
+    if (!(k in a.prototype)) {
+      const o = Object.getOwnPropertyDescriptor(b.prototype, k);
+      if (o.get) {
+        Object.defineProperty(a.prototype, k, o);
+      } else {
+        const {value} = o;
+        a.prototype[k] = typeof value === 'function' ? function() {
+          return value.apply(this.backingContext, arguments);
+        } : value;
+      }
     }
   }
 };
@@ -65,6 +69,7 @@ class WebGLRenderingContext {
     const extensions = {
       WEBGL_depth_texture: gl.getExtension('WEBGL_depth_texture'),
       OES_vertex_array_object: gl.getExtension('OES_vertex_array_object'),
+      EXT_frag_depth: gl.getExtension('EXT_frag_depth'),
     };
     this.extensions = extensions;
     this.defaultFramebuffer = {
@@ -111,7 +116,8 @@ class WebGLRenderingContext {
     GlobalContext.contexts.push(this);
   }
   getParameter(key) {
-    let result = this.backingContext.getParameter(key);
+    const {backingContext: gl} = this;
+    let result = gl.getParameter(key);
     // if ((key === gl.FRAMEBUFFER_BINDING || key === gl.READ_FRAMEBUFFER_BINDING || key === gl.DRAW_FRAMEBUFFER_BINDING) && result === this.defaultFramebuffer.fbo) {
     if (key === gl.FRAMEBUFFER_BINDING && result === this.defaultFramebuffer.fbo) {
       result = null;
@@ -316,6 +322,7 @@ class WebGLRenderingContext {
         }
         {
           const fsh = `
+            #extension GL_EXT_frag_depth : enable
             precision highp float;
             uniform sampler2D uColorTex;
             uniform sampler2D uDepthTex;
@@ -330,7 +337,13 @@ class WebGLRenderingContext {
               return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
             }
             void main() {
-              gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
+              gl_FragColor = texture2D(uColorTex, vTexCoords);
+              // gl_FragColor.r += 0.1;
+              float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
+              if (depth == 0.0) {
+                depth = 1.0;
+              }
+              gl_FragDepthEXT = depth;
             }
           `;
           const shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -404,10 +417,10 @@ class WebGLRenderingContext {
     const depth = canvas.transferToImageBitmap();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
     gl.bindTexture(gl.TEXTURE_2D, oldTexture);
     gl.activeTexture(oldActiveTexture);
     extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
     gl.useProgram(oldProgram);
 
     return {
@@ -425,18 +438,20 @@ class WebGLRenderingContext {
     const oldTexture0 = gl.getParameter(gl.TEXTURE_BINDING_2D);
     gl.activeTexture(gl.TEXTURE1);
     const oldTexture1 = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    gl.activeTexture(gl.TEXTURE0);
     const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
     const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
     const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
     this._exokitEnsureShaders();
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
 
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthDecodeVao);
+    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.decodeVao);
     gl.useProgram(this.defaultFramebuffer.decodeProgram);
 
+    this._exokitClear();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
@@ -446,17 +461,21 @@ class WebGLRenderingContext {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, oldTexture0);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, oldTexture1);
     gl.activeTexture(oldActiveTexture);
     extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
     gl.useProgram(oldProgram);
   }
   _exokitClearEnabled(enabled) {
     this.enabled.clear = enabled;
+  }
+  _exokitClear() {
+    const {backingContext: gl} = this;
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);
   }
   destroy() {
     GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
