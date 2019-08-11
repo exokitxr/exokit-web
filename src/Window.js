@@ -1147,6 +1147,8 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       vrDisplay.isPresenting = true;
       xrSession.addEventListener('end', () => {
         vrDisplay.isPresenting = false;
+      }, {
+        once: true,
       });
       return onrequestpresent.apply(this, arguments);
     })(_onrequestpresent);

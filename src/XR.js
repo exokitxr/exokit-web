@@ -38,9 +38,11 @@ class XR extends EventTarget {
 
         await session.onrequestpresent();
         session.isPresenting = true;
-        session.once('end', () => {
+        session.addEventListener('end', () => {
           session.isPresenting = false;
           this.session = null;
+        }, {
+          once: true,
         });
         this.session = session;
       } else {
