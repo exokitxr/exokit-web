@@ -42,8 +42,8 @@ const _loadPromise = el => new Promise((accept, reject) => {
     reject(err);
   };
   const _cleanup = () => {
-    el.removeListener('load', load);
-    el.removeListener('error', error);
+    el.removeEventListener('load', load);
+    el.removeEventListener('error', error);
   };
   el.addEventListener('load', load);
   el.addEventListener('error', error);
@@ -2108,7 +2108,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
       const contentDocument = {
         /* _emit() {},
         on() {},
-        removeListener() {}, */
+        removeEventListener() {}, */
         open() {},
         write() {},
         close() {},
