@@ -824,7 +824,7 @@ _startTopRenderLoop();
 
 const _startFakeMesher = () => {
   const mesher = new FakeMesher();
-  mesher.on('meshes', updates => {
+  mesher.addEventListener('meshes', ({detail: {updates}}) => {
     const request = {
       method: 'meshes',
       updates,
@@ -837,7 +837,7 @@ const _startFakeMesher = () => {
 };
 const _startFakePlaneTracker = () => {
   const planeTracker = new FakePlaneTracker();
-  planeTracker.on('planes', updates => {
+  planeTracker.addEventListener('planes', ({detail: {updates}}) => {
     const request = {
       method: 'planes',
       updates,

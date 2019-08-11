@@ -12,11 +12,16 @@ class History extends EventTarget {
     this._history.listen((location, action) => {
       if (action === 'POP') {
         const {pathname, search, hash, state} = location;
-        this.emit('popstate', url.format({
-          pathname,
-          search,
-          hash,
-        }), state);
+        this.dispatchEvent(new CustomEvent('popstate', {
+          detail: {
+            url: url.format({
+              pathname,
+              search,
+              hash,
+            }),
+            state,
+          },
+        }));
       }
     });
   }

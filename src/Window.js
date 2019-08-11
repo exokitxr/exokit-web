@@ -215,7 +215,7 @@ class CustomElementRegistry {
     if (el instanceof HTMLElement) {
       let isConnected = el.isConnected;
       let connectHandled = false;
-      el.ownerDocument.on('domchange', () => {
+      el.ownerDocument.addEventListener('domchange', () => {
         const newConnected = el.isConnected;
         if (newConnected && !isConnected) {
           el.connectedCallback && el.connectedCallback();
@@ -229,7 +229,7 @@ class CustomElementRegistry {
 
       const observedAttributes = constructor.observedAttributes || [];
       if (observedAttributes.length > 0) {
-        el.on('attribute', (name, value, oldValue) => {
+        el.addEventListener('attribute', ({detail: {name, value, oldValue}}) => {
           if (el.attributeChangedCallback && observedAttributes.includes(name)) {
             el.attributeChangedCallback(name, value, oldValue);
           }
@@ -893,15 +893,17 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     },
   });
 
-  window.history.addEventListener('popstate', (u, state) => {
-    window.location.set(u);
+  window.history.addEventListener('popstate', ({detail: {url, state}}) => {
+    window.location.set(url);
 
-    const event = new Event('popstate');
-    event.state = state;
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('popstate', {
+      detail: {
+        state,
+      },
+    }));
   });
   let loading = false;
-  window.location.addEventListener('update', href => {
+  window.location.addEventListener('update', ({detail: {href}}) => {
     if (!loading) {
       loading = true;
 
@@ -1127,9 +1129,11 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     vrDisplay.onrequestanimationframe = _makeRequestAnimationFrame(window);
     vrDisplay.oncancelanimationframe = window.cancelAnimationFrame;
     vrDisplay.onvrdisplaypresentchange = () => {
-      const e = new Event('vrdisplaypresentchange');
-      e.display = vrDisplay;
-      window.dispatchEvent(e);
+      window.dispatchEvent(new CustomEvent('vrdisplaypresentchange', {
+        detail: {
+          display: vrDisplay,
+        },
+      }));
     };
     vrDisplay.onrequestpresent = _onrequestpresent;
     vrDisplay.onmakeswapchain = _onmakeswapchain;
@@ -1141,7 +1145,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     const xrSession = new XR.XRSession({}, window);
     xrSession.onrequestpresent = (onrequestpresent => function() {
       vrDisplay.isPresenting = true;
-      xrSession.once('end', () => {
+      xrSession.addEventListener('end', () => {
         vrDisplay.isPresenting = false;
       });
       return onrequestpresent.apply(this, arguments);

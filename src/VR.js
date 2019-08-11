@@ -451,7 +451,7 @@ class FakeMesher extends EventTarget {
       updates.push.apply(updates, this.meshes);
 
       if (updates.length > 0) {
-        this.emit('meshes', updates);
+        this.dispatchEvent(new CustomEvent('meshes', {detail: {updates}}));
       }
 
       lastMeshPosition.copy(currentMeshPosition);
@@ -543,7 +543,7 @@ class FakePlaneTracker extends EventTarget {
       }
 
       if (updates.length > 0) {
-        this.emit('planes', updates);
+        this.dispatchEvent(new CustomEvent('planes', {detail: {updates}}));
       }
 
       lastMeshPosition.copy(currentMeshPosition);
