@@ -1,4 +1,5 @@
 // const {EventEmitter} = require('events');
+import {EventTarget} from './Event.js';
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
 

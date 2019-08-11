@@ -1,4 +1,5 @@
 // const {EventEmitter} = require('events');
+import {EventTarget} from './Event.js';
 import history from '../modules/history.js';
 
 class History extends EventTarget {

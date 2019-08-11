@@ -1,4 +1,5 @@
 // const {EventEmitter} = require('events');
+import {EventTarget} from './Event.js';
 // const url = require('url');
 
 class Location extends EventTarget {

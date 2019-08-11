@@ -1,5 +1,5 @@
 // const {EventEmitter} = require('events');
-// import {Event, EventTarget} from './Event.js';
+import {EventTarget} from './Event.js';
 import {getHMDType} from './VR.js';
 import GlobalContext from './GlobalContext.js';
 import THREE from '../lib/three-min.js';

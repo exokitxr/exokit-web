@@ -1,3 +1,4 @@
+import {EventTarget} from './Event.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 /* const {

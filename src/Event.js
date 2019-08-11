@@ -1,6 +1,42 @@
 import USKeyboardLayout from './USKeyboardLayout.js';
 import GlobalContext from './GlobalContext.js';
 
+const EventTarget = (Old => class EventTarget extends Old {
+  constructor() {
+    super();
+
+    this._listeners = {};
+  }
+
+  listeners(event) {
+    return this._listeners[event] || [];
+  }
+  addEventListener(event, listener, options) {
+    if (typeof listener === 'function') {
+      if (!this.listeners(event).includes(listener)) {
+        let listeners = this._listeners[event];
+        if (!listeners) {
+          listeners = this._listeners[event] = [];
+        }
+        listeners.push(listener);
+      }
+    }
+
+    return super.addEventListener(event, listener, options);
+  }
+  removeEventListener(event, listener) {
+    if (typeof listener === 'function') {
+      const listeners = this._listeners[event];
+      if (listeners) {
+        const index = listeners.indexOf(listeners);
+        listeners.splice(index, 1);
+      }
+    }
+
+    return super.removeListener(event, listener);
+  }
+})(self.EventTarget);
+
 class KeyboardEvent extends Event {
   constructor(type, init = {}) {
     init.bubbles = true;
@@ -150,6 +186,7 @@ class SpatialEvent extends Event {
 }
 
 export {
+  EventTarget,
   KeyboardEvent,
   MouseEvent,
   WheelEvent,

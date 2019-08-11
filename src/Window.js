@@ -9,7 +9,7 @@ import util from '../modules/util.js';
 // const {TextEncoder, TextDecoder} = util;
 // const {performance} = require('perf_hooks');
 
-import {KeyboardEvent, SpatialEvent} from './Event.js';
+import {EventTarget, KeyboardEvent, SpatialEvent} from './Event.js';
 import {
   AudioContext,
   AudioNode,
@@ -773,9 +773,11 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       return _parseDocumentAst(htmlAst, window, false);
     }
   };
-  /* window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
+  window._listeners = {}; // EventTarget
+  window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
   window.removeEventListener = EventTarget.prototype.removeEventListener.bind(window);
-  window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window); */
+  window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window);
+
   window.Image = HTMLImageElement;
   /* window.ImageData = ImageData;
   window.ImageBitmap = ImageBitmap;

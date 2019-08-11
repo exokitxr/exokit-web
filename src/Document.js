@@ -3,7 +3,7 @@
 import parse5 from '../modules/parse5.js';
 
 import * as DOM from './DOM.js';
-// import {Event, EventTarget} from './Event.js';
+import {EventTarget} from './Event.js';
 import GlobalContext from './GlobalContext.js';
 // import nativeBindings from './native-bindings.js';
 import symbols from './symbols.js';

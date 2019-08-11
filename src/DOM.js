@@ -15,7 +15,7 @@ import selector from '../modules/window-selector.js';
 // const {Blob} = fetch;
 
 // const bindings = require('./native-bindings');
-import {MouseEvent} from './Event.js';
+import {EventTarget, MouseEvent} from './Event.js';
 import {_makeWindow} from './WindowVm.js';
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
