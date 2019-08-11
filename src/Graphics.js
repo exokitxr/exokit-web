@@ -44,6 +44,22 @@ class CanvasRenderingContext2D {
 
     GlobalContext.contexts.push(this);
   }
+  drawImage(a, b, c, d, e, f, g, h, i) {
+    if (a && a.constructor && a.constructor.name === 'HTMLImageElement') {
+      a = a.imageBitmap;
+    }
+    if (a && a.constructor && a.constructor.name === 'HTMLCanvasElement') {
+      a = a.backingCanvas;
+    }
+
+    if (i !== undefined) {
+      return this.backingContext.backingContext(a, b, c, d, e, f, g, h, i);
+    }
+    if (e !== undefined) {
+      return this.backingContext.drawImage(a, b, c, d, e);
+    }
+    return this.backingContext.drawImage(a, b, c);
+  }
   resize(w, h) {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
