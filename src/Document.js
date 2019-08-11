@@ -414,7 +414,7 @@ const _runHtml = (element, window) => {
       element.traverse(el => {
         const {id} = el;
         if (id) {
-          el.dispatchEvent('attribute', {name: 'id', value: id});
+          el.dispatchEvent(new CustomEvent('attribute', {detail: {name: 'id', value: id}}));
         }
 
         if (el[symbols.runSymbol]) {

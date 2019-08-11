@@ -1226,7 +1226,7 @@ class Element extends Node {
         console.warn(err);
       });
 
-    this.dispatchEvent('innerHTML', {detail: {innerHTML}});
+    this.dispatchEvent(new CustomEvent('innerHTML', {detail: {innerHTML}}));
   }
 
   get innerText() {
@@ -1856,7 +1856,7 @@ class HTMLScriptElement extends HTMLLoadableElement {
     innerHTML = innerHTML + '';
 
     this.childNodes = new NodeList([this.ownerDocument.createTextNode(innerHTML)]);
-    this.dispatchEvent('innerHTML', {detail: {innerHTML}});
+    this.dispatchEvent(new CustomEvent('innerHTML', {detail: {innerHTML}}));
   }
 
   isRunnable() {
