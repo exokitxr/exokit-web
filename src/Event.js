@@ -33,7 +33,7 @@ const EventTarget = (Old => class EventTarget extends Old {
       }
     }
 
-    return super.removeListener(event, listener);
+    return super.removeEventListener(event, listener);
   }
 })(self.EventTarget);
 
