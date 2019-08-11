@@ -774,6 +774,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   };
   window._listeners = {}; // EventTarget
+  window.listeners = EventTarget.prototype.listeners.bind(window);
   window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
   window.removeEventListener = EventTarget.prototype.removeEventListener.bind(window);
   window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window);
