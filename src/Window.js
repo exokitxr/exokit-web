@@ -1040,7 +1040,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       // }
 
       vrPresentState.hmdType = lookupHMDTypeString(GlobalContext.xrState.hmdType[0]);
-      GlobalContext.clearGamepads();
+      // GlobalContext.clearGamepads();
     };
     const _onmakeswapchain = context => {
       if (context !== vrPresentState.glContext) {
@@ -1076,7 +1076,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       vrPresentState.hmdType = null;
       // vrPresentState.glContext.setClearEnabled(true);
       vrPresentState.glContext = null;
-      GlobalContext.clearGamepads();
+      // GlobalContext.clearGamepads();
     };
     const _onrequesthittest = (origin, direction, coordinateSystem) => new Promise((accept, reject) => {
       localQuaternion.setFromUnitVectors(

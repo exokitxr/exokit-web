@@ -760,10 +760,10 @@ function getGamepads() {
   }
 };
 GlobalContext.getGamepads = getGamepads;
-function clearGamepads() {
+/* function clearGamepads() {
   gamepads = null;
 }
-GlobalContext.clearGamepads = clearGamepads;
+GlobalContext.clearGamepads = clearGamepads; */
 
 export {
   VRDisplay,
