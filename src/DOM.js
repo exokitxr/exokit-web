@@ -1126,14 +1126,10 @@ class Element extends Node {
 
   focus() {
     const document = this.tagName === 'DOCUMENT' ? this : this.ownerDocument;
-    document.activeElement.dispatchEvent(new Event('blur', {
-      target: document.activeElement,
-    }));
+    document.activeElement.dispatchEvent(new CustomEvent('blur'));
 
     document.activeElement = this;
-    this.dispatchEvent(new Event('focus', {
-      target: this,
-    }));
+    this.dispatchEvent(new CustomEvent('focus'));
   }
 
   blur() {
@@ -1642,13 +1638,12 @@ class HTMLStyleElement extends HTMLLoadableElement {
         .then(stylesheet => {
           this.stylesheet = stylesheet;
           this.ownerDocument.defaultView[symbols.styleEpochSymbol]++;
-          this.dispatchEvent(new Event('load', {target: this}));
+          this.dispatchEvent(new CustomEvent('load'));
         })
         .catch(err => {
-          const e = new ErrorEvent('error', {target: this});
-          e.message = err.message;
-          e.stack = err.stack;
-          this.dispatchEvent(e);
+          this.dispatchEvent(new ErrorEvent('error', {
+            error: err,
+          }));
         });
     });
   }
@@ -1718,18 +1713,16 @@ class HTMLLinkElement extends HTMLLoadableElement {
 
           this.readyState = 'complete';
 
-          const e = new Event('load', {target: this});
-          this._dispatchEventOnDocumentReady(e);
+          this._dispatchEventOnDocumentReady(new CustomEvent('load'));
 
           cb();
         })
         .catch(err => {
           this.readyState = 'complete';
 
-          const e = new ErrorEvent('error', {target: this});
-          e.message = err.message;
-          e.stack = err.stack;
-          this._dispatchEventOnDocumentReady(e);
+          this._dispatchEventOnDocumentReady(new ErrorEvent('error', {
+            error: err,
+          }));
 
           cb(err);
         });
@@ -1920,7 +1913,7 @@ class HTMLScriptElement extends HTMLLoadableElement {
         .then(() => {
           this.readyState = 'complete';
 
-          this.dispatchEvent(new Event('load', {target: this}));
+          this.dispatchEvent(new CustomEvent('load'));
 
           cb();
         })
@@ -2200,7 +2193,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                 const _load = () => {
                   this.readyState = 'complete';
 
-                  this.dispatchEvent(new Event('load', {target: this}));
+                  this.dispatchEvent(new CustomEvent('load'));
 
                   cb();
                 };
@@ -2281,7 +2274,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
 
                 this.readyState = 'complete';
 
-                this.dispatchEvent(new Event('load', {target: this}));
+                this.dispatchEvent(new CustomEvent('load'));
 
                 cb();
               } else {
@@ -2294,7 +2287,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
 
               this.readyState = 'complete';
 
-              this.dispatchEvent(new Event('load', {target: this}));
+              this.dispatchEvent(new CustomEvent('load'));
 
               cb(err);
             })
@@ -2866,7 +2859,7 @@ class HTMLImageElement extends HTMLSrcableElement {
 
                 this.readyState = 'complete';
 
-                this._dispatchEventOnDocumentReady(new Event('load', {target: this}));
+                this._dispatchEventOnDocumentReady(new CustomEvent('load'));
 
                 cb();
               })
@@ -2994,10 +2987,10 @@ class HTMLAudioElement extends HTMLMediaElement {
                   lengthComputable: true,
                 }));
 
-                this._dispatchEventOnDocumentReady(new Event('loadeddata', {target: this}));
-                this._dispatchEventOnDocumentReady(new Event('loadedmetadata', {target: this}));
-                this._dispatchEventOnDocumentReady(new Event('canplay', {target: this}));
-                this._dispatchEventOnDocumentReady(new Event('canplaythrough', {target: this}));
+                this._dispatchEventOnDocumentReady(new CustomEvent('loadeddata'));
+                this._dispatchEventOnDocumentReady(new CustomEvent('loadedmetadata'));
+                this._dispatchEventOnDocumentReady(new CustomEvent('canplay'));
+                this._dispatchEventOnDocumentReady(new CustomEvent('canplaythrough'));
 
                 if (this.autoplay) {
                   this.play();
@@ -3008,10 +3001,9 @@ class HTMLAudioElement extends HTMLMediaElement {
               .catch(err => {
                 console.warn('failed to load audio:', src);
 
-                const e = new ErrorEvent('error', {target: this});
-                e.message = err.message;
-                e.stack = err.stack;
-                this._dispatchEventOnDocumentReady(e);
+                this._dispatchEventOnDocumentReady(new ErrorEvent('error', {
+                  error: err,
+                }));
 
                 cb(err);
               });
@@ -3117,10 +3109,10 @@ class HTMLVideoElement extends HTMLMediaElement {
 
           this.readyState = 'complete';
 
-          this._dispatchEventOnDocumentReady(new Event('loadeddata', {target: this}));
-          this._dispatchEventOnDocumentReady(new Event('loadedmetadata', {target: this}));
-          this._dispatchEventOnDocumentReady(new Event('canplay', {target: this}));
-          this._dispatchEventOnDocumentReady(new Event('canplaythrough', {target: this}));
+          this._dispatchEventOnDocumentReady(new CustomEvent('loadeddata'));
+          this._dispatchEventOnDocumentReady(new CustomEvent('loadedmetadata'));
+          this._dispatchEventOnDocumentReady(new CustomEvent('canplay'));
+          this._dispatchEventOnDocumentReady(new CustomEvent('canplaythrough'));
 
           cb();
         });
