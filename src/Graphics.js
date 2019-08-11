@@ -38,11 +38,15 @@ class CanvasRenderingContext2D {
   constructor(canvasEl) {
     const {width, height} = canvasEl;
 
+    this._canvas = canvasEl;
     this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     this.backingCanvas = new OffscreenCanvas(width, height);
     this.backingContext = this.backingCanvas.getContext('2d');
 
     GlobalContext.contexts.push(this);
+  }
+  get canvas() {
+    return this._canvas;
   }
   drawImage(a, b, c, d, e, f, g, h, i) {
     if (a && a.constructor && a.constructor.name === 'HTMLImageElement') {
@@ -77,6 +81,7 @@ class WebGLRenderingContext {
   constructor(canvasEl) {
     const {width, height} = canvasEl;
 
+    this._canvas = canvasEl;
     this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     this.backingCanvas = new OffscreenCanvas(width, height);
     const gl = this.backingCanvas.getContext('webgl');
@@ -130,6 +135,9 @@ class WebGLRenderingContext {
     // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     GlobalContext.contexts.push(this);
+  }
+  get canvas() {
+    return this._canvas;
   }
   getParameter(key) {
     const {backingContext: gl} = this;
