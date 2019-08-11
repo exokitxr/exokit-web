@@ -55,7 +55,7 @@ class MutationObserver {
     const bindings = new Map();
     
     const _addBinding = (el, evt, fn) => {
-      el.on(evt, fn);
+      el.addEventListener(evt, fn);
 
       let a = bindings.get(el);
       (a === undefined) && bindings.set(el, a = []);
@@ -64,13 +64,13 @@ class MutationObserver {
     const _bind = el => {
       if (el.nodeType === Node.ELEMENT_NODE) {
         if (options.attributes) {
-          _addBinding(el, 'attribute', (name, value, oldValue) => {
+          _addBinding(el, 'attribute', ({detail: {name, value, oldValue}}) => {
             this.handleAttribute(el, name, value, oldValue, options);
           });
         }
 
         if (options.childList || options.subtree) {
-          _addBinding(el, 'children', (addedNodes, removedNodes, previousSibling, nextSibling) => {
+          _addBinding(el, 'children', ({detail: {addedNodes, removedNodes, previousSibling, nextSibling}}) => {
             if (options.childList) {
               this.handleChildren(el, addedNodes, removedNodes, previousSibling, nextSibling);
             }
@@ -105,7 +105,7 @@ class MutationObserver {
       if (a !== undefined) {
         for (let i = 0; i < a.length; i++) {
           const [evt, fn] = a[i];
-          el.removeListener(evt, fn);
+          el.removeEventListener(evt, fn);
         }
         bindings.delete(el);
       }
@@ -123,7 +123,7 @@ class MutationObserver {
     return () => {
       for (let i = 0; i < bindings.length; i++) {
         const [el, evt, fn] = bindings[i];
-        el.removeListener(evt, fn);
+        el.removeEventListener(evt, fn);
       }
       bindings.length = 0;
     };
@@ -147,7 +147,7 @@ class MutationObserver {
     }
 
     this.queue.push(new MutationRecord('attributes', el, emptyNodeList, emptyNodeList, null, null, name, null, oldValue));
-    process.nextTick(() => {
+    Promise.resolve().then(() => {
       this.flush();
     });
   }
@@ -157,7 +157,7 @@ class MutationObserver {
     // if (this.element === el.ownerDocument && !el.ownerDocument.contains(el)) { return; }
 
     this.queue.push(new MutationRecord('childList', el, addedNodes, removedNodes, previousSibling, nextSibling, null, null, null));
-    process.nextTick(() => {
+    Promise.resolve().then(() => {
       this.flush();
     });
   }
@@ -167,7 +167,7 @@ class MutationObserver {
     // if (this.element === el.ownerDocument && !el.ownerDocument.contains(el)) { return; }
 
     this.queue.push(new MutationRecord('characterData', el, emptyNodeList, emptyNodeList, null, null, null, null, null));
-    process.nextTick(() => {
+    Promise.resolve().then(() => {
       this.flush();
     });
   }
