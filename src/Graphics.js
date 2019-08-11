@@ -263,9 +263,6 @@ class WebGLRenderingContext {
               enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
               return enc;
             }
-            float DecodeFloatRGBA(vec4 rgba) {
-              return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
-            }
             void main() {
               gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
             }
@@ -327,18 +324,11 @@ class WebGLRenderingContext {
             uniform sampler2D uColorTex;
             uniform sampler2D uDepthTex;
             varying vec2 vTexCoords;
-            vec4 EncodeFloatRGBA(float v) {
-              vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
-              enc = fract(enc);
-              enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
-              return enc;
-            }
             float DecodeFloatRGBA(vec4 rgba) {
               return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
             }
             void main() {
               gl_FragColor = texture2D(uColorTex, vTexCoords);
-              // gl_FragColor.r += 0.1;
               float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
               if (depth == 0.0) {
                 depth = 1.0;
