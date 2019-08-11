@@ -250,6 +250,7 @@ class Node extends EventTarget {
     if (this.ownerDocument.readyState === 'complete') {
       this.dispatchEvent.apply(this, arguments);
     } else {
+      const el = this;
       const args = Array.from(arguments);
 
       const _readystatechange = () => {
@@ -257,7 +258,6 @@ class Node extends EventTarget {
           this.ownerDocument.removeEventListener('readystatechange', _readystatechange);
 
           Promise.resolve().then(() => {
-            const el = args[0].target;
             el.dispatchEvent.apply(el, args);
           });
         }
