@@ -1294,7 +1294,7 @@ self.onrunasync = req => {
       break;
     }
     case 'eval': // used in tests
-      return Promise.resolve([eval(req.scriptString), []]);
+      return Promise.resolve([(0, eval)(req.scriptString), []]);
     default:
       return Promise.reject(new Error(`invalid window async request: ${JSON.stringify(req)}`));
   }

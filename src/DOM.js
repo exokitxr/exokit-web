@@ -1911,7 +1911,7 @@ class HTMLScriptElement extends HTMLLoadableElement {
             text = await _fetch(url);
           }
           (function() {
-            eval(text);
+            (0, eval)(text);
           }).call(window);
         }
       };

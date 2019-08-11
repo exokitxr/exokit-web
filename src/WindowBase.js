@@ -321,7 +321,7 @@ const _oninitmessage = e => {
       case 'runRepl': {
         let result, err;
         try {
-          result = util.inspect(eval(m.jsString));
+          result = util.inspect((0, eval)(m.jsString));
         } catch(e) {
           err = e.stack;
         }
