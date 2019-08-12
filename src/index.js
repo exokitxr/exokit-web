@@ -324,7 +324,7 @@ window.addEventListener('resize', e => {
   }
 });
 ['keydown', 'keyup', 'keypress'].forEach(type => {
-  window.addEventListener('keydown', e => {
+  window.addEventListener(type, e => {
     const event = {
       altKey: e.altKey,
       charCode: e.charCode,
