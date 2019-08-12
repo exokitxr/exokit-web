@@ -314,10 +314,134 @@ const xrState = (() => {
 })();
 GlobalContext.xrState = xrState;
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', e => {
   xrState.metrics[0] = window.innerWidth;
   xrState.metrics[1] = window.innerHeight;
   xrState.devicePixelRatio[0] = window.devicePixelRatio;
+
+  for (let i = 0; i < windows.length; i++) {
+    windows[i].emit('resize', {});
+  }
+})
+['keydown', 'keyup', 'keypress'].forEach(type => {
+  window.addEventListener('keydown', e => {
+    const event = {
+      altKey: e.altKey,
+      charCode: e.charCode,
+      code: e.code,
+      ctrlKey: e.ctrlKey,
+      detail: e.detail,
+      key: e.key,
+      keyCode: e.keyCode,
+      location: e.location,
+      metaKey: e.metaKey,
+      repeat: e.repeat,
+      shiftKey: e.shiftKey,
+      which: e.which,
+      timeStamp: e.timeStamp,
+    };
+    for (let i = 0; i < windows.length; i++) {
+      windows[i].emit(type, event);
+    }
+  });
+});
+['mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'wheel'].forEach(type => {
+  const event = {
+    altKey: e.altKey,
+    button: e.button,
+    buttons: e.buttons,
+    clientX: e.clientX,
+    clientY: e.clientY,
+    ctrlKey: e.ctrlKey,
+    deltaMode: e.deltaMode,
+    deltaX: e.deltaX,
+    deltaY: e.deltaY,
+    deltaZ: e.deltaZ,
+    detail: e.detail,
+    layerX: e.layerX,
+    layerY: e.layerY,
+    metaKey: e.metaKey,
+    movementX: e.movementX,
+    movementY: e.movementY,
+    offsetX: e.offsetX,
+    offsetY: e.offsetY,
+    pageX: e.pageX,
+    pageY: e.pageY,
+    screenX: e.screenX,
+    screenY: e.screenY,
+    shiftKey: e.shiftKey,
+    timeStamp: e.timeStamp,
+    which: e.which,
+    x: e.x,
+    y: e.y,
+  };
+  for (let i = 0; i < windows.length; i++) {
+    windows[i].emit(type, event);
+  }
+});
+window.addEventListener('drop', e => {
+  console.log('drop event', e);
+  /* const _readFiles = paths => {
+    const result = [];
+
+    return Promise.all(paths.map(p =>
+      new Promise((accept, reject) => {
+        fs.lstat(p, (err, stats) => {
+          if (!err) {
+            if (stats.isFile()) {
+              fs.readFile(p, (err, data) => {
+                if (!err) {
+                  const file = new window.Blob([data]);
+                  file.name = path.basename(p);
+                  file.path = p;
+                  result.push(file);
+
+                  accept();
+                } else {
+                  reject(err);
+                }
+              });
+            } else if (stats.isDirectory()) {
+              fs.readdir(p, (err, fileNames) => {
+                if (!err) {
+                  _readFiles(fileNames.map(fileName => path.join(p, fileName)))
+                    .then(files => {
+                      result.push.apply(result, files);
+
+                      accept();
+                    })
+                    .catch(err => {
+                      reject(err);
+                    });
+                } else {
+                  reject(err);
+                }
+              });
+            } else {
+              accept();
+            }
+          } else {
+            reject(err);
+          }
+        });
+      })
+    ))
+      .then(() => result);
+  };
+
+  _readFiles(data.paths)
+    .then(files => {
+      const dataTransfer = new window.DataTransfer({
+        files,
+      });
+      const e = new window.DragEvent('drop');
+      e.dataTransfer = dataTransfer;
+      canvas.dispatchEvent(e);
+    })
+    .catch(err => {
+      console.warn(err.stack);
+    });
+  break; */
 });
 
 const topVrPresentState = {
