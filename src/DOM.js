@@ -27,6 +27,46 @@ import {XRRigidTransform} from './XR.js';
 
 he.encode.options.useNamedReferences = true;
 
+const RESERVED_WORDS = {
+  'await': true,
+  'break': true,
+  'case': true,
+  'catch': true,
+  'class': true,
+  'const': true,
+  'continue': true,
+  'debugger': true,
+  'default': true,
+  'delete': true,
+  'do': true,
+  'else': true,
+  'export': true,
+  'extends': true,
+  'finally': true,
+  'for': true,
+  'function': true,
+  'if': true,
+  'import': true,
+  'in': true,
+  'instanceof': true,
+  'new': true,
+  'return': true,
+  'super': true,
+  'switch': true,
+  'this': true,
+  'throw': true,
+  'try': true,
+  'typeof': true,
+  'var': true,
+  'void': true,
+  'while': true,
+  'with': true,
+  'yield': true,
+  'null': true,
+  'true': true,
+  'false': true,
+};
+
 const _promiseSerial = async promiseFns => {
   for (let i = 0; i < promiseFns.length; i++) {
     await promiseFns[i]();
@@ -1911,6 +1951,17 @@ class HTMLScriptElement extends HTMLLoadableElement {
           if (!text) {
             text = await _fetch(url);
           }
+          const regex = /(?:let|const|class)\s+([a-zA-Z_\$][a-zA-Z0-9_\$]*)/gm;
+          let match;
+          const exportIds = [];
+          while (match = regex.exec(text)) {
+            const id = match[1];
+            if (!RESERVED_WORDS[id]) {
+              exportIds.push(`typeof ${id} !== 'undefined' && (self.${id} = ${id});`);
+            }
+          }
+          text += ';\n';
+          text += exportIds.join('\n');
           (function() {
             (0, eval)(text);
           }).call(window);
