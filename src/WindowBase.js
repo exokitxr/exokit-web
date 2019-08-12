@@ -373,6 +373,15 @@ const _oninitmessage = e => {
         }
         break;
       }
+      case 'emit': {
+        const {type, event} = m;
+        const e = new CustomEvent(type);
+        for (const k in event) {
+          e[k] = event[k];
+        }
+        window.dispatchEvent(e);
+        break;
+      }
       default: throw new Error(`invalid method: ${JSON.stringify(m.method)}`);
     }
   });
