@@ -374,35 +374,37 @@ const _oninitmessage = e => {
         break;
       }
       case 'emit': {
-        const {type, event} = m;
-        const constructor = (() => {
-          switch (type) {
-            case 'keydown':
-            case 'keyup':
-            case 'keypress':
-              return KeyboardEvent;
-            case 'mousedown':
-            case 'mouseup':
-            case 'click':
-            case 'dblclick':
-              return MouseEvent;
-            case 'wheel':
-              return WheelEvent;
-            default:
-              return function(type) {
-                return new Event(type, {
-                  bubbles: true,
-                  cancelable: true,
-                });
-              };
+        if (GlobalContext.contexts) {
+          const {type, event} = m;
+          const constructor = (() => {
+            switch (type) {
+              case 'keydown':
+              case 'keyup':
+              case 'keypress':
+                return KeyboardEvent;
+              case 'mousedown':
+              case 'mouseup':
+              case 'click':
+              case 'dblclick':
+                return MouseEvent;
+              case 'wheel':
+                return WheelEvent;
+              default:
+                return function(type) {
+                  return new Event(type, {
+                    bubbles: true,
+                    cancelable: true,
+                  });
+                };
+            }
+          })();
+          const e = new constructor(type);
+          for (const k in event) {
+            e[k] = event[k];
           }
-        })();
-        const e = new constructor(type);
-        for (const k in event) {
-          e[k] = event[k];
-        }
-        for (let i = 0; i < GlobalContext.contexts.length; i++) {
-          GlobalContext.contexts[i].canvas.dispatchEvent(e);
+          for (let i = 0; i < GlobalContext.contexts.length; i++) {
+            GlobalContext.contexts[i].canvas.dispatchEvent(e);
+          }
         }
         break;
       }
