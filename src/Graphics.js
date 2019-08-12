@@ -431,11 +431,15 @@ class WebGLRenderingContext {
     const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
     const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
     const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+    const oldViewport = gl.getParameter(gl.VIEWPORT);
+    const oldScissorTest = gl.getParameter(gl.SCISSOR_TEST);
 
     this._exokitEnsureShaders();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.disable(gl.SCISSOR_TEST);
 
     extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.colorVao);
     gl.useProgram(this.defaultFramebuffer.colorProgram);
@@ -455,6 +459,10 @@ class WebGLRenderingContext {
     gl.activeTexture(oldActiveTexture);
     extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
     gl.useProgram(oldProgram);
+    gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
+    if (oldScissorTest) {
+      gl.enable(gl.SCISSOR_TEST);
+    }
 
     return {
       color,
@@ -475,11 +483,15 @@ class WebGLRenderingContext {
     const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
     const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
     const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+    const oldViewport = gl.getParameter(gl.VIEWPORT);
+    const oldScissorTest = gl.getParameter(gl.SCISSOR_TEST);
 
     this._exokitEnsureShaders();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.disable(gl.SCISSOR_TEST);
 
     extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.decodeVao);
     gl.useProgram(this.defaultFramebuffer.decodeProgram);
@@ -502,6 +514,10 @@ class WebGLRenderingContext {
     gl.activeTexture(oldActiveTexture);
     extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
     gl.useProgram(oldProgram);
+    gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
+    if (oldScissorTest) {
+      gl.enable(gl.SCISSOR_TEST);
+    }
   }
   _exokitClearEnabled(enabled) {
     this.enabled.clear = enabled;
