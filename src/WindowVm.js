@@ -45,9 +45,12 @@ class WorkerVm extends EventTarget {
           break;
         }
         case 'emit': {
-          this.dispatchEvent(new CustomEvent(m.type, {
-            detail: m.event,
-          }));
+          const {type, event} = m;
+          const e = new CustomEvent(m.type);
+          for (const k in event) {
+            e[k] = event[k];
+          }
+          this.dispatchEvent(e);
           break;
         }
         default: {
@@ -114,6 +117,13 @@ class WorkerVm extends EventTarget {
       method: 'postMessage',
       message,
     }, transferList);
+  }
+  emit(type, event) {
+    this.worker.postMessage({
+      method: 'emit',
+      type,
+      event,
+    });
   }
   
   destroy() {
