@@ -535,6 +535,8 @@ _inherit(WebGLRenderingContext, OffscreenWebGLRenderingContext);
 class WebGL2RenderingContext extends WebGLRenderingContext {
   constructor(canvasEl) {
     super(canvasEl);
+
+    throw new Error('webgl2 not implemented');
   }
   resize(w, h) {
     this.backingCanvas.width = w;
