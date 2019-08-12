@@ -314,15 +314,6 @@ const xrState = (() => {
 })();
 GlobalContext.xrState = xrState;
 
-window.addEventListener('resize', e => {
-  xrState.metrics[0] = window.innerWidth;
-  xrState.metrics[1] = window.innerHeight;
-  xrState.devicePixelRatio[0] = window.devicePixelRatio;
-
-  for (let i = 0; i < windows.length; i++) {
-    windows[i].emit('resize', {});
-  }
-});
 ['keydown', 'keyup', 'keypress'].forEach(type => {
   window.addEventListener(type, e => {
     const event = {
@@ -380,6 +371,15 @@ window.addEventListener('resize', e => {
       windows[i].emit(type, event);
     }
   });
+});
+window.addEventListener('resize', e => {
+  xrState.metrics[0] = window.innerWidth;
+  xrState.metrics[1] = window.innerHeight;
+  xrState.devicePixelRatio[0] = window.devicePixelRatio;
+
+  for (let i = 0; i < windows.length; i++) {
+    windows[i].emit('resize', {});
+  }
 });
 window.addEventListener('drop', e => {
   console.log('drop event', e);
