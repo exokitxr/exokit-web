@@ -322,7 +322,7 @@ window.addEventListener('resize', e => {
   for (let i = 0; i < windows.length; i++) {
     windows[i].emit('resize', {});
   }
-})
+});
 ['keydown', 'keyup', 'keypress'].forEach(type => {
   window.addEventListener('keydown', e => {
     const event = {
