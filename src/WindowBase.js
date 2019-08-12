@@ -365,10 +365,9 @@ const _oninitmessage = e => {
       }
       case 'postMessage': {
         try {
-          const e = new MessageEvent('messge', {
+          window.dispatchEvent(new MessageEvent('message', {
             data: m.message,
-          });
-          global.emit('message', e);
+          }));
         } catch(err) {
           console.warn(err.stack);
         }
