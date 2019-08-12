@@ -203,6 +203,9 @@ const _makeWindow = (options = {}, handlers = {}) => {
     const {detail: framebuffer} = e;
     window.framebuffer = framebuffer;
   });
+  window.addEventListener('pointerLock', e => {
+    options.onpointerlock && options.onpointerlock(e.detail);
+  });
   window.addEventListener('hapticPulse', e => {
     options.onhapticpulse && options.onhapticpulse(e.detail);
   });

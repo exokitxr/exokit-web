@@ -75,6 +75,9 @@ exokit.load = (src, options = {}) => {
         replacements: options.replacements,
         onnavigate: options.onnavigate,
         onrequest: options.onrequest,
+        onpointerlock: options.onpointerlock,
+        onhapticpulse: options.onhapticpulse,
+        onpaymentrequest: options.onpaymentrequest,
       });
     });
 };

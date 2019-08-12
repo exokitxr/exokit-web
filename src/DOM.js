@@ -2249,6 +2249,13 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                   onrequest(req) {
                     self._postMessage(req);
                   },
+                  onpointerlock(event) {
+                    self._postMessage({
+                      method: 'emit',
+                      type: 'pointerLock',
+                      event,
+                    });
+                  },
                   onhapticpulse(event) {
                     self._postMessage({
                       method: 'emit',

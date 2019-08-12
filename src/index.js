@@ -578,6 +578,9 @@ const _waitHandleRequest = ({type, keypath}) => {
     console.warn('cannot find window to respond request to', windowId, windows.map(window => window.id));
   }
 };
+const handlePointerLock = () => {
+  window.document.body.requestPointerLock();
+};
 const handleHapticPulse = ({index, value, duration}) => {
   if (topVrPresentState.hmdType === 'openvr') {
     value = Math.min(Math.max(value, 0), 1);
@@ -976,6 +979,7 @@ const _start = () => {
         replacements,
         onnavigate: _onnavigate,
         onrequest: handleRequest,
+        onpointerlock: handlePointerLock,
         onhapticpulse: handleHapticPulse,
         onpaymentrequest: handlePaymentRequest,
       });
@@ -989,6 +993,10 @@ const _start = () => {
         dataPath,
       }, {
         onnavigate: _onnavigate,
+        onrequest: handleRequest,
+        onpointerlock: handlePointerLock,
+        onhapticpulse: handleHapticPulse,
+        onpaymentrequest: handlePaymentRequest,
       })
         .then(newWindow => {
           window = newWindow;
@@ -1002,6 +1010,7 @@ const _start = () => {
       args,
       onnavigate: _onnavigate,
       onrequest: handleRequest,
+      onpointerlock: handlePointerLock,
       onhapticpulse: handleHapticPulse,
       onpaymentrequest: handlePaymentRequest,
     });

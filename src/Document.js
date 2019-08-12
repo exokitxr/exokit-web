@@ -126,11 +126,21 @@ function initDocument (document, window) {
   if (window.top === window) {
     document.addEventListener('pointerlockchange', () => {
       const pointerLockElement = document[symbols.pointerLockElementSymbol];
-      
-      for (let i = 0; i < GlobalContext.contexts.length; i++) {
+
+      if (pointerLockElement) {
+        self._postMessage({
+          method: 'emit',
+          type: 'pointerLock',
+          event: {
+            pointerLockElement: true,
+          },
+        });
+      }
+
+      /* for (let i = 0; i < GlobalContext.contexts.length; i++) {
         const context = GlobalContext.contexts[i];
         nativeBindings.nativeWindow.setCursorMode(context.getWindowHandle(), !pointerLockElement);
-      }
+      } */
 
       /* const iframes = document.getElementsByTagName('iframe');
       for (let i = 0; i < iframes.length; i++) {
@@ -143,10 +153,10 @@ function initDocument (document, window) {
     document.addEventListener('fullscreenchange', () => {
       const fullscreenElement = document[symbols.fullscreenElementSymbol];
       
-      for (let i = 0; i < GlobalContext.contexts.length; i++) {
+      /* for (let i = 0; i < GlobalContext.contexts.length; i++) {
         const context = GlobalContext.contexts[i];
         nativeBindings.nativeWindow.setFullscreen(context.getWindowHandle(), !!fullscreenElement);
-      }
+      } */
       
       /* const iframes = document.getElementsByTagName('iframe');
       for (let i = 0; i < iframes.length; i++) {
