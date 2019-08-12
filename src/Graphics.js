@@ -68,9 +68,6 @@ class CanvasRenderingContext2D {
     this.backingCanvas.width = w;
     this.backingCanvas.height = h;
   }
-  transferToImageBitmap() {
-    return this.backingCanvas.transferToImageBitmap();
-  }
   destroy() {
     GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
   }
