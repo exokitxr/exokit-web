@@ -330,7 +330,7 @@ window.addEventListener('resize', e => {
       charCode: e.charCode,
       code: e.code,
       ctrlKey: e.ctrlKey,
-      detail: e.detail,
+      // detail: e.detail,
       key: e.key,
       keyCode: e.keyCode,
       location: e.location,
@@ -338,7 +338,7 @@ window.addEventListener('resize', e => {
       repeat: e.repeat,
       shiftKey: e.shiftKey,
       which: e.which,
-      timeStamp: e.timeStamp,
+      // timeStamp: e.timeStamp,
     };
     for (let i = 0; i < windows.length; i++) {
       windows[i].emit(type, event);
@@ -346,38 +346,40 @@ window.addEventListener('resize', e => {
   });
 });
 ['mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'wheel'].forEach(type => {
-  const event = {
-    altKey: e.altKey,
-    button: e.button,
-    buttons: e.buttons,
-    clientX: e.clientX,
-    clientY: e.clientY,
-    ctrlKey: e.ctrlKey,
-    deltaMode: e.deltaMode,
-    deltaX: e.deltaX,
-    deltaY: e.deltaY,
-    deltaZ: e.deltaZ,
-    detail: e.detail,
-    layerX: e.layerX,
-    layerY: e.layerY,
-    metaKey: e.metaKey,
-    movementX: e.movementX,
-    movementY: e.movementY,
-    offsetX: e.offsetX,
-    offsetY: e.offsetY,
-    pageX: e.pageX,
-    pageY: e.pageY,
-    screenX: e.screenX,
-    screenY: e.screenY,
-    shiftKey: e.shiftKey,
-    timeStamp: e.timeStamp,
-    which: e.which,
-    x: e.x,
-    y: e.y,
-  };
-  for (let i = 0; i < windows.length; i++) {
-    windows[i].emit(type, event);
-  }
+  window.addEventListener(type, e => {
+    const event = {
+      altKey: e.altKey,
+      button: e.button,
+      buttons: e.buttons,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      ctrlKey: e.ctrlKey,
+      deltaMode: e.deltaMode,
+      deltaX: e.deltaX,
+      deltaY: e.deltaY,
+      deltaZ: e.deltaZ,
+      // detail: e.detail,
+      layerX: e.layerX,
+      layerY: e.layerY,
+      metaKey: e.metaKey,
+      movementX: e.movementX,
+      movementY: e.movementY,
+      offsetX: e.offsetX,
+      offsetY: e.offsetY,
+      pageX: e.pageX,
+      pageY: e.pageY,
+      screenX: e.screenX,
+      screenY: e.screenY,
+      shiftKey: e.shiftKey,
+      // timeStamp: e.timeStamp,
+      which: e.which,
+      x: e.x,
+      y: e.y,
+    };
+    for (let i = 0; i < windows.length; i++) {
+      windows[i].emit(type, event);
+    }
+  });
 });
 window.addEventListener('drop', e => {
   console.log('drop event', e);
