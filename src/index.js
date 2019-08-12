@@ -381,6 +381,15 @@ window.addEventListener('resize', e => {
     windows[i].emit('resize', {});
   }
 });
+window.document.addEventListener('pointerlockchange', e => {
+  const pointerLockElement = !!window.document.pointerLockElement;
+
+  for (let i = 0; i < windows.length; i++) {
+    windows[i].emit('pointerlockchange', {
+      pointerLockElement,
+    });
+  }
+});
 window.addEventListener('drop', e => {
   console.log('drop event', e);
   /* const _readFiles = paths => {

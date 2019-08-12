@@ -376,34 +376,56 @@ const _oninitmessage = e => {
       case 'emit': {
         if (GlobalContext.contexts) {
           const {type, event} = m;
-          const constructor = (() => {
-            switch (type) {
-              case 'keydown':
-              case 'keyup':
-              case 'keypress':
-                return KeyboardEvent;
-              case 'mousedown':
-              case 'mouseup':
-              case 'click':
-              case 'dblclick':
-                return MouseEvent;
-              case 'wheel':
-                return WheelEvent;
-              default:
-                return function(type) {
-                  return new Event(type, {
-                    bubbles: true,
-                    cancelable: true,
-                  });
-                };
+          let constructor, target;
+          switch (type) {
+            case 'keydown':
+            case 'keyup':
+            case 'keypress': {
+              constructor = KeyboardEvent;
+              target = 'input';
+              break;
             }
-          })();
+            case 'mousedown':
+            case 'mouseup':
+            case 'click':
+            case 'dblclick':
+            case 'mousemove': {
+              constructor = MouseEvent;
+              target = 'input';
+              break;
+            }
+            case 'wheel': {
+              constructor = WheelEvent;
+              target = 'input';
+              break;
+            }
+            default: {
+              constructor = function(type) {
+                return new Event(type, {
+                  bubbles: true,
+                  cancelable: true,
+                });
+              };
+              if (type === 'pointerlockchange' || type === 'fullscreenchange') {
+                target = 'document';
+              } else {
+                target = 'window';
+              }
+              break;
+            }
+          }
           const e = new constructor(type);
           for (const k in event) {
             e[k] = event[k];
           }
-          for (let i = 0; i < GlobalContext.contexts.length; i++) {
-            GlobalContext.contexts[i].canvas.dispatchEvent(e);
+          if (target === 'input') {
+            for (let i = 0; i < GlobalContext.contexts.length; i++) {
+              GlobalContext.contexts[i].canvas.dispatchEvent(e);
+            }
+          } else if (target === 'document') {
+            document.dispatchEvent(e);
+          } else {
+            window.dispatchEvent(e);
           }
         }
         break;

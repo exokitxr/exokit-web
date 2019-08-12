@@ -124,10 +124,16 @@ function initDocument (document, window) {
   document[symbols.addRunSymbol] = _addRun;
 
   if (window.top === window) {
-    document.addEventListener('pointerlockchange', () => {
-      const pointerLockElement = document[symbols.pointerLockElementSymbol];
+    document.addEventListener('pointerlockchange', e => {
+      // console.log('got pointer lock change', e);
 
-      if (pointerLockElement) {
+      const {pointerLockElement} = e;
+      if (!pointerLockElement) {
+        document[symbols.pointerLockElementSymbol] = null;
+      }
+      /* const pointerLockElement = document[symbols.pointerLockElementSymbol];
+
+      if (!pointerLockElement) {
         self._postMessage({
           method: 'emit',
           type: 'pointerLock',
@@ -135,37 +141,15 @@ function initDocument (document, window) {
             pointerLockElement: true,
           },
         });
-      }
-
-      /* for (let i = 0; i < GlobalContext.contexts.length; i++) {
-        const context = GlobalContext.contexts[i];
-        nativeBindings.nativeWindow.setCursorMode(context.getWindowHandle(), !pointerLockElement);
-      } */
-
-      /* const iframes = document.getElementsByTagName('iframe');
-      for (let i = 0; i < iframes.length; i++) {
-        const iframe = iframes[i];
-        if (iframe.contentDocument) {
-          // iframe.contentDocument._emit('pointerlockchange'); // XXX send this down
-        }
       } */
     });
     document.addEventListener('fullscreenchange', () => {
-      const fullscreenElement = document[symbols.fullscreenElementSymbol];
-      
-      /* for (let i = 0; i < GlobalContext.contexts.length; i++) {
-        const context = GlobalContext.contexts[i];
-        nativeBindings.nativeWindow.setFullscreen(context.getWindowHandle(), !!fullscreenElement);
-      } */
-      
-      /* const iframes = document.getElementsByTagName('iframe');
-      for (let i = 0; i < iframes.length; i++) {
-        const iframe = iframes[i];
-        if (iframe.contentDocument) {
-          // iframe.contentDocument._emit('pointerlockchange'); // XXX send this down
-          iframe.contentDocument._emit('fullscreenchange');
-        }
-      } */
+      // console.log('got fullscreen change', e);
+
+      const {fullscreenElement} = e;
+      if (!fullscreenElement) {
+        document[symbols.fullscreenElementSymbol] = null;
+      }
     });
   }
 

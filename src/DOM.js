@@ -1339,9 +1339,17 @@ class Element extends Node {
     if (this.ownerDocument[symbols.pointerLockElementSymbol] === null) {
       this.ownerDocument[symbols.pointerLockElementSymbol] = this;
 
-      Promise.resolve().then(() => {
-        this.ownerDocument.dispatchEvent(new CustomEvent('pointerlockchange'));
+      self._postMessage({
+        method: 'emit',
+        type: 'pointerLock',
+        event: {
+          pointerLockElement: true,
+        },
       });
+
+      /* Promise.resolve().then(() => {
+        this.ownerDocument.dispatchEvent(new CustomEvent('pointerlockchange'));
+      }); */
     }
   }
 
