@@ -1,7 +1,7 @@
 import USKeyboardLayout from './USKeyboardLayout.js';
 import GlobalContext from './GlobalContext.js';
 
-const EventTarget = (Old => class EventTarget extends Old {
+const EventTarget = (EventTargetOld => class EventTarget extends EventTargetOld {
   constructor() {
     super();
 
@@ -34,6 +34,29 @@ const EventTarget = (Old => class EventTarget extends Old {
     }
 
     return super.removeEventListener(event, listener);
+  }
+  dispatchEvent(event) {
+    self.event = event;
+
+    const _emit = (node, event) => {
+      try {
+        EventTargetOld.prototype.dispatchEvent.call(node, event);
+      } catch (err) {
+        console.warn(err);
+      }
+    };
+    const _recurse = (node, event) => {
+      _emit(node, event);
+      if (event.bubbles && node instanceof GlobalContext.Document) {
+        _emit(node.defaultView, event);
+      }
+      if (event.bubbles && !event.cancelBubble && node.parentNode) {
+        _recurse(node.parentNode, event);
+      }
+    };
+    _recurse(this, event);
+
+    self.event = null;
   }
 })(self.EventTarget);
 
