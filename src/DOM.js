@@ -25,6 +25,8 @@ import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext}
 import {XRRigidTransform} from './XR.js';
 // const {ElectronVm} = require('./electron-vm.js');
 
+const {createImageBitmap} = self;
+
 he.encode.options.useNamedReferences = true;
 
 const RESERVED_WORDS = {

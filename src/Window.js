@@ -832,7 +832,27 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.AnalyserNode = AnalyserNode;
   window.PannerNode = PannerNode;
   window.StereoPannerNode = StereoPannerNode;
-  // window.createImageBitmap = createImageBitmap;
+  window.createImageBitmap = (createImageBitmapOld => function createImageBitmap(image, sx, sy, sw, sh, options) {
+    if (image && image.constructor && image.constructor.name === 'HTMLImageElement') {
+      image = image.imageBitmap;
+    }
+    if (image && image.constructor && image.constructor.name === 'HTMLCanvasElement') {
+      image = image.backingCanvas;
+    }
+    if (options !== undefined) {
+      return createImageBitmapOld(image, sx, sy, sw, sh, options);
+    } else if (sh !== undefined) {
+      return createImageBitmapOld(image, sx, sy, sw, sh);
+    } else if (sw !== undefined) {
+      return createImageBitmapOld(image, sx, sy, sw);
+    } else if (sy !== undefined) {
+      return createImageBitmapOld(image, sx, sy);
+    } else if (sx !== undefined) {
+      return createImageBitmapOld(image, sx);
+    } else {
+      return createImageBitmapOld(image);
+    }
+  })(window.createImageBitmap);
   // window.Worker = Worker;
   window.PaymentRequest = PaymentRequest;
   window.requestAnimationFrame = _makeRequestAnimationFrame(window);
