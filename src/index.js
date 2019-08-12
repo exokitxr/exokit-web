@@ -756,7 +756,7 @@ const _startTopRenderLoop = () => {
         // color.close();
       }
       {
-        const j = index++;
+        /* const j = index++;
         let canvas = canvases[j];
         if (!canvas) {
           canvas = canvases[j] = document.createElement('canvas');
@@ -769,8 +769,8 @@ const _startTopRenderLoop = () => {
           canvas.width = expectedWidth;
           canvas.height = expectedHeight;
         }
-        canvas.ctx.transferFromImageBitmap(depth);
-        // depth.close();
+        canvas.ctx.transferFromImageBitmap(depth); */
+        depth.close();
       }
     }
     frame = null;
