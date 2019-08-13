@@ -311,7 +311,7 @@ class Resources extends EventTarget {
       const resource = this.queue.shift();
       resource.get()
         .catch(err => {
-          console.warn(err.stack);
+          console.warn(err);
         })
         .finally(() => {
           resource.destroy();
