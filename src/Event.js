@@ -28,7 +28,7 @@ const EventTarget = (EventTargetOld => class EventTarget extends EventTargetOld 
     if (typeof listener === 'function') {
       const listeners = this._listeners[event];
       if (listeners) {
-        const index = listeners.indexOf(listeners);
+        const index = listeners.indexOf(listener);
         listeners.splice(index, 1);
       }
     }
