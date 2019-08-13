@@ -2,9 +2,35 @@
   <body>
   <script src="three.js"></script>
   <script>
-    let container, camera, scene, renderer, cubeMesh;
-    window.layers = [];
+    let container, camera, scene, renderer, cubeMesh, session;
 
+    async function _enterXr() {
+      session = await navigator.xr.requestSession({
+        exclusive: true,
+      });
+
+      // console.log('request first frame');
+      session.requestAnimationFrame((timestamp, frame) => {
+        renderer.vr.setSession(session, {
+          frameOfReferenceType: 'stage',
+        });
+
+        const pose = frame.getViewerPose();
+        const viewport = session.baseLayer.getViewport(pose.views[0]);
+        // const width = viewport.width;
+        const height = viewport.height;
+        const fullWidth = (() => {
+          let result = 0;
+          for (let i = 0; i < pose.views.length; i++) {
+            result += session.baseLayer.getViewport(pose.views[i]).width;
+          }
+          return result;
+        })();
+        renderer.setSize(fullWidth, height);
+
+        console.log('loaded child in XR');
+      });
+    }
     function init() {
       container = document.createElement('div');
       document.body.appendChild(container);
@@ -41,12 +67,7 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       container.appendChild(renderer.domElement);
 
-      /* renderer = {
-        domElement: document.createElement('canvas'),
-      };
-      const ctx = renderer.domElement.getContext('webgl'); */
-
-      window.layers.push(renderer.domElement);
+      _enterXr();
     }
 
     function animate() {

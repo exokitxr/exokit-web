@@ -2,9 +2,68 @@
   <body>
   <script src="three.js"></script>
   <script>
-    let container, camera, scene, renderer, cubeMesh, iframe;
-    window.layers = [];
+    let container, camera, scene, renderer, cubeMesh, iframe, fakeXrDisplay, session;
+    const layers = [];
 
+    async function _startFakeVrDisplay() {
+      fakeXrDisplay = new FakeXRDisplay();
+      fakeXrDisplay.width = 1280;
+      fakeXrDisplay.height = 1024;
+      fakeXrDisplay.position.copy(camera.position);
+      fakeXrDisplay.pushUpdate();
+      fakeXrDisplay.enable();
+      _enterXr();
+    }
+    async function _endFakeVrDisplay() {
+      renderer.vr.enabled = false;
+      renderer.vr.setAnimationLoop(null);
+
+      if (session) {
+        await session.end();
+        session = null;
+      } else if (display) {
+        await display.exitPresent();
+        display = null;
+      }
+
+      fakeXrDisplay.disable();
+      fakeXrDisplay = null;
+    }
+    async function _enterXr() {
+      session = await navigator.xr.requestSession({
+        exclusive: true,
+      });
+      session.layers = layers;
+
+      // console.log('request first frame');
+      session.requestAnimationFrame((timestamp, frame) => {
+        renderer.vr.setSession(session, {
+          frameOfReferenceType: 'stage',
+        });
+
+        const pose = frame.getViewerPose();
+        const viewport = session.baseLayer.getViewport(pose.views[0]);
+        // const width = viewport.width;
+        const height = viewport.height;
+        const fullWidth = (() => {
+          let result = 0;
+          for (let i = 0; i < pose.views.length; i++) {
+            result += session.baseLayer.getViewport(pose.views[i]).width;
+          }
+          return result;
+        })();
+        renderer.setSize(fullWidth, height);
+        /* viewportVector.set(fullWidth, height);
+
+        renderer.setAnimationLoop(null);
+
+        renderer.vr.enabled = true;
+        renderer.vr.setSession(session);
+        renderer.vr.setAnimationLoop(animate); */
+
+        console.log('loaded root in XR');
+      });
+    }
     function init() {
       container = document.createElement('div');
       document.body.appendChild(container);
@@ -39,17 +98,22 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       container.appendChild(renderer.domElement);
 
-      window.layers.push(renderer.domElement);
-
       iframe = document.createElement('iframe');
       iframe.d = 3;
       iframe.src = 'example2.html';
       iframe.onload = () => {
-        window.layers.push(iframe);
+        console.log('iframe loaded', iframe.src);
+
+        /* setTimeout(() => {
+          iframe.src = 'example3.html';
+        }); */
       };
       iframe.onerror = err => {
         console.warn(err.stack);
       };
+      layers.push(iframe);
+
+      _startFakeVrDisplay();
     }
 
     function animate() {
