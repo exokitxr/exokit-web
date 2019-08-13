@@ -105,14 +105,19 @@
       iframe.onload = () => {
         console.log('iframe loaded', iframe.src);
 
-        /* setTimeout(() => {
+        layers.push(iframe);
+        iframe.onload = null;
+
+        setTimeout(() => {
+          layers.splice(layers.indexOf(iframe), 1);
+
+          // iframe.contentWindow.destroy(); // XXX
           iframe.src = 'example3.html';
-        }); */
+        }, 2000);
       };
       iframe.onerror = err => {
-        console.warn(err.stack);
+        console.warn(err);
       };
-      layers.push(iframe);
 
       _startFakeVrDisplay();
     }
