@@ -732,7 +732,7 @@ this.bootstrapped = true;
   load(u) {
     this.bootstrap();
 
-    const replacements = [];/* (() => {
+    const replacements = {};/* (() => {
       const result = {};
       for (let i = 0; i < args.replace.length; i++) {
         const replaceArg = args.replace[i];
