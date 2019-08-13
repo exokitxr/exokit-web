@@ -97,6 +97,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       container.appendChild(renderer.domElement);
+      layers.push(renderer.domElement);
 
       iframe = document.createElement('iframe');
       iframe.d = 3;
