@@ -1,28 +1,15 @@
-// const cwd = process.cwd();
-// process.chdir(__dirname); // needed for global bin to find libraries
-
 import path from '../modules/path-browserify.js';
-// const fs = require('fs');
-// const url = require('url');
-// const net = require('net');
-// const child_process = require('child_process');
-// const os = require('os');
 import util from '../modules/util.js';
-// const repl = require('repl');
 
 import core from './core.js';
-// const mkdirp = require('mkdirp');
-// const replHistory = require('repl.history');
 import minimist from '../modules/minimist.js';
 
-const version = '0.0.1'; // const {version} = require('../package.json');
+const version = '0.0.1';
 import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 
 import {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
-
-// const nativeBindings = require(path.join(__dirname, 'native-bindings.js'));
 
 import GlobalContext from './GlobalContext.js';
 GlobalContext.args = {};
