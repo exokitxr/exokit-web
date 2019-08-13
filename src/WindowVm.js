@@ -9,7 +9,6 @@ class WorkerVm extends EventTarget {
 
     const worker = new Worker('/src/WindowBase.js', {
       type: 'module',
-      // name: 'WorkerVm@',
     });
     worker.postMessage({
       method: 'init',
