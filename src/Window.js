@@ -1259,13 +1259,3 @@ self.onrunasync = req => {
       return Promise.reject(new Error(`invalid window async request: ${JSON.stringify(req)}`));
   }
 };
-/* global.onexit = () => {
-  const localContexts = contexts.slice();
-  for (let i = 0; i < localContexts.length; i++) {
-    localContexts[i].destroy();
-  }
-  
-  AudioContext.Destroy();
-  nativeWindow.destroyThreadPool();
-}; */
-// global.setImmediate = undefined; // need this for the TLS implementation

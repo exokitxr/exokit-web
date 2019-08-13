@@ -89,12 +89,4 @@ exokit.setVersion = newVersion => {
   GlobalContext.version = newVersion;
 };
 
-/* if (require.main === module) {
-  if (process.argv.length === 3) {
-    const baseUrl = 'file://' + __dirname + '/';
-    const u = new URL(process.argv[2], baseUrl).href;
-    exokit.load(u);
-  }
-} */
-
 export default exokit;
