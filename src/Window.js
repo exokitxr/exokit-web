@@ -404,17 +404,10 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     matches: false,
   });
 
-  // WebVR enabled.
-  if (['all', 'webvr'].includes(options.args.xr)) {
-    window.navigator.getVRDisplays = function() {
-      return Promise.resolve(this.getVRDisplaysSync());
-    }
+  window.navigator.getVRDisplays = function() {
+    return Promise.resolve(this.getVRDisplaysSync());
   }
-
-  // WebXR enabled.
-  if (['all', 'webxr'].includes(options.args.xr)) {
-    window.navigator.xr = new XR.XR(window);
-  }
+  window.navigator.xr = new XR.XR(window);
 
   window.alert = console.log;
   /* window.setTimeout = (setTimeout => (fn, timeout, args) => {
@@ -745,9 +738,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.CanvasGradient = CanvasGradient; */
   window.CanvasRenderingContext2D = CanvasRenderingContext2D;
   window.WebGLRenderingContext = WebGLRenderingContext;
-  if (options.args.webgl !== '1') {
-    window.WebGL2RenderingContext = WebGL2RenderingContext;
-  }
+  window.WebGL2RenderingContext = WebGL2RenderingContext;
   window.Audio = HTMLAudioElement;
   window.MediaRecorder = MediaRecorder;
   window.DataTransfer = DataTransfer;

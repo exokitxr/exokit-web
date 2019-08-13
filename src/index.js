@@ -1,10 +1,6 @@
-import path from '../modules/path-browserify.js';
-import util from '../modules/util.js';
-
 import core from './core.js';
 import minimist from '../modules/minimist.js';
 
-const version = '0.0.1';
 import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
@@ -12,115 +8,26 @@ import THREE from '../lib/three-min.js';
 import {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
 
 import GlobalContext from './GlobalContext.js';
+
+window.exokit = {
+  bootstrapped: false,
+  bootstrap() {
+
+if (this.bootstrapped) {
+  return;
+}
+
 GlobalContext.args = {};
 GlobalContext.version = '';
-GlobalContext.commands = [];
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 
-const args = (() => {
-  const process = {
-    argv: ['node', '.', 'example.html'],
-  };
-  const minimistArgs = minimist(process.argv.slice(2), {
-    boolean: [
-      'version',
-      'home',
-      'log',
-      'perf',
-      'performance',
-      'frame',
-      'minimalFrame',
-      'tab',
-      'quit',
-      'blit',
-      'require',
-      'nogl',
-      'headless',
-      'uncapped',
-    ],
-    string: [
-      'webgl',
-      'xr',
-      'size',
-      'replace',
-      'onbeforeload'
-    ],
-    alias: {
-      v: 'version',
-      h: 'home',
-      l: 'log',
-      w: 'webgl',
-      x: 'xr',
-      p: 'performance',
-      perf: 'performance',
-      s: 'size',
-      f: 'frame',
-      m: 'minimalFrame',
-      t: 'tab',
-      q: 'quit',
-      b: 'blit',
-      r: 'replace',
-      u: 'require',
-      n: 'nogl',
-      e: 'headless',
-      c: 'uncapped',
-    },
-  });
-  return {
-    version: minimistArgs.version,
-    url: minimistArgs._[0] || '',
-    home: minimistArgs.home,
-    log: minimistArgs.log,
-    webgl: minimistArgs.webgl || '2',
-    xr: minimistArgs.xr || 'all',
-    performance: !!minimistArgs.performance,
-    size: minimistArgs.size,
-    frame: minimistArgs.frame,
-    minimalFrame: minimistArgs.minimalFrame,
-    tab: minimistArgs.tab,
-    quit: minimistArgs.quit,
-    blit: minimistArgs.blit,
-    replace: Array.isArray(minimistArgs.replace) ? minimistArgs.replace : ((minimistArgs.replace !== undefined) ? [minimistArgs.replace] : []),
-    require: minimistArgs.require,
-    nogl: minimistArgs.nogl,
-    headless: minimistArgs.headless,
-    uncapped: minimistArgs.uncapped,
-    onbeforeload: minimistArgs.onbeforeload
-  };
-})();
-
+const args = {};
 core.setArgs(args);
-core.setVersion(version);
-
-const dataPath = null;
-/* const dataPath = (() => {
-  const candidatePathPrefixes = [
-    os.homedir(),
-    __dirname,
-    os.tmpdir(),
-  ];
-  for (let i = 0; i < candidatePathPrefixes.length; i++) {
-    const candidatePathPrefix = candidatePathPrefixes[i];
-    if (candidatePathPrefix) {
-      const ok = (() => {
-        try {
-         fs.accessSync(candidatePathPrefix, fs.constants.W_OK);
-         return true;
-        } catch(err) {
-          return false;
-        }
-      })();
-      if (ok) {
-        return path.join(candidatePathPrefix, '.exokit');
-      }
-    }
-  }
-  return null;
-})(); */
+core.setVersion('0.0.1');
 
 const windows = [];
 GlobalContext.windows = windows;
@@ -534,6 +441,7 @@ const _waitHandleRequest = ({type, keypath}) => {
 const handlePointerLock = () => {
   window.document.body.requestPointerLock();
 };
+GlobalContext.handlePointerLock = handlePointerLock;
 const handleHapticPulse = ({index, value, duration}) => {
   if (topVrPresentState.hmdType === 'openvr') {
     value = Math.min(Math.max(value, 0), 1);
@@ -552,9 +460,11 @@ const handleHapticPulse = ({index, value, duration}) => {
     // TODO: handle the other HMD cases...
   }
 };
+GlobalContext.handleHapticPulse = handleHapticPulse;
 const handlePaymentRequest = () => {
   throw new Error('no payment request handler');
 };
+GlobalContext.handlePaymentRequest = handlePaymentRequest;
 
 const _startTopRenderLoop = () => {
   /* const timestamps = {
@@ -816,99 +726,13 @@ const _startFakePlaneTracker = () => {
   topVrPresentState.planeTracker = planeTracker;
 };
 
-const _prepare = () => Promise.resolve();/*Promise.all([
-  (() => {
-    if (!process.env['DISPLAY']) {
-      process.env['DISPLAY'] = ':0.0';
-    }
-  })(),
-  (() => {
-    let rootPath = null;
-    let runtimePath = null;
-    const platform = os.platform();
-    if (platform === 'win32') {
-      rootPath = path.join(os.homedir(), 'AppData', 'Local', 'openvr');
-      runtimePath = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\SteamVR';
-    } else if (platform === 'darwin') {
-      rootPath = path.join('/Users/', os.userInfo().username, '/Library/Application Support/OpenVR/.openvr');
-      runtimePath = path.join(__dirname, '/node_modules/native-openvr-deps/bin/osx64');
-    } else if (platform === 'linux') {
-      rootPath = path.join(os.userInfo().homedir, '.config/openvr');
-      runtimePath = path.join(__dirname, '..', 'node_modules', 'native-openvr-deps/bin/linux64');
-    }
+this.bootstrapped = true;
 
-    if (rootPath !== null) {
-      const openvrPathsPath = path.join(rootPath, 'openvrpaths.vrpath');
+  },
+  load(u) {
+    this.bootstrap();
 
-      return new Promise((accept, reject) => {
-        fs.lstat(openvrPathsPath, (err, stats) => {
-          if (err) {
-            if (err.code === 'ENOENT') {
-              mkdirp(rootPath, err => {
-                if (!err) {
-                  const jsonString = JSON.stringify({
-                    "config" : [ rootPath ],
-                    "external_drivers" : null,
-                    "jsonid" : "vrpathreg",
-                    "log" : [ rootPath ],
-                    "runtime" : [
-                       runtimePath,
-                     ],
-                    "version" : 1
-                  }, null, 2);
-                  fs.writeFile(openvrPathsPath, jsonString, err => {
-                    if (!err) {
-                      accept();
-                    } else {
-                      reject(err);
-                    }
-                  });
-                } else if (err.code === 'EACCES') {
-                  accept();
-                } else {
-                  reject(err);
-                }
-              });
-            } else if (err.code === 'EACCES') {
-              accept();
-            } else {
-              reject(err);
-            }
-          } else {
-            accept();
-          }
-        });
-      });
-    } else {
-      return Promise.resolve();
-    }
-  })(),
-  new Promise((accept, reject) => {
-    mkdirp(dataPath, err => {
-      if (!err) {
-        accept();
-      } else {
-        reject(err);
-      }
-    });
-  }),
-]); */
-
-const realityTabsUrl = path.join('..', 'examples', 'realitytabs.html');
-const _start = () => {
-  let {url: u} = args;
-  if (!u && args.home) {
-    u = realityTabsUrl;
-  }
-  if (u) {
-    if (u === '.') {
-      console.warn('NOTE: You ran `exokit . <url>`\n(Did you mean to run `node . <url>` or `exokit <url>` instead?)')
-    }
-    u = u.replace(/^exokit:/, '');
-    if (args.tab) {
-      u = `${realityTabsUrl}?t=${encodeURIComponent(u)}`
-    }
-    const replacements = (() => {
+    const replacements = [];/* (() => {
       const result = {};
       for (let i = 0; i < args.replace.length; i++) {
         const replaceArg = args.replace[i];
@@ -920,121 +744,20 @@ const _start = () => {
         }
       }
       return result;
-    })();
-    const _onnavigate = href => {
-      core.load(href, {
-        dataPath,
-        args,
+    })(); */
+    const _onnavigate = u => {
+      core.load(u, {
+        dataPath: null,
+        args: GlobalContext.args,
         replacements,
         onnavigate: _onnavigate,
-        onrequest: handleRequest,
-        onpointerlock: handlePointerLock,
-        onhapticpulse: handleHapticPulse,
-        onpaymentrequest: handlePaymentRequest,
+        onrequest: GlobalContext.handleRequest,
+        onpointerlock: GlobalContext.handlePointerLock,
+        onhapticpulse: GlobalContext.handleHapticPulse,
+        onpaymentrequest: GlobalContext.handlePaymentRequest,
       });
     };
     _onnavigate(u);
-  } else {
-    const _onnavigate = href => {
-      window = null;
-
-      core.load(href, {
-        dataPath,
-      }, {
-        onnavigate: _onnavigate,
-        onrequest: handleRequest,
-        onpointerlock: handlePointerLock,
-        onhapticpulse: handleHapticPulse,
-        onpaymentrequest: handlePaymentRequest,
-      })
-        .then(newWindow => {
-          window = newWindow;
-        })
-        .catch(err => {
-          console.warn(err.stack);
-        });
-    };
-    let window = core.make('', {
-      dataPath,
-      args,
-      onnavigate: _onnavigate,
-      onrequest: handleRequest,
-      onpointerlock: handlePointerLock,
-      onhapticpulse: handleHapticPulse,
-      onpaymentrequest: handlePaymentRequest,
-    });
-
-    const prompt = '[x] ';
-
-    const replEval = async (cmd, context, filename, callback) => {
-      cmd = cmd.slice(0, -1); // remove trailing \n
-
-      let result, err;
-      let match;
-
-      if (/^[a-z]+:\/\//.test(cmd)) {
-        cmd = `window.location.href = ${JSON.stringify(cmd)};`;
-      } else if (/^\s*<(?:\!\-*)?[a-z]/i.test(cmd)) {
-        cmd = `(() => {
-          const e = window.document.createElement('div');
-          e.innerHTML = ${JSON.stringify(cmd)};
-          if (e.childNodes.length === 0) {
-            return window._ = undefined;
-          } else if (e.childNodes.length === 1) {
-            return window._ = e.childNodes[0];
-          } else {
-            return window._ = e.childNodes;
-          }
-        })();`;
-      } else if (match = cmd.match(/^\s*(?:const|var|let)?\s*([a-z][a-z0-9]*)\s*=\s*(<(?:\!\-*)?[a-z].*)$/im)) {
-        const name = match[1];
-        const src = match[2];
-        cmd = `(() => {
-          const name = ${JSON.stringify(name)};
-          const e = window.document.createElement('div');
-          e.innerHTML = ${JSON.stringify(src)};
-          if (e.childNodes.length === 0) {
-            return window[name] = window._ = undefined;
-          } else if (e.childNodes.length === 1) {
-            return window[name] = window._ = e.childNodes[0];
-          } else {
-            return window[name] = window._ = e.childNodes;
-          }
-        })();`;
-      }
-      try {
-        result = await window.runRepl(cmd);
-      } catch(e) {
-        err = e;
-      }
-
-      if (!err) {
-        if (result !== undefined) {
-          r.setPrompt(prompt);
-        }
-      } else {
-        if (err.name === 'SyntaxError') {
-          err = new repl.Recoverable(err);
-        }
-      }
-
-      GlobalContext.commands.push(cmd);
-
-      callback(err, {[util.inspect.custom]() { return result; }});
-    };
-    const r = repl.start({
-      prompt,
-      eval: replEval,
-    });
-    r.on('exit', () => {
-      process.exit();
-    });
-  }
+  },
 };
-
-_prepare()
-  .then(() => _start())
-  .catch(err => {
-    console.warn(err.stack);
-    process.exit(1);
-  });
+export default window.exokit;
