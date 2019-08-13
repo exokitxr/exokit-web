@@ -167,7 +167,8 @@ const _makeWindow = (options = {}, handlers = {}) => {
     },
   });
   window.id = id;
-  window.framebuffer = null;
+  window.loaded = false;
+  // window.framebuffer = null;
   // window.phase = 0; // XXX
   // window.rendered = false;
   // window.promise = null;
@@ -198,10 +199,10 @@ const _makeWindow = (options = {}, handlers = {}) => {
     req.keypath.push(id);
     options.onrequest && options.onrequest(req);
   });
-  window.addEventListener('framebuffer', e => {
+  /* window.addEventListener('framebuffer', e => {
     const {detail: framebuffer} = e;
     window.framebuffer = framebuffer;
-  });
+  }); */
   window.addEventListener('pointerLock', e => {
     options.onpointerlock && options.onpointerlock(e.detail);
   });
@@ -211,9 +212,14 @@ const _makeWindow = (options = {}, handlers = {}) => {
   window.addEventListener('paymentRequest', e => {
     options.onpaymentrequest && options.onpaymentrequest(e.detail);
   });
-  window.addEventListener('error', err => {
-    console.warn(err.stack);
+  window.addEventListener('load', () => {
+    window.loaded = true;
+  }, {
+    once: true,
   });
+  /* window.addEventListener('error', err => {
+    console.warn(err.stack);
+  }); */
   window.destroy = (destroy => function() {
     GlobalContext.windows.splice(GlobalContext.windows.indexOf(window), 1);
     const ks = Object.keys(window.queue);
