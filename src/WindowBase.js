@@ -419,8 +419,8 @@ const _oninitmessage = e => {
             e[k] = event[k];
           }
           if (target === 'input') {
-            for (let i = 0; i < GlobalContext.contexts.length; i++) {
-              GlobalContext.contexts[i].canvas.dispatchEvent(e);
+            if (GlobalContext.contexts.length > 0) {
+              GlobalContext.contexts[0].canvas.dispatchEvent(e);
             }
           } else if (target === 'document') {
             document.dispatchEvent(e);
