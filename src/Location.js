@@ -65,7 +65,7 @@ class Location extends EventTarget {
     this._url.href = u;
   }
   update() {
-    this.dispatchEvent(new CustomEvemt('update', {
+    this.dispatchEvent(new CustomEvent('update', {
       detail: {
         href: this.href,
       },
