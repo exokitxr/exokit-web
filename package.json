@@ -2,7 +2,7 @@
   "name": "exokit-web",
   "version": "0.0.1",
   "description": "",
-  "main": "iframe-worker.js",
+  "main": "index.js",
   "dependencies": {
     "@rgrove/parse-xml": "^2.0.1",
     "css": "^2.2.4",
