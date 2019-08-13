@@ -2331,10 +2331,19 @@ class HTMLIFrameElement extends HTMLSrcableElement {
               });
               this.contentWindow.document = this.contentDocument;
 
-              Promise.resolve().then(() => {
+              this.contentWindow.addEventListener('load', () => {
                 this.readyState = 'complete';
 
                 this.dispatchEvent(new CustomEvent('load'));
+
+                cb();
+              });
+              this.contentWindow.addEventListener('error', err => {
+                this.readyState = 'complete';
+
+                this.dispatchEvent(new ErrorEvent('error', {
+                  error: err,
+                }));
 
                 cb();
               });

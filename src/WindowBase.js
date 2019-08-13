@@ -317,20 +317,33 @@ const _oninitmessage = e => {
   const messageQueue = [];
   const _onmessageQueue = e => {
     messageQueue.push(e);
+  };
+  self.addEventListener('message', _onmessageQueue);
+  self.addEventListener('bootstrap', e => {
+    const {detail: {error}} = e;
 
-    self.addEventListener('bootstrap', () => {
-      self.removeEventListener('message', _onmessageQueue);
+    self.removeEventListener('message', _onmessageQueue);
+
+    if (!error) {
+      self._postMessage({
+        method: 'load',
+      });
+
       self.addEventListener('message', _onmessageHandle);
-
       for (let i = 0; i < messageQueue.length; i++) {
         self.dispatchEvent(messageQueue[i]);
       }
-      messageQueue.length = 0;
-    }, {
-      once: true,
-    });
-  };
-  self.addEventListener('message', _onmessageQueue);
+    } else {
+      self._postMessage({
+        method: 'error',
+        error,
+      });
+    }
+
+    messageQueue.length = 0;
+  }, {
+    once: true,
+  });
   const _onmessageHandle = e => {
     const {data: m} = e;
     // console.log('got event', e);

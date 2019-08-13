@@ -972,7 +972,7 @@ const _fetchText = src => fetch(src)
     frame,
     layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
   }, frame ? [frame.color, frame.depth] : undefined);
-  const _collectRenders = () => windows.map(_makeRenderChild).concat([_renderLocal]);
+  const _collectRenders = () => windows.filter(window => window.loaded).map(_makeRenderChild).concat([_renderLocal]);
   const _render = (frame, layered) => new Promise((accept, reject) => {
     const renders = _collectRenders();
     const _recurse = i => {
@@ -1151,7 +1151,17 @@ const _fetchText = src => fetch(src)
   window.document.hidden = options.hidden || false;
   window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
 })(self).then(() => {
-  window.dispatchEvent(new CustomEvent('bootstrap'));
+  self.dispatchEvent(new CustomEvent('bootstrap', {
+    detail: {
+      error: null,
+    },
+  }));
+}).catch(err => {
+  self.dispatchEvent(new CustomEvent('bootstrap', {
+    detail: {
+      error: err,
+    },
+  }));
 });
 
 self.onrunasync = req => {

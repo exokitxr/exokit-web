@@ -52,6 +52,17 @@ class WorkerVm extends EventTarget {
           this.dispatchEvent(e);
           break;
         }
+        case 'load': {
+          this.dispatchEvent(new CustomEvent('load'));
+          break;
+        }
+        case 'error': {
+          const {error} = m;
+          this.dispatchEvent(new ErrorEvent('error', {
+            error,
+          }));
+          break;
+        }
         default: {
           throw new Error(`worker got unknown message: '${JSON.stringify(m)}'`);
           break;
@@ -59,6 +70,9 @@ class WorkerVm extends EventTarget {
       }
     };
     worker.addEventListener('message', _message);
+    worker.addEventListener('load', () => {
+      this.dispatchEvent(new CustomEvent('load'));
+    });
     worker.addEventListener('error', err => {
       this.dispatchEvent(new ErrorEvent({
         error: err,
@@ -128,6 +142,7 @@ class WorkerVm extends EventTarget {
   destroy() {
     this.worker.terminate();
     this.worker.cleanup();
+    this.worker = null;
   }
 
   get onmessage() {
@@ -187,12 +202,12 @@ const _makeWindow = (options = {}, handlers = {}) => {
   }); */
   window.addEventListener('navigate', ({href}) => {
     window.destroy()
-      .then(() => {
+      // .then(() => {
         options.onnavigate && options.onnavigate(href);
-      })
+      /* })
       .catch(err => {
         console.warn(err.stack);
-      });
+      }); */
   });
   window.addEventListener('request', e => {
     const {detail: req} = e;
@@ -221,7 +236,9 @@ const _makeWindow = (options = {}, handlers = {}) => {
     console.warn(err.stack);
   }); */
   window.destroy = (destroy => function() {
+    destroy.apply(this, arguments);
     GlobalContext.windows.splice(GlobalContext.windows.indexOf(window), 1);
+
     const ks = Object.keys(window.queue);
     if (ks.length > 0) {
       const err = new Error('cancel request: window destroyed');
@@ -232,7 +249,7 @@ const _makeWindow = (options = {}, handlers = {}) => {
     }
     window.queue = null;
 
-    return Promise.resolve();
+    // return Promise.resolve();
   })(window.destroy);
   
   GlobalContext.windows.push(window);
