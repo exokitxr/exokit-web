@@ -9,10 +9,10 @@ body {
   margin: 0;
   overflow: hidden;
 }
-body.loaded {
+body.entered {
   background-color: #000;
 }
-body.loaded #form, body:not(.loaded) canvas {
+body:not(.loaded) #form, body.entered #form, body:not(.entered) canvas {
   display: none;
 }
 canvas {
@@ -29,15 +29,37 @@ canvas {
     <script type=module>
       import exokit from './src/index.js';
 
-      const input = document.getElementById('input');
       const form = document.getElementById('form');
+      const input = document.getElementById('input');
+      let childWindow = null;
+
+      const _check = () => {
+        const match = window.location.hash.match(/^#!(.*)$/);
+        if (match) {
+          document.body.classList.add('entered');
+
+          childWindow = exokit.load(decodeURIComponent(match[1]));
+        } else {
+          document.body.classList.remove('entered');
+
+          if (childWindow) {
+            childWindow.destroy();
+            childWindow = null;
+          }
+        }
+      };
+      _check();
+
       form.addEventListener('submit', e => {
         e.preventDefault();
 
-        document.body.classList.add('loaded');
-
-        exokit.load(input.value);
+        window.location.hash = `#!${encodeURIComponent(input.value)}`;
       });
+      window.addEventListener('popstate', () => {
+        _check();
+      });
+
+      document.body.classList.add('loaded');
     </script>
   </body>
 </html>

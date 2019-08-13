@@ -334,7 +334,7 @@ const _handleRequestImmediate = req => {
 
   const _respond = (error, result) => {
     const windowId = keypath.pop();
-    const window = windows.find(window => window.id === windowId);
+    const window = windows.find(win => win.id === windowId);
     if (window) {
       window.runAsync({
         method: 'response',
@@ -343,7 +343,7 @@ const _handleRequestImmediate = req => {
         result,
       });
     } else {
-      console.warn('cannot find window to respond request to', windowId, windows.map(window => window.id));
+      console.warn('cannot find window to respond request to', windowId, windows.map(win => win.id));
     }
   };
 
@@ -429,14 +429,14 @@ const _waitHandleRequest = ({type, keypath}) => {
   }
 
   const windowId = keypath.pop();
-  const window = windows.find(window => window.id === windowId);
+  const window = windows.find(win => win.id === windowId);
   if (window) {
     window.runAsync({
       method: 'response',
       keypath,
     });
   } else {
-    console.warn('cannot find window to respond request to', windowId, windows.map(window => window.id));
+    console.warn('cannot find window to respond request to', windowId, windows.map(win => win.id));
   }
 };
 const handlePointerLock = () => {
@@ -481,8 +481,8 @@ const _startTopRenderLoop = () => {
   }; */
   // const TIMESTAMP_FRAMES = 100;
   // let lastFrameTime = Date.now();
-  let frame = null;
-  const canvases = [];
+  // let frame = null;
+  // const canvases = [];
 
   /* if (nativeBindings.nativeWindow.pollEvents) {
     setInterval(() => {
@@ -615,7 +615,7 @@ const _startTopRenderLoop = () => {
       _deriveGamepadData(xrState.eye);
     }
   };
-  const _tickAnimationFrame = window => window.runAsync({
+  const _tickAnimationFrame = win => win.runAsync({
     method: 'tickAnimationFrame',
     layered: true,
   })
@@ -626,21 +626,18 @@ const _startTopRenderLoop = () => {
       return Promise.resolve([]);
     })
     .then(newFrame => {
-      frame = newFrame;
+      win.frame = newFrame;
     });
-  const _tickAnimationFrames = () => Promise.all(windows.map(_tickAnimationFrame));
+  const _tickAnimationFrames = () => Promise.all(windows.filter(win => win.loaded).map(_tickAnimationFrame));
   const _submitFrame = async () => {
-    if (topVrPresentState.hmdType) {
-      // _blitXrFbo();
-    }
-    let index = 0;
-    if (frame) {
-      const {color, depth} = frame;
-      {
-        const j = index++;
-        let canvas = canvases[j];
+    for (let i = 0; i < windows.length; i++) {
+      const win = windows[i];
+
+      if (win.frame) {
+        const {color, depth} = win.frame;
+        let {canvas} = win;
         if (!canvas) {
-          canvas = canvases[j] = document.createElement('canvas');
+          canvas = win.canvas = document.createElement('canvas');
           canvas.ctx = canvas.getContext('bitmaprenderer');
           document.body.appendChild(canvas);
         }
@@ -652,8 +649,7 @@ const _startTopRenderLoop = () => {
         }
         canvas.ctx.transferFromImageBitmap(color);
         // color.close();
-      }
-      {
+
         /* const j = index++;
         let canvas = canvases[j];
         if (!canvas) {
@@ -669,9 +665,10 @@ const _startTopRenderLoop = () => {
         }
         canvas.ctx.transferFromImageBitmap(depth); */
         depth.close();
+
+        win.frame = null;
       }
     }
-    frame = null;
   };
   let animating = false;
   const _topRenderLoop = async () => {
@@ -751,7 +748,7 @@ this.bootstrapped = true;
         this.window.destroy();
         this.window = null;
       }
-      this.window = core.load(u, {
+      const window = core.load(u, {
         dataPath: null,
         args: GlobalContext.args,
         replacements,
@@ -761,6 +758,22 @@ this.bootstrapped = true;
         onhapticpulse: GlobalContext.handleHapticPulse,
         onpaymentrequest: GlobalContext.handlePaymentRequest,
       });
+      window.frame = null;
+      window.canvas = null;
+      window.destroy = (destroy => function() {
+        if (window.frame) {
+          window.frame.color.close();
+          window.frame.depth.close();
+          window.frame = null;
+        }
+        if (window.canvas) {
+          document.body.removeChild(window.canvas);
+          window.canvas = null;
+        }
+
+        return destroy.apply(this, arguments);
+      })(window.destroy);
+      this.window = window;
     };
     _onnavigate(u);
   },
