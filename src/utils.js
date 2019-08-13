@@ -16,7 +16,9 @@ function _getBaseUrl(u, currentBaseUrl = '') {
     result = currentBaseUrl;
   } else {
     if (!/^[a-z]+:/.test(u)) {
-      u = location.href + '/' + u;
+      let {href} = location;
+      href = href.replace(/#.*$/, '');
+      u = href + '/' + u;
     }
     const parsedUrl = new URL(u);
     parsedUrl.pathname = parsedUrl.pathname.replace(/\/[^\/]*\.[^\/]*$/, '') || '/';
