@@ -2152,7 +2152,6 @@ class HTMLIFrameElement extends HTMLSrcableElement {
     this.contentWindow = null;
     this.contentDocument = null;
     // this.live = true;
-    this.epoch = 0;
 
     this.browser = null;
     this.onconsole = null;
@@ -2180,8 +2179,6 @@ class HTMLIFrameElement extends HTMLSrcableElement {
 
     this.addEventListener('attribute', ({detail: {name, value}}) => {
       if (name === 'src' && value) {
-        const localEpoch = ++this.epoch;
-
         this.readyState = 'loading';
 
         _resetContentWindowDocument();
@@ -2275,79 +2272,65 @@ class HTMLIFrameElement extends HTMLSrcableElement {
                 throw new Error('iframe owner document does not have a WebGL context');
               }
             } else {
-              const res = await this.ownerDocument.defaultView.fetch(url);
-              if (this.epoch !== localEpoch) {
-                return;
-              }
-              if (res.status >= 200 && res.status < 300) {
-                const htmlString = await res.text();
-                if (this.epoch !== localEpoch) {
-                  return;
-                }
+              const parentWindow = this.ownerDocument.defaultView;
+              const options = parentWindow[symbols.optionsSymbol];
 
-                const parentWindow = this.ownerDocument.defaultView;
-                const options = parentWindow[symbols.optionsSymbol];
+              url = _normalizeUrl(url, options.baseUrl);
+              const parent = {};
+              const top = parentWindow === parentWindow.top ? parent : {};
+              this.contentWindow = _makeWindow({
+                url,
+                baseUrl: url,
+                args: options.args,
+                dataPath: options.dataPath,
+                replacements: options.replacements,
+                parent,
+                top,
+                hidden: this.d === 3,
+                xrOffsetBuffer: this.xrOffset._buffer,
+                onnavigate: (href) => {
+                  this.readyState = null;
 
-                url = _normalizeUrl(url, options.baseUrl);
-                const parent = {};
-                const top = parentWindow === parentWindow.top ? parent : {};
-                this.contentWindow = _makeWindow({
-                  url,
-                  baseUrl: url,
-                  args: options.args,
-                  dataPath: options.dataPath,
-                  replacements: options.replacements,
-                  parent,
-                  top,
-                  htmlString,
-                  hidden: this.d === 3,
-                  xrOffsetBuffer: this.xrOffset._buffer,
-                  onnavigate: (href) => {
-                    this.readyState = null;
-
-                    this.setAttribute('src', href);
-                  },
-                  onrequest(req) {
-                    self._postMessage(req);
-                  },
-                  onpointerlock(event) {
+                  this.setAttribute('src', href);
+                },
+                onrequest(req) {
+                  self._postMessage(req);
+                },
+                onpointerlock(event) {
+                  self._postMessage({
+                    method: 'emit',
+                    type: 'pointerLock',
+                    event,
+                  });
+                },
+                onhapticpulse(event) {
+                  self._postMessage({
+                    method: 'emit',
+                    type: 'hapticPulse',
+                    event,
+                  });
+                },
+                onpaymentrequest(event) {
+                  if (window.listeners('paymentrequest').length > 0) {
+                    window.dispatchEvent(new CustomEvent('paymentrequest', {
+                      detail: event,
+                    }));
+                  } else {
                     self._postMessage({
                       method: 'emit',
-                      type: 'pointerLock',
+                      type: 'paymentRequest',
                       event,
                     });
-                  },
-                  onhapticpulse(event) {
-                    self._postMessage({
-                      method: 'emit',
-                      type: 'hapticPulse',
-                      event,
-                    });
-                  },
-                  onpaymentrequest(event) {
-                    if (window.listeners('paymentrequest').length > 0) {
-                      window.dispatchEvent(new CustomEvent('paymentrequest', {
-                        detail: event,
-                      }));
-                    } else {
-                      self._postMessage({
-                        method: 'emit',
-                        type: 'paymentRequest',
-                        event,
-                      });
-                    }
-                  },
-                });
-                this.contentWindow.document = this.contentDocument;
+                  }
+                },
+              });
+              this.contentWindow.document = this.contentDocument;
 
-                this.readyState = 'complete';
+              this.readyState = 'complete';
 
-                this.dispatchEvent(new CustomEvent('load'));
+              this.dispatchEvent(new CustomEvent('load'));
 
-                cb();
-              } else {
-                throw new Error('iframe src got invalid status code: ' + res.status + ' : ' + url);
-              }
+              cb();
             }
           })()
             .catch(err => {

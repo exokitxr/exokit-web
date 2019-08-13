@@ -314,9 +314,26 @@ const _oninitmessage = e => {
   }
   global.importScripts = importScripts; */
 
-  self.addEventListener('message', e => {
+  const messageQueue = [];
+  const _onmessageQueue = e => {
+    messageQueue.push(e);
+
+    self.addEventListener('bootstrap', () => {
+      self.removeEventListener('message', _onmessageQueue);
+      self.addEventListener('message', _onmessageHandle);
+
+      for (let i = 0; i < messageQueue.length; i++) {
+        self.dispatchEvent(messageQueue[i]);
+      }
+      messageQueue.length = 0;
+    }, {
+      once: true,
+    });
+  };
+  self.addEventListener('message', _onmessageQueue);
+  const _onmessageHandle = e => {
     const {data: m} = e;
-    // console.log('got event', e, e.data);
+    // console.log('got event', e);
     switch (m.method) {
       case 'runRepl': {
         let result, err;
@@ -432,7 +449,7 @@ const _oninitmessage = e => {
       }
       default: throw new Error(`invalid method: ${JSON.stringify(m.method)}`);
     }
-  });
+  };
 
   // run init module
 

@@ -370,8 +370,18 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   rafCbs.sort((a, b) => (b ? b[symbols.prioritySymbol] : 0) - (a ? a[symbols.prioritySymbol] : 0));
   return id;
 };
+const _fetchText = src => fetch(src)
+  .then(res => {
+    if (res.status >= 200 && res.status < 300) {
+      return res.text();
+    } else {
+      return Promise.reject(new Error('fetch got invalid status code: ' + res.status + ' : ' + src));
+    }
+  });
 
-(window => {
+(async window => {
+  const htmlString = await _fetchText(options.url);
+
   /* for (const k in EventEmitter.prototype) {
     window[k] = EventEmitter.prototype[k];
   }
@@ -1131,16 +1141,18 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
   window.vrdisplayactivate = () => {
     const displays = window.navigator.getVRDisplaysSync();
     if (displays.length > 0 && (!window[symbols.optionsSymbol].args || ['all', 'webvr'].includes(window[symbols.optionsSymbol].args.xr)) && !displays[0].isPresenting) {
-      const e = new window.Event('vrdisplayactivate');
+      const e = new CustomEvent('vrdisplayactivate');
       e.display = displays[0];
       window.dispatchEvent(e);
     }
   };
 
-  window.document = _parseDocument(options.htmlString, window);
+  window.document = _parseDocument(htmlString, window);
   window.document.hidden = options.hidden || false;
   window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
-})(self);
+})(self).then(() => {
+  window.dispatchEvent(new CustomEvent('bootstrap'));
+});
 
 self.onrunasync = req => {
   const {method} = req;

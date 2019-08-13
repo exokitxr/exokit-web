@@ -11,6 +11,7 @@ import GlobalContext from './GlobalContext.js';
 
 window.exokit = {
   bootstrapped: false,
+  window: null,
   bootstrap() {
 
 if (this.bootstrapped) {
@@ -746,7 +747,11 @@ this.bootstrapped = true;
       return result;
     })(); */
     const _onnavigate = u => {
-      core.load(u, {
+      if (this.window) {
+        this.window.destroy();
+        this.window = null;
+      }
+      this.window = core.load(u, {
         dataPath: null,
         args: GlobalContext.args,
         replacements,
