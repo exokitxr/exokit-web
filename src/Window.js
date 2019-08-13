@@ -1188,7 +1188,7 @@ self.onrunasync = req => {
         return Promise.resolve();
       }
     }
-    case 'keyEvent': {
+    /* case 'keyEvent': {
       const {event} = request;
       switch (event.type) {
         case 'keydown':
@@ -1205,7 +1205,7 @@ self.onrunasync = req => {
         }
       }
       break;
-    }
+    } */
     case 'meshes': {
       for (let i = 0; i < windows.length; i++) {
         windows[i].runAsync(req);
