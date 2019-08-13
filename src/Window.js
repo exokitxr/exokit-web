@@ -900,15 +900,6 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
     }
   });
 
-  Object.defineProperty(window, 'layers', { // XXX make this only happen on XR
-    get() {
-      return vrPresentState.layers;
-    },
-    set(layers) {
-      vrPresentState.layers = layers;
-    },
-  });
-
   const rafCbs = [];
   window[symbols.rafCbsSymbol] = rafCbs;
   /* const timeouts = [null];
@@ -959,8 +950,7 @@ const _makeRequestAnimationFrame = window => (fn, priority = 0) => {
       const context = contexts[i];
       context._exokitClearEnabled && context._exokitClearEnabled(true);
     }
-    const layerCanvas = layered ? vrPresentState.layers.find(layer => layer.constructor.name === 'HTMLCanvasElement' && layer._context && ['WebGLRenderingContext', 'WebGL2RenderingContext'].includes(layer._context.constructor.name)) : null;
-    const layerContext = layerCanvas && layerCanvas._context;
+    const layerContext = layered ? vrPresentState.glContext : null;
     if (layerContext) {
       if (frame) {
         layerContext._exokitPutFrame(frame);
