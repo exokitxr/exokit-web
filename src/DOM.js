@@ -361,7 +361,7 @@ const _setAttributeRaw = (el, name, value) => {
     } else {
       const oldValue = attr.value;
       attr.value = value;
-      el.dispatchEvent(new CustomEvent('attribute', {detail: {name, value: oldValue}}));
+      el.dispatchEvent(new CustomEvent('attribute', {detail: {name, value, oldValue}}));
     }
   }
 };
