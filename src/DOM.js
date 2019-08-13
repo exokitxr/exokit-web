@@ -2158,6 +2158,10 @@ class HTMLIFrameElement extends HTMLSrcableElement {
     this.xrOffset = new XRRigidTransform();
 
     const _resetContentWindowDocument = () => {
+      if (this.contentWindow) {
+        this.contentWindow.destroy();
+      }
+
       const contentDocument = {
         /* _emit() {},
         on() {},
@@ -2173,6 +2177,7 @@ class HTMLIFrameElement extends HTMLSrcableElement {
       };
       this.contentWindow = {
         document: contentDocument,
+        destroy() {},
       };
       this.contentDocument = contentDocument;
     };
