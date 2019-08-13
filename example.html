@@ -7,8 +7,8 @@
 
     async function _startFakeVrDisplay() {
       fakeXrDisplay = new FakeXRDisplay();
-      fakeXrDisplay.width = 1280;
-      fakeXrDisplay.height = 1024;
+      fakeXrDisplay.width = window.innerWidth*2;
+      fakeXrDisplay.height = window.innerHeight;
       fakeXrDisplay.position.copy(camera.position);
       fakeXrDisplay.pushUpdate();
       fakeXrDisplay.enable();
