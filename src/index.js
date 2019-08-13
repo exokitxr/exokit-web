@@ -906,12 +906,8 @@ const _start = () => {
     }
     u = u.replace(/^exokit:/, '');
     if (args.tab) {
-      // u = u.replace(/\/?$/, '/');
       u = `${realityTabsUrl}?t=${encodeURIComponent(u)}`
     }
-    /* if (u && !/^[a-z]+:/.test(u)) {
-      u = window.location.protocol + '//' + u;
-    } */
     const replacements = (() => {
       const result = {};
       for (let i = 0; i < args.replace.length; i++) {
@@ -1030,86 +1026,15 @@ const _start = () => {
       prompt,
       eval: replEval,
     });
-    // replHistory(r, path.join(dataPath, '.repl_history'));
     r.on('exit', () => {
       process.exit();
     });
   }
 };
 
-// if (require.main === module) {
-  /* if (!nativeBindings.nativePlatform) { // not a mobile platform
-    require(path.join(__dirname, 'bugsnag'));
-    require('fault-zone').registerHandler((stack, stackLen) => {
-      const message = new Buffer(stack, 0, stackLen).toString('utf8');
-      console.warn(message);
-      child_process.execFileSync(process.argv[0], [
-        path.join(__dirname, 'bugsnag.js'),
-      ], {
-        input: message,
-      });
-      process.exit(1);
-    });
-  } */
-  /* if (args.log) {
-    const RedirectOutput = require('redirect-output').default;
-    new RedirectOutput({
-      flags: 'a',
-    }).write(path.join(dataPath, 'log.txt'));
-  } */
-
-  /* const _logStack = err => {
-    console.warn(err);
-  };
-  process.on('uncaughtException', _logStack);
-  process.on('unhandledRejection', _logStack); */
-
-  if (args.version) {
-    console.log(version);
-    // process.exit(0);
-  }
-  if (args.size) {
-    const match = args.size.match(/^([0-9]+)x([0-9]+)$/);
-    if (match) {
-      const w = parseInt(match[1], 10);
-      const h = parseInt(match[2], 10);
-      if (w > 0 && h > 0) {
-        xrState.metrics[0] = w;
-        xrState.metrics[1] = h;
-      }
-    }
-  }
-  /* if (args.frame || args.minimalFrame) {
-    nativeBindings.nativeGl = (OldWebGLRenderingContext => {
-      function WebGLRenderingContext() {
-        const result = Reflect.construct(OldWebGLRenderingContext, arguments);
-        for (const k in result) {
-          if (typeof result[k] === 'function') {
-            result[k] = (old => function() {
-              if (GlobalContext.args.frame) {
-                console.log(k, arguments);
-              } else if (GlobalContext.args.minimalFrame) {
-                console.log(k);
-              }
-              return old.apply(this, arguments);
-            })(result[k]);
-          }
-        }
-        return result;
-      }
-      for (const k in OldWebGLRenderingContext) {
-        WebGLRenderingContext[k] = OldWebGLRenderingContext[k];
-      }
-      return WebGLRenderingContext;
-    })(nativeBindings.nativeGl);
-  } */
-
-  _prepare()
-    .then(() => _start())
-    .catch(err => {
-      console.warn(err.stack);
-      process.exit(1);
-    });
-// }
-
-// module.exports = core;
+_prepare()
+  .then(() => _start())
+  .catch(err => {
+    console.warn(err.stack);
+    process.exit(1);
+  });
