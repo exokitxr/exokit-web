@@ -7,8 +7,13 @@
     <style>
 body {
   margin: 0;
-  background-color: #000;
   overflow: hidden;
+}
+body.loaded {
+  background-color: #000;
+}
+body.loaded #form, body:not(.loaded) canvas {
+  display: none;
 }
 canvas {
   width: 100vw;
@@ -17,10 +22,22 @@ canvas {
     </style>
   </head>
   <body>
+    <form id=form>
+      <input type=text value="example.html" id=input>
+      <input type=submit>
+    </form>
     <script type=module>
       import exokit from './src/index.js';
 
-      exokit.load('example.html');
+      const input = document.getElementById('input');
+      const form = document.getElementById('form');
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        document.body.classList.add('loaded');
+
+        exokit.load(input.value);
+      });
     </script>
   </body>
 </html>
