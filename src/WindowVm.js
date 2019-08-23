@@ -2,11 +2,13 @@ import {EventTarget} from './Event.js';
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
 
+const workerScriptPath = `${import.meta.url.replace(/[^\/]+$/, '')}WindowBase.js`;
+
 class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
-    const worker = new Worker('/src/WindowBase.js', {
+    const worker = new Worker(workerScriptPath, {
       type: 'module',
     });
     worker.postMessage({
