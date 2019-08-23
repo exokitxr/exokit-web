@@ -2918,9 +2918,7 @@ class HTMLImageElement extends HTMLSrcableElement {
                   return Promise.reject(new Error(`img src got invalid status code (url: ${JSON.stringify(src)}, code: ${res.status})`));
                 }
               })
-              .then(blob => createImageBitmap(blob, {
-                imageOrientation: 'flipY',
-              }))
+              .then(blob => createImageBitmap(blob))
               .then(imageBitmap => {
                 this.imageBitmap = imageBitmap;
 

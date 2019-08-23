@@ -162,23 +162,33 @@ class WebGLRenderingContext {
     }
   }
   texImage2D(a, b, c, d, e, f, g, h, i) {
+    const {backingContext: gl} = this;
+
     if (f && f.constructor && f.constructor.name === 'HTMLImageElement') {
       f = f.imageBitmap;
-      return this.backingContext.texImage2D(a, b, c, d, e, f);
+      const canvas = new OffscreenCanvas(f.width, f.height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(f, 0, 0);
+      f = canvas;
+      return gl.texImage2D(a, b, c, d, e, f);
     }
     if (i && i.constructor && i.constructor.name === 'HTMLImageElement') {
       i = i.imageBitmap;
-      return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
+      const canvas = new OffscreenCanvas(i.width, i.height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(i, 0, 0);
+      i = canvas;
+      return gl.texImage2D(a, b, c, d, e, f, g, h, i);
     }
     if (f && f.constructor && f.constructor.name === 'HTMLCanvasElement') {
       f = f._context.backingCanvas;
-      return this.backingContext.texImage2D(a, b, c, d, e, f);
+      return gl.texImage2D(a, b, c, d, e, f);
     }
     if (i && i.constructor && i.constructor.name === 'HTMLCanvasElement') {
       i = i._context.backingCanvas;
-      return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
+      return gl.texImage2D(a, b, c, d, e, f, g, h, i);
     }
-    return this.backingContext.texImage2D.apply(this.backingContext, arguments);
+    return gl.texImage2D.apply(this.backingContext, arguments);
   }
   resize(w, h) {
     this.backingCanvas.width = w;
