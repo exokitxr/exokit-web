@@ -59,7 +59,7 @@ class CanvasRenderingContext2D {
       a = a.imageBitmap;
     }
     if (a && a.constructor && a.constructor.name === 'HTMLCanvasElement') {
-      a = a.backingCanvas;
+      a = a._context.backingCanvas;
     }
 
     if (i !== undefined) {
@@ -171,11 +171,11 @@ class WebGLRenderingContext {
       return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
     }
     if (f && f.constructor && f.constructor.name === 'HTMLCanvasElement') {
-      f = f.backingCanvas;
+      f = f._context.backingCanvas;
       return this.backingContext.texImage2D(a, b, c, d, e, f);
     }
     if (i && i.constructor && i.constructor.name === 'HTMLCanvasElement') {
-      i = i.backingCanvas;
+      i = i._context.backingCanvas;
       return this.backingContext.texImage2D(a, b, c, d, e, f, g, h, i);
     }
     return this.backingContext.texImage2D.apply(this.backingContext, arguments);
