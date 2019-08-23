@@ -23,6 +23,12 @@ const _inherit = (a, b) => {
     if (!(k in a.prototype)) {
       const o = Object.getOwnPropertyDescriptor(b.prototype, k);
       if (o.get) {
+        o.get = (get => function() {
+          return get.apply(this.backingContext, arguments);
+        })(o.get);
+        o.set = (set => function() {
+          return set.apply(this.backingContext, arguments);
+        })(o.set);
         Object.defineProperty(a.prototype, k, o);
       } else {
         const {value} = o;
