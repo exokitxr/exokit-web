@@ -306,6 +306,9 @@ window.addEventListener('drop', e => {
     });
   break; */
 });
+window.addEventListener('contextmenu', e => {
+  e.preventDefault();
+});
 
 const topVrPresentState = {
   hmdType: null,
