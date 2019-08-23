@@ -797,7 +797,7 @@ const _fetchText = src => fetch(src)
       image = image.imageBitmap;
     }
     if (image && image.constructor && image.constructor.name === 'HTMLCanvasElement') {
-      image = image.backingCanvas;
+      image = image._context.backingCanvas;
     }
     if (options !== undefined) {
       return createImageBitmapOld(image, sx, sy, sw, sh, options);
