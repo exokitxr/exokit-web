@@ -449,8 +449,12 @@ const _oninitmessage = e => {
             e[k] = event[k];
           }
           if (target === 'input') {
-            if (GlobalContext.contexts.length > 0) {
-              GlobalContext.contexts[0].canvas.dispatchEvent(e);
+            for (let i = 0; i < GlobalContext.contexts.length; i++) {
+              const {canvas} = GlobalContext.contexts[i];
+              if (canvas.parentNode) {
+                canvas.dispatchEvent(e);
+                break;
+              }
             }
           } else if (target === 'document') {
             document.dispatchEvent(e);
