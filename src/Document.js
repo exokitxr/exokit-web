@@ -2,7 +2,7 @@
 
 import parse5 from '../modules/parse5.js';
 
-import * as DOM from './DOM.js';
+// import * as DOM from './DOM.js';
 import {EventTarget} from './Event.js';
 import GlobalContext from './GlobalContext.js';
 // import nativeBindings from './native-bindings.js';
@@ -131,17 +131,6 @@ function initDocument (document, window) {
       if (!pointerLockElement) {
         document[symbols.pointerLockElementSymbol] = null;
       }
-      /* const pointerLockElement = document[symbols.pointerLockElementSymbol];
-
-      if (!pointerLockElement) {
-        self._postMessage({
-          method: 'emit',
-          type: 'pointerLock',
-          event: {
-            pointerLockElement: true,
-          },
-        });
-      } */
     });
     document.addEventListener('fullscreenchange', () => {
       // console.log('got fullscreen change', e);

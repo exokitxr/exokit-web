@@ -22,44 +22,8 @@ canvas {
     </style>
   </head>
   <body>
-    <form id=form>
-      <input type=text value="example.html" id=input>
-      <input type=submit>
-    </form>
-    <script type=module>
-      import exokit from './src/index.js';
-
-      const form = document.getElementById('form');
-      const input = document.getElementById('input');
-      let childWindow = null;
-
-      const _check = () => {
-        const match = window.location.hash.match(/^#!(.*)$/);
-        if (match) {
-          document.body.classList.add('entered');
-
-          childWindow = exokit.load(decodeURIComponent(match[1]));
-        } else {
-          document.body.classList.remove('entered');
-
-          if (childWindow) {
-            childWindow.destroy();
-            childWindow = null;
-          }
-        }
-      };
-      _check();
-
-      form.addEventListener('submit', e => {
-        e.preventDefault();
-
-        window.location.hash = `#!${encodeURIComponent(input.value)}`;
-      });
-      window.addEventListener('popstate', () => {
-        _check();
-      });
-
-      document.body.classList.add('loaded');
+    <script>
+      
     </script>
   </body>
 </html>

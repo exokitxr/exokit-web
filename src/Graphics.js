@@ -1,9 +1,11 @@
 import GlobalContext from './GlobalContext.js';
 
-const {OffscreenCanvasRenderingContext2D, WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
+/* const {OffscreenCanvasRenderingContext2D, WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
 self.OffscreenCanvasRenderingContext2D = undefined;
 self.WebGLRenderingContext = undefined;
-self.WebGL2RenderingContext = undefined;
+self.WebGL2RenderingContext = undefined; */
+
+const {WebGLRenderingContext, WebGL2RenderingContext, CanvasRenderingContext2D} = self;
 
 const VERTS = Float32Array.from([
    1.0,  1.0,
@@ -13,7 +15,7 @@ const VERTS = Float32Array.from([
    1.0, -1.0,
    1.0,  1.0,
 ]);
-const _inherit = (a, b) => {
+/* const _inherit = (a, b) => {
   for (const k in b) {
     if (!(k in a)) {
       a[k] = b[k];
@@ -38,65 +40,50 @@ const _inherit = (a, b) => {
       }
     }
   }
-};
+}; */
 
-class CanvasRenderingContext2D {
-  constructor(canvasEl) {
-    const {width, height} = canvasEl;
+HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init) {
+  if (/^(?:experimental-)?webgl2?$/.test(type)) {
+    const canvas = this;
+    const offscreenCanvas = new OffscreenCanvas(this.width, this.height);
+    const gl = offscreenCanvas.getContext(type, init);
+    gl.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
+    /* Object.defineProperty(offscreenCanvas, 'ownerDocument', {
+      get() {
+        return canvas.ownerDocument;
+      },
+    });
+    Object.defineProperty(offscreenCanvas, 'parentNode', {
+      get() {
+        return canvas.parentNode;
+      },
+    });
+    Object.defineProperty(gl, 'canvas', {
+      get() {
+        return offscreenCanvas;
+      },
+    }); */
+    Object.defineProperty(gl, 'canvas', {
+      get() {
+        return canvas;
+      },
+    });
+    canvas.getContext = function getContext() {
+      return gl;
+    };
+    canvas.transferToImageBitmap = function transferToImageBitmap() {
+      return offscreenCanvas.transferToImageBitmap();
+    };
 
-    this._canvas = canvasEl;
-    this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
-    this.backingCanvas = new OffscreenCanvas(width, height);
-    this.backingContext = this.backingCanvas.getContext('2d');
-
-    GlobalContext.contexts.push(this);
-  }
-  get canvas() {
-    return this._canvas;
-  }
-  drawImage(a, b, c, d, e, f, g, h, i) {
-    if (a && a.constructor && a.constructor.name === 'HTMLImageElement') {
-      a = a.imageBitmap;
-    }
-    if (a && a.constructor && a.constructor.name === 'HTMLCanvasElement') {
-      a = a._context.backingCanvas;
-    }
-
-    if (i !== undefined) {
-      return this.backingContext.backingContext(a, b, c, d, e, f, g, h, i);
-    }
-    if (e !== undefined) {
-      return this.backingContext.drawImage(a, b, c, d, e);
-    }
-    return this.backingContext.drawImage(a, b, c);
-  }
-  resize(w, h) {
-    this.backingCanvas.width = w;
-    this.backingCanvas.height = h;
-  }
-  destroy() {
-    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
-  }
-}
-_inherit(CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D);
-
-class WebGLRenderingContext {
-  constructor(canvasEl) {
-    const {width, height} = canvasEl;
-
-    this._canvas = canvasEl;
-    this.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
-    this.backingCanvas = new OffscreenCanvas(width, height);
-    const gl = this.backingCanvas.getContext('webgl');
-    this.backingContext = gl;
+    GlobalContext.contexts.push(gl);
 
     const extensions = {
       WEBGL_depth_texture: gl.getExtension('WEBGL_depth_texture'),
       OES_vertex_array_object: gl.getExtension('OES_vertex_array_object'),
       EXT_frag_depth: gl.getExtension('EXT_frag_depth'),
     };
-    this.extensions = extensions;
-    this.defaultFramebuffer = {
+    gl._extensions = extensions;
+    const defaultFramebuffer = {
       fbo: gl.createFramebuffer(),
       colorTex: gl.createTexture(),
       depthTex: gl.createTexture(),
@@ -111,461 +98,436 @@ class WebGLRenderingContext {
       decodeColorTex: null,
       decodeDepthTex: null,
     };
-    this.enabled = {
+    gl._defaultFramebuffer = defaultFramebuffer;
+    const enabled = {
       clear: false,
     };
+    gl._enabled = enabled;
 
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.vao);
+    extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.vao);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
+    gl._exokitBindFramebuffer(gl.FRAMEBUFFER, defaultFramebuffer.fbo);
 
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
+    gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.colorTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.defaultFramebuffer.colorTex, 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, defaultFramebuffer.colorTex, 0);
 
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
+    gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.depthTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.defaultFramebuffer.depthTex, 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.width, this.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, defaultFramebuffer.depthTex, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
 
-    // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    new MutationObserver(() => {
+      offscreenCanvas.width = this.width;
+      offscreenCanvas.height = this.height;
 
-    GlobalContext.contexts.push(this);
-  }
-  get canvas() {
-    return this._canvas;
-  }
-  getParameter(key) {
-    const {backingContext: gl} = this;
-    let result = gl.getParameter(key);
-    // if ((key === gl.FRAMEBUFFER_BINDING || key === gl.READ_FRAMEBUFFER_BINDING || key === gl.DRAW_FRAMEBUFFER_BINDING) && result === this.defaultFramebuffer.fbo) {
-    if (key === gl.FRAMEBUFFER_BINDING && result === this.defaultFramebuffer.fbo) {
-      result = null;
-    }
-    return result;
-  }
-  bindFramebuffer(target, fbo) {
-    if (!fbo) {
-      fbo = this.defaultFramebuffer.fbo;
-    }
-  }
-  clear(flags) {
-    if (this.enabled.clear) {
-      this.backingContext.clear(flags);
-    }
-  }
-  texImage2D(a, b, c, d, e, f, g, h, i) {
-    const {backingContext: gl} = this;
+      // const oldFramebuffer = gl._exokitGetParameter(gl.FRAMEBUFFER_BINDING);
+      const oldTexture = gl._exokitGetParameter(gl.TEXTURE_BINDING_2D);
 
-    if (f && f.constructor && f.constructor.name === 'HTMLImageElement') {
-      f = f.imageBitmap;
-      const canvas = new OffscreenCanvas(f.width, f.height);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(f, 0, 0);
-      f = canvas;
-      return gl.texImage2D(a, b, c, d, e, f);
-    }
-    if (i && i.constructor && i.constructor.name === 'HTMLImageElement') {
-      i = i.imageBitmap;
-      const canvas = new OffscreenCanvas(i.width, i.height);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(i, 0, 0);
-      i = canvas;
-      return gl.texImage2D(a, b, c, d, e, f, g, h, i);
-    }
-    if (f && f.constructor && f.constructor.name === 'HTMLCanvasElement') {
-      f = f._context.backingCanvas;
-      return gl.texImage2D(a, b, c, d, e, f);
-    }
-    if (i && i.constructor && i.constructor.name === 'HTMLCanvasElement') {
-      i = i._context.backingCanvas;
-      return gl.texImage2D(a, b, c, d, e, f, g, h, i);
-    }
-    return gl.texImage2D.apply(this.backingContext, arguments);
-  }
-  resize(w, h) {
-    this.backingCanvas.width = w;
-    this.backingCanvas.height = h;
+      gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.colorTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.depthTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.width, this.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
 
-    const {backingContext: gl, extensions} = this;
-    // const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
-
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, this.backingCanvas.width, this.backingCanvas.height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
-
-    if (this.defaultFramebuffer.decodeColorTex) {
-      gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    }
-    if (this.defaultFramebuffer.decodeDepthTex) {
-      gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    }
-
-    // gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
-
-    // gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
-    gl.bindTexture(gl.TEXTURE_2D, oldTexture);
-  }
-  _exokitEnsureShaders() {
-    const {backingContext: gl, extensions} = this;
-    if (!this.defaultFramebuffer.buffer) {
-      this.defaultFramebuffer.buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, VERTS, gl.STATIC_DRAW);
-
-      {
-        this.defaultFramebuffer.colorVao = extensions.OES_vertex_array_object.createVertexArrayOES();
-        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.colorVao);
-
-        this.defaultFramebuffer.colorProgram = gl.createProgram();
-
-        {
-          const vsh = `
-            attribute vec2 position;
-            varying vec2 vTexCoords;
-            const vec2 scale = vec2(0.5, 0.5);
-            void main() {
-              vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
-              // vTexCoords.y = 1.0 - vTexCoords.y;
-              gl_Position = vec4(position, 0.0, 1.0);
-            }
-          `;
-          const shader = gl.createShader(gl.VERTEX_SHADER);
-          gl.shaderSource(shader, vsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log(`Error compiling vertex shader:`);
-            console.log(gl.getShaderInfoLog(shader));
-          }
-          gl.attachShader(this.defaultFramebuffer.colorProgram, shader);
-        }
-        {
-          const fsh = `
-            precision highp float;
-            uniform sampler2D uColorTex;
-            varying vec2 vTexCoords;
-            void main() {
-              gl_FragColor = texture2D(uColorTex, vTexCoords);
-            }
-          `;
-          const shader = gl.createShader(gl.FRAGMENT_SHADER);
-          gl.shaderSource(shader, fsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log('Error compiling fragment shader:');
-            console.log(gl.getShaderInfoLog(shader));
-          }
-          gl.attachShader(this.defaultFramebuffer.colorProgram, shader);
-        }
-
-        gl.linkProgram(this.defaultFramebuffer.colorProgram);
-        if (!gl.getProgramParameter(this.defaultFramebuffer.colorProgram, gl.LINK_STATUS)) {
-          console.log('Error linking shader program:');
-          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.colorProgram));
-        }
-        gl.useProgram(this.defaultFramebuffer.colorProgram)
-
-        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.colorProgram, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.colorProgram, 'uColorTex');
-        gl.uniform1i(uColorTexLocation, 0);
+      if (defaultFramebuffer.decodeColorTex) {
+        gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeColorTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      }
+      if (defaultFramebuffer.decodeDepthTex) {
+        gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeDepthTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       }
 
-      {
-        this.defaultFramebuffer.depthVao = extensions.OES_vertex_array_object.createVertexArrayOES();
-        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthVao);
+      gl.bindTexture(gl.TEXTURE_2D, oldTexture);
+    }).observe(this, {
+      attributes: true,
+      attributeFilter: ['width', 'height'],
+    });
 
-        this.defaultFramebuffer.depthProgram = gl.createProgram();
+    return gl;
+  } else {
+    return oldGetContext.call(this, type, init);
+  }
+})(HTMLCanvasElement.prototype.getContext);
+Object.defineProperty(HTMLCanvasElement.prototype, 'clientWidth', {
+  get() {
+    return this.width;
+  },
+});
+Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
+  get() {
+    return this.height;
+  },
+});
 
-        {
-          const vsh = `
-            attribute vec2 position;
-            varying vec2 vTexCoords;
-            const vec2 scale = vec2(0.5, 0.5);
-            void main() {
-              vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
-              // vTexCoords.y = 1.0 - vTexCoords.y;
-              gl_Position = vec4(position, 0.0, 1.0);
-            }
-          `;
-          const shader = gl.createShader(gl.VERTEX_SHADER);
-          gl.shaderSource(shader, vsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log(`Error compiling vertex shader:`);
-            console.log(gl.getShaderInfoLog(shader));
-          }
-          gl.attachShader(this.defaultFramebuffer.depthProgram, shader);
-        }
-        {
-          const fsh = `
-            precision highp float;
-            uniform sampler2D uColorTex;
-            varying vec2 vTexCoords;
-            vec4 EncodeFloatRGBA(float v) {
-              vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
-              enc = fract(enc);
-              enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
-              return enc;
-            }
-            void main() {
-              gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
-            }
-          `;
-          const shader = gl.createShader(gl.FRAGMENT_SHADER);
-          gl.shaderSource(shader, fsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log('Error compiling fragment shader:');
-            console.log(gl.getShaderInfoLog(shader));
-          }
-          gl.attachShader(this.defaultFramebuffer.depthProgram, shader);
-        }
+WebGLRenderingContext.prototype._exokitGetParameter = (oldGetParameter => function _exokitGetParameter() {
+  return oldGetParameter.apply(this, arguments);
+})(WebGLRenderingContext.prototype.getParameter);
+WebGLRenderingContext.prototype.getParameter = (oldGetParameter => function getParameter(key) {
+  let result = oldGetParameter.call(this, key);
+  // if ((key === this.FRAMEBUFFER_BINDING || key === this.READ_FRAMEBUFFER_BINDING || key === this.DRAW_FRAMEBUFFER_BINDING) && result === this._defaultFramebuffer.fbo) {
+  if (key === this.FRAMEBUFFER_BINDING && result === this._defaultFramebuffer.fbo) {
+    result = null;
+  }
+  return result;
+})(WebGLRenderingContext.prototype.getParameter);
+WebGLRenderingContext.prototype._exokitBindFramebuffer = (oldBindframebuffer => function _exokitBindFramebuffer() {
+  oldBindframebuffer.apply(this, arguments);
+})(WebGLRenderingContext.prototype.bindFramebuffer);
+WebGLRenderingContext.prototype.bindFramebuffer = (oldBindframebuffer => function bindFramebuffer(target, fbo) {
+  if (!fbo) {
+    fbo = this._defaultFramebuffer.fbo;
+  }
+  oldBindframebuffer.call(this, target, fbo);
+})(WebGLRenderingContext.prototype.bindFramebuffer);
+WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
+  if (this._enabled.clear) {
+    oldClear.apply(this, arguments);
+  }
+})(WebGLRenderingContext.prototype.clear);
+WebGLRenderingContext.prototype._exokitEnsureShaders = function _exokitEnsureShaders() {
+  const gl = this;
+  const {_extensions: extensions, _defaultFramebuffer: defaultFramebuffer} = this;
 
-        gl.linkProgram(this.defaultFramebuffer.depthProgram);
-        if (!gl.getProgramParameter(this.defaultFramebuffer.depthProgram, gl.LINK_STATUS)) {
-          console.log('Error linking shader program:');
-          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.depthProgram));
-        }
-        gl.useProgram(this.defaultFramebuffer.depthProgram)
+  if (!defaultFramebuffer.buffer) {
+    defaultFramebuffer.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, defaultFramebuffer.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, VERTS, gl.STATIC_DRAW);
 
-        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.depthProgram, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    {
+      defaultFramebuffer.colorVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+      extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.colorVao);
 
-        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.depthProgram, 'uColorTex');
-        gl.uniform1i(uColorTexLocation, 0);
-      }
+      defaultFramebuffer.colorProgram = gl.createProgram();
 
       {
-        this.defaultFramebuffer.decodeVao = extensions.OES_vertex_array_object.createVertexArrayOES();
-        extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.decodeVao);
-
-        this.defaultFramebuffer.decodeProgram = gl.createProgram();
-
-        {
-          const vsh = `
-            attribute vec2 position;
-            varying vec2 vTexCoords;
-            const vec2 scale = vec2(0.5, 0.5);
-            void main() {
-              vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
-              vTexCoords.y = 1.0 - vTexCoords.y;
-              gl_Position = vec4(position, 0.0, 1.0);
-            }
-          `;
-          const shader = gl.createShader(gl.VERTEX_SHADER);
-          gl.shaderSource(shader, vsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log(`Error compiling vertex shader:`);
-            console.log(gl.getShaderInfoLog(shader));
+        const vsh = `
+          attribute vec2 position;
+          varying vec2 vTexCoords;
+          const vec2 scale = vec2(0.5, 0.5);
+          void main() {
+            vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
+            // vTexCoords.y = 1.0 - vTexCoords.y;
+            gl_Position = vec4(position, 0.0, 1.0);
           }
-          gl.attachShader(this.defaultFramebuffer.decodeProgram, shader);
+        `;
+        const shader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(shader, vsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log(`Error compiling vertex shader:`);
+          console.log(gl.getShaderInfoLog(shader));
         }
-        {
-          const fsh = `
-            #extension GL_EXT_frag_depth : enable
-            precision highp float;
-            uniform sampler2D uColorTex;
-            uniform sampler2D uDepthTex;
-            varying vec2 vTexCoords;
-            float DecodeFloatRGBA(vec4 rgba) {
-              return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
-            }
-            void main() {
-              gl_FragColor = texture2D(uColorTex, vTexCoords);
-              float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
-              if (depth == 0.0) {
-                depth = 1.0;
-              }
-              gl_FragDepthEXT = depth;
-            }
-          `;
-          const shader = gl.createShader(gl.FRAGMENT_SHADER);
-          gl.shaderSource(shader, fsh);
-          gl.compileShader(shader);
-          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.log('Error compiling fragment shader:');
-            console.log(gl.getShaderInfoLog(shader));
-          }
-          gl.attachShader(this.defaultFramebuffer.decodeProgram, shader);
-        }
-
-        gl.linkProgram(this.defaultFramebuffer.decodeProgram);
-        if (!gl.getProgramParameter(this.defaultFramebuffer.decodeProgram, gl.LINK_STATUS)) {
-          console.log('Error linking shader program:');
-          console.log(gl.getProgramInfoLog(this.defaultFramebuffer.decodeProgram));
-        }
-        gl.useProgram(this.defaultFramebuffer.decodeProgram)
-
-        const positionLocation = gl.getAttribLocation(this.defaultFramebuffer.decodeProgram, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-        const uColorTexLocation = gl.getUniformLocation(this.defaultFramebuffer.decodeProgram, 'uColorTex');
-        gl.uniform1i(uColorTexLocation, 0);
-
-        const uDepthTexLocation = gl.getUniformLocation(this.defaultFramebuffer.decodeProgram, 'uDepthTex');
-        gl.uniform1i(uDepthTexLocation, 1);
-
-        this.defaultFramebuffer.decodeColorTex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-        this.defaultFramebuffer.decodeDepthTex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.backingCanvas.width, this.backingCanvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.attachShader(defaultFramebuffer.colorProgram, shader);
       }
-    }
-  }
-  _exokitGetFrame() {
-    const {backingCanvas: canvas, backingContext: gl, extensions} = this;
-    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-    const oldActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-    gl.activeTexture(gl.TEXTURE0);
-    const oldTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
-    const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
-    const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-    const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-    const oldViewport = gl.getParameter(gl.VIEWPORT);
-    const oldScissorTest = gl.getParameter(gl.SCISSOR_TEST);
+      {
+        const fsh = `
+          precision highp float;
+          uniform sampler2D uColorTex;
+          varying vec2 vTexCoords;
+          void main() {
+            gl_FragColor = texture2D(uColorTex, vTexCoords);
+          }
+        `;
+        const shader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(shader, fsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log('Error compiling fragment shader:');
+          console.log(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(defaultFramebuffer.colorProgram, shader);
+      }
 
-    this._exokitEnsureShaders();
+      gl.linkProgram(defaultFramebuffer.colorProgram);
+      if (!gl.getProgramParameter(defaultFramebuffer.colorProgram, gl.LINK_STATUS)) {
+        console.log('Error linking shader program:');
+        console.log(gl.getProgramInfoLog(defaultFramebuffer.colorProgram));
+      }
+      gl.useProgram(defaultFramebuffer.colorProgram)
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.disable(gl.SCISSOR_TEST);
+      const positionLocation = gl.getAttribLocation(defaultFramebuffer.colorProgram, 'position');
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.colorVao);
-    gl.useProgram(this.defaultFramebuffer.colorProgram);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.colorTex);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    const color = canvas.transferToImageBitmap();
-
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.depthVao);
-    gl.useProgram(this.defaultFramebuffer.depthProgram);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.depthTex);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    const depth = canvas.transferToImageBitmap();
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
-    gl.bindTexture(gl.TEXTURE_2D, oldTexture);
-    gl.activeTexture(oldActiveTexture);
-    extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
-    gl.useProgram(oldProgram);
-    gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
-    if (oldScissorTest) {
-      gl.enable(gl.SCISSOR_TEST);
+      const uColorTexLocation = gl.getUniformLocation(defaultFramebuffer.colorProgram, 'uColorTex');
+      gl.uniform1i(uColorTexLocation, 0);
     }
 
-    return {
-      color,
-      depth,
-    };
-  }
-  _exokitPutFrame(frame) {
-    const {color, depth} = frame;
+    {
+      defaultFramebuffer.depthVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+      extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.depthVao);
 
-    const {backingCanvas: canvas, backingContext: gl, extensions} = this;
-    const oldFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-    const oldActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-    gl.activeTexture(gl.TEXTURE0);
-    const oldTexture0 = gl.getParameter(gl.TEXTURE_BINDING_2D);
-    gl.activeTexture(gl.TEXTURE1);
-    const oldTexture1 = gl.getParameter(gl.TEXTURE_BINDING_2D);
-    gl.activeTexture(gl.TEXTURE0);
-    const oldVao = gl.getParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
-    const oldBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-    const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-    const oldViewport = gl.getParameter(gl.VIEWPORT);
-    const oldScissorTest = gl.getParameter(gl.SCISSOR_TEST);
+      defaultFramebuffer.depthProgram = gl.createProgram();
 
-    this._exokitEnsureShaders();
+      {
+        const vsh = `
+          attribute vec2 position;
+          varying vec2 vTexCoords;
+          const vec2 scale = vec2(0.5, 0.5);
+          void main() {
+            vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
+            // vTexCoords.y = 1.0 - vTexCoords.y;
+            gl_Position = vec4(position, 0.0, 1.0);
+          }
+        `;
+        const shader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(shader, vsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log(`Error compiling vertex shader:`);
+          console.log(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(defaultFramebuffer.depthProgram, shader);
+      }
+      {
+        const fsh = `
+          precision highp float;
+          uniform sampler2D uColorTex;
+          varying vec2 vTexCoords;
+          vec4 EncodeFloatRGBA(float v) {
+            vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+            enc = fract(enc);
+            enc -= enc.yzww * vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);
+            return enc;
+          }
+          void main() {
+            gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
+          }
+        `;
+        const shader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(shader, fsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log('Error compiling fragment shader:');
+          console.log(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(defaultFramebuffer.depthProgram, shader);
+      }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.defaultFramebuffer.fbo);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.defaultFramebuffer.buffer);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.disable(gl.SCISSOR_TEST);
+      gl.linkProgram(defaultFramebuffer.depthProgram);
+      if (!gl.getProgramParameter(defaultFramebuffer.depthProgram, gl.LINK_STATUS)) {
+        console.log('Error linking shader program:');
+        console.log(gl.getProgramInfoLog(defaultFramebuffer.depthProgram));
+      }
+      gl.useProgram(defaultFramebuffer.depthProgram)
 
-    extensions.OES_vertex_array_object.bindVertexArrayOES(this.defaultFramebuffer.decodeVao);
-    gl.useProgram(this.defaultFramebuffer.decodeProgram);
+      const positionLocation = gl.getAttribLocation(defaultFramebuffer.depthProgram, 'position');
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    this._exokitClear();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeColorTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultFramebuffer.decodeDepthTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, depth);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+      const uColorTexLocation = gl.getUniformLocation(defaultFramebuffer.depthProgram, 'uColorTex');
+      gl.uniform1i(uColorTexLocation, 0);
+    }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, oldTexture0);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, oldTexture1);
-    gl.activeTexture(oldActiveTexture);
-    extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
-    gl.useProgram(oldProgram);
-    gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
-    if (oldScissorTest) {
-      gl.enable(gl.SCISSOR_TEST);
+    {
+      defaultFramebuffer.decodeVao = extensions.OES_vertex_array_object.createVertexArrayOES();
+      extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.decodeVao);
+
+      defaultFramebuffer.decodeProgram = gl.createProgram();
+
+      {
+        const vsh = `
+          attribute vec2 position;
+          varying vec2 vTexCoords;
+          const vec2 scale = vec2(0.5, 0.5);
+          void main() {
+            vTexCoords = position * scale + scale; // scale vertex attribute to [0,1] range
+            vTexCoords.y = 1.0 - vTexCoords.y;
+            gl_Position = vec4(position, 0.0, 1.0);
+          }
+        `;
+        const shader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(shader, vsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log(`Error compiling vertex shader:`);
+          console.log(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(defaultFramebuffer.decodeProgram, shader);
+      }
+      {
+        const fsh = `
+          #extension GL_EXT_frag_depth : enable
+          precision highp float;
+          uniform sampler2D uColorTex;
+          uniform sampler2D uDepthTex;
+          varying vec2 vTexCoords;
+          float DecodeFloatRGBA(vec4 rgba) {
+            return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+          }
+          void main() {
+            gl_FragColor = texture2D(uColorTex, vTexCoords);
+            float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
+            if (depth == 0.0) {
+              depth = 1.0;
+            }
+            gl_FragDepthEXT = depth;
+          }
+        `;
+        const shader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(shader, fsh);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.log('Error compiling fragment shader:');
+          console.log(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(defaultFramebuffer.decodeProgram, shader);
+      }
+
+      gl.linkProgram(defaultFramebuffer.decodeProgram);
+      if (!gl.getProgramParameter(defaultFramebuffer.decodeProgram, gl.LINK_STATUS)) {
+        console.log('Error linking shader program:');
+        console.log(gl.getProgramInfoLog(defaultFramebuffer.decodeProgram));
+      }
+      gl.useProgram(defaultFramebuffer.decodeProgram)
+
+      const positionLocation = gl.getAttribLocation(defaultFramebuffer.decodeProgram, 'position');
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      const uColorTexLocation = gl.getUniformLocation(defaultFramebuffer.decodeProgram, 'uColorTex');
+      gl.uniform1i(uColorTexLocation, 0);
+
+      const uDepthTexLocation = gl.getUniformLocation(defaultFramebuffer.decodeProgram, 'uDepthTex');
+      gl.uniform1i(uDepthTexLocation, 1);
+
+      defaultFramebuffer.decodeColorTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeColorTex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.canvas.width, this.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+      defaultFramebuffer.decodeDepthTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeDepthTex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.canvas.width, this.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     }
   }
-  _exokitClearEnabled(enabled) {
-    this.enabled.clear = enabled;
-  }
-  _exokitClear() {
-    const {backingContext: gl} = this;
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);
-  }
-  destroy() {
-    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
-  }
-}
-_inherit(WebGLRenderingContext, OffscreenWebGLRenderingContext);
+};
+WebGLRenderingContext.prototype._exokitGetFrame = function _exokitGetFrame() {
+  const gl = this;
+  const {canvas, _defaultFramebuffer: defaultFramebuffer, _extensions: extensions} = this;
 
-class WebGL2RenderingContext extends WebGLRenderingContext {
-  constructor(canvasEl) {
-    super(canvasEl);
+  const oldFramebuffer = gl._exokitGetParameter(gl.FRAMEBUFFER_BINDING);
+  const oldActiveTexture = gl._exokitGetParameter(gl.ACTIVE_TEXTURE);
+  gl.activeTexture(gl.TEXTURE0);
+  const oldTexture = gl._exokitGetParameter(gl.TEXTURE_BINDING_2D);
+  const oldVao = gl._exokitGetParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
+  const oldBuffer = gl._exokitGetParameter(gl.ARRAY_BUFFER_BINDING);
+  const oldProgram = gl._exokitGetParameter(gl.CURRENT_PROGRAM);
+  const oldViewport = gl._exokitGetParameter(gl.VIEWPORT);
+  const oldScissorTest = gl._exokitGetParameter(gl.SCISSOR_TEST);
 
-    throw new Error('webgl2 not implemented');
+  this._exokitEnsureShaders();
+
+  gl._exokitBindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.bindBuffer(gl.ARRAY_BUFFER, defaultFramebuffer.buffer);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.disable(gl.SCISSOR_TEST);
+
+  extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.colorVao);
+  gl.useProgram(defaultFramebuffer.colorProgram);
+  gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.colorTex);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  const color = canvas.transferToImageBitmap();
+
+  extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.depthVao);
+  gl.useProgram(defaultFramebuffer.depthProgram);
+  gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.depthTex);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  const depth = canvas.transferToImageBitmap();
+
+  gl._exokitBindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
+  gl.bindTexture(gl.TEXTURE_2D, oldTexture);
+  gl.activeTexture(oldActiveTexture);
+  extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
+  gl.useProgram(oldProgram);
+  gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
+  if (oldScissorTest) {
+    gl.enable(gl.SCISSOR_TEST);
   }
-  resize(w, h) {
-    this.backingCanvas.width = w;
-    this.backingCanvas.height = h;
+
+  return {
+    color,
+    depth,
+  };
+};
+WebGLRenderingContext.prototype._exokitPutFrame = function _exokitPutFrame(frame) {
+  const {color, depth} = frame;
+
+  const gl = this;
+  const {canvas, _extensions: extensions} = this;
+
+  const oldFramebuffer = gl._exokitGetParameter(gl.FRAMEBUFFER_BINDING);
+  const oldActiveTexture = gl._exokitGetParameter(gl.ACTIVE_TEXTURE);
+  gl.activeTexture(gl.TEXTURE0);
+  const oldTexture0 = gl._exokitGetParameter(gl.TEXTURE_BINDING_2D);
+  gl.activeTexture(gl.TEXTURE1);
+  const oldTexture1 = gl._exokitGetParameter(gl.TEXTURE_BINDING_2D);
+  gl.activeTexture(gl.TEXTURE0);
+  const oldVao = gl._exokitGetParameter(extensions.OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES);
+  const oldBuffer = gl._exokitGetParameter(gl.ARRAY_BUFFER_BINDING);
+  const oldProgram = gl._exokitGetParameter(gl.CURRENT_PROGRAM);
+  const oldViewport = gl._exokitGetParameter(gl.VIEWPORT);
+  const oldScissorTest = gl._exokitGetParameter(gl.SCISSOR_TEST);
+
+  this._exokitEnsureShaders();
+
+  gl._exokitBindFramebuffer(gl.FRAMEBUFFER, defaultFramebuffer.fbo);
+  gl.bindBuffer(gl.ARRAY_BUFFER, defaultFramebuffer.buffer);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.disable(gl.SCISSOR_TEST);
+
+  extensions.OES_vertex_array_object.bindVertexArrayOES(defaultFramebuffer.decodeVao);
+  gl.useProgram(defaultFramebuffer.decodeProgram);
+
+  this._exokitClear();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeColorTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, color);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, defaultFramebuffer.decodeDepthTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, depth);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  gl._exokitBindFramebuffer(gl.FRAMEBUFFER, oldFramebuffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, oldBuffer);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, oldTexture0);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, oldTexture1);
+  gl.activeTexture(oldActiveTexture);
+  extensions.OES_vertex_array_object.bindVertexArrayOES(oldVao);
+  gl.useProgram(oldProgram);
+  gl.viewport(oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);
+  if (oldScissorTest) {
+    gl.enable(gl.SCISSOR_TEST);
   }
-  destroy() {
-    GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
-  }
-}
-_inherit(WebGL2RenderingContext, OffscreenWebGL2RenderingContext);
+};
+WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
+  this._enabled.clear = enabled;
+};
+WebGLRenderingContext.prototype._exokitClear = function _exokitClear() {
+  this.clear(this.COLOR_BUFFER_BIT|this.DEPTH_BUFFER_BIT|this.STENCIL_BUFFER_BIT);
+};
+WebGLRenderingContext.prototype.destroy = function destroy() {
+  GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
+};
 
 export {
-  CanvasRenderingContext2D,
   WebGLRenderingContext,
   WebGL2RenderingContext,
+  CanvasRenderingContext2D,
 };

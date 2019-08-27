@@ -111,7 +111,7 @@ class GamepadHapticActuator {
   }
   set type(type) {}
   pulse(value, duration) {
-    self._postMessage({
+    self._postMessageUp({
       method: 'emit',
       type: 'hapticPulse',
       event: {
@@ -282,7 +282,7 @@ class VRDisplay extends EventTarget {
     await this.onrequestpresent();
 
     const [{source: canvas}] = layers;
-    const context = canvas._context || canvas.getContext('webgl');
+    const context = canvas.getContext('webgl');
     this.onmakeswapchain(context);
 
     if (this.onvrdisplaypresentchange && !this.isPresenting) {
@@ -679,28 +679,6 @@ const _makeGlobalGamepads = () => ({
     new Gamepad('gamepad', 'left', GlobalContext.xrState.gamepads[0], new GamepadHapticActuator(0)),
     new Gamepad('gamepad', 'right', GlobalContext.xrState.gamepads[1], new GamepadHapticActuator(1)),
   ],
-  tracker: (() => {
-    const result = Array(maxNumTrackers);
-    for (let i = 0; i < result.length; i++) {
-      result[i] = new Gamepad('tracker', '', GlobalContext.xrState.gamepads[2+i], null);
-    }
-    return result;
-  })(),
-  hand: (() => {
-    const result = [
-      new Gamepad('hand', 'left', GlobalContext.xrState.hands[0], null),
-      new Gamepad('hand', 'right', GlobalContext.xrState.hands[1], null),
-    ];
-    for (let i = 0; i < result.length; i++) {
-      const handGamepad = result[i];
-      const hand = handGamepad._xrGamepad;
-
-      handGamepad.wrist = hand.wrist;
-      handGamepad.fingers = hand.fingers;
-    }
-    return result;
-  })(),
-  eye: new Gamepad('eye', '', GlobalContext.xrState.eye, null),
 });
 
 const controllerIDs = {
@@ -724,13 +702,7 @@ function getControllerID(hmdType, hand) {
 }
 function getGamepads() {
   if (GlobalContext.xrState.isPresenting[0]) {
-    let hmdType = getHMDType();
-    if (hmdType === 'openvr') {
-      const vrSystem = nativeOpenVR.GetGlobalSystem();
-      if (vrSystem && /^Knuckles/.test(vrSystem.GetModelName(0) || vrSystem.GetModelName(1))) {
-        hmdType = 'index';
-      }
-    }
+    const hmdType = getHMDType();
 
     if (!globalGamepads) {
       globalGamepads = _makeGlobalGamepads();
@@ -739,20 +711,6 @@ function getGamepads() {
 
     globalGamepads.main[0].id = getControllerID(hmdType, 'left');
     globalGamepads.main[1].id = getControllerID(hmdType, 'right');
-
-    if (hmdType === 'openvr') {
-      for (let i = 0; i < globalGamepads.tracker.length; i++) {
-        globalGamepads.tracker[i].id = getControllerID('openvr', 'tracker');
-      }
-      gamepads.push.apply(gamepads, globalGamepads.tracker);
-    }
-
-    if (GlobalContext.xrState.handTracking[0]) {
-      gamepads.push.apply(gamepads, globalGamepads.hand);
-    }
-    if (GlobalContext.xrState.eyeTracking[0]) {
-      gamepads.push(globalGamepads.eye);
-    }
 
     return gamepads;
   } else {

@@ -1,10 +1,10 @@
 // const {EventEmitter} = require('events');
-import {EventTarget} from './Event.js';
+// import {EventTarget} from './Event.js';
 import {getHMDType} from './VR.js';
 import GlobalContext from './GlobalContext.js';
 import THREE from '../lib/three-min.js';
 import symbols from './symbols.js';
-import {maxNumTrackers} from './constants.js';
+// import {maxNumTrackers} from './constants.js';
 import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 
@@ -110,40 +110,11 @@ class XRSession extends EventTarget {
 
     this._frame = new XRFrame(this);
     this._referenceSpace = new XRReferenceSpace();
-    this._gamepadInputSources = (() => {
-      const result = Array(2 + maxNumTrackers);
-      for (let i = 0; i < maxNumTrackers; i++) {
-        let hand, targetRayMode;
-        if (i === 0) {
-          hand = 'left';
-          targetRayMode = 'tracked-pointer';
-        } else if (i === 1) {
-          hand = 'right';
-          targetRayMode = 'tracked-pointer';
-        } else {
-          hand = null;
-          targetRayMode = 'tracker';
-        }
-        result[i] = new XRInputSource(hand, targetRayMode, GlobalContext.xrState.gamepads[i]);
-      }
-      return result;
-    })();
-    this._handInputSources = (() => {
-      const result = [
-        new XRInputSource('left', 'hand', GlobalContext.xrState.hands[0]),
-        new XRInputSource('right', 'hand', GlobalContext.xrState.hands[1]),
-      ];
-      for (let i = 0; i < result.length; i++) {
-        const inputSource = result[i];
-        inputSource.wrist = inputSource._xrStateGamepad.wrist;
-        inputSource.fingers = inputSource._xrStateGamepad.fingers;
-      }
-      return result;
-    })();
-    this._eyeInputSource = new XRInputSource('', 'gaze', GlobalContext.xrState.eye);
-    this._inputSources = this._gamepadInputSources
-      .concat(this._handInputSources)
-      .concat(this._eyeInputSource);
+    this._gamepadInputSources = [
+      new XRInputSource('left', 'tracked-pointer', GlobalContext.xrState.gamepads[0]),
+      new XRInputSource('right', 'tracked-pointer', GlobalContext.xrState.gamepads[1]),
+    ];
+    this._inputSources = this._gamepadInputSources;
     this._lastPresseds = [false, false];
     this._rafs = [];
     this._layers = [];
@@ -549,8 +520,8 @@ class XRInputSource {
 
 class XRRay { // non-standard
   constructor() {
-    this.origin = new GlobalContext.DOMPoint();
-    this.direction = new GlobalContext.DOMPoint(0, 0, -1);
+    this.origin = new DOMPoint();
+    this.direction = new DOMPoint(0, 0, -1);
     this.transformMatrix = Float32Array.from([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   }
 }

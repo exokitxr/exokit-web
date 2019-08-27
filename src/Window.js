@@ -1,49 +1,12 @@
-// import events from '../events-browserify.js';
-// const {EventEmitter} = events;
 import path from '../modules/path-browserify.js';
-// const fs = require('fs');
-// const http = require('http');
-// const https = require('https');
-// const os = require('os');
 import util from '../modules/util.js';
-// const {TextEncoder, TextDecoder} = util;
-// const {performance} = require('perf_hooks');
 
-import {EventTarget, KeyboardEvent, SpatialEvent} from './Event.js';
-import {
-  AudioContext,
-  AudioNode,
-  AudioBufferSourceNode,
-  OscillatorNode,
-  AudioDestinationNode,
-  AudioParam,
-  AudioListener,
-  GainNode,
-  AnalyserNode,
-  PannerNode,
-  StereoPannerNode,
-} from './Audio.js';
-import {MutationObserver} from './MutationObserver.js';
+// import {EventTarget, KeyboardEvent, SpatialEvent} from './Event.js';
+// import {MutationObserver} from './MutationObserver.js';
 import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext} from './Graphics.js';
 
-// const mkdirp = require('mkdirp');
-// const ws = require('ws');
-
-/* const {
-  RTCIceCandidate,
-  RTCPeerConnection,
-  RTCRtpTransceiver,
-  RTCSessionDescription,
-
-  RTCPeerConnectionIceEvent,
-  RTCDataChannelEvent,
-  RTCDataChannelMessageEvent,
-  RTCTrackEvent,
-} = require('./RTC/index.js'); */
-
-import LocalStorage from '../modules/window-lsm.js';
-// const indexedDB = require('fake-indexeddb');
-import parseXml from '../modules/parse-xml.js';
+// import LocalStorage from '../modules/window-lsm.js';
+// import parseXml from '../modules/parse-xml.js';
 import THREE from '../lib/three-min.js';
 import {
   VRDisplay,
@@ -54,6 +17,7 @@ import {
   Gamepad,
   GamepadButton,
   lookupHMDTypeString,
+  getGamepads,
 } from './VR.js';
 
 import {maxNumTrackers} from './constants.js';
@@ -73,8 +37,8 @@ GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 
-import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document.js';
-import {
+// import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document.js';
+/* import {
   HTMLElement,
   getBoundDOMElements,
   DOMTokenList,
@@ -84,7 +48,7 @@ import {
   DOMPoint,
   // createImageBitmap,
 } from './DOM.js';
-import History from './History.js';
+import History from './History.js'; */
 import * as XR from './XR.js';
 // const DevTools = require('./DevTools');
 import utils from './utils.js';
@@ -114,111 +78,6 @@ const vrPresentState = {
 };
 GlobalContext.vrPresentState = vrPresentState;
 
-class CustomElementRegistry {
-  constructor(window) {
-    this._window = window;
-
-    this.elements = {};
-    this.extensions = {};
-    this.elementPromises = {};
-  }
-
-  define(name, constructor, options = {}) {
-    name = name.toUpperCase();
-
-    this.elements[name] = constructor;
-    if (options.extends) {
-      this.extensions[options.extends.toUpperCase()] = name.toLowerCase();
-    }
-
-    this._window.document.traverse(el => {
-      if (el.tagName === name) {
-        this.upgrade(el, constructor);
-      }
-    });
-
-    const promises = this.elementPromises[name];
-    if (promises) {
-      for (let i = 0; i < promises.length; i++) {
-        promises[i].accept();
-      }
-      this.elementPromises[name] = null;
-    }
-  }
-  get(name) {
-    name = name.toUpperCase();
-
-    return this.elements[name];
-  }
-  whenDefined(name) {
-    name = name.toUpperCase();
-
-    if (this.elements[name]) {
-      return Promise.resolve();
-    } else {
-      let promises = this.elementPromises[name];
-      if (!promises) {
-        promises = [];
-        this.elementPromises[name] = promises;
-      }
-      const promise = new Promise((accept, reject) => {
-        promise.accept = accept;
-        promise.reject = reject;
-      });
-      promises.push(promise);
-      return promise;
-    }
-  }
-
-  upgrade(el, constructor) {
-    if (el instanceof HTMLElement) {
-      let isConnected = el.isConnected;
-      let connectHandled = false;
-      el.ownerDocument.addEventListener('domchange', () => {
-        const newConnected = el.isConnected;
-        if (newConnected && !isConnected) {
-          el.connectedCallback && el.connectedCallback();
-          isConnected = true;
-        } else if (isConnected && !newConnected) {
-          el.disconnectedCallback && el.disconnectedCallback();
-          isConnected = false;
-        }
-        connectHandled = true;
-      });
-
-      const observedAttributes = constructor.observedAttributes || [];
-      if (observedAttributes.length > 0) {
-        el.addEventListener('attribute', ({detail: {name, value, oldValue}}) => {
-          if (el.attributeChangedCallback && observedAttributes.includes(name)) {
-            el.attributeChangedCallback(name, value, oldValue);
-          }
-        });
-      }
-
-      Object.setPrototypeOf(el, constructor.prototype);
-      HTMLElement.upgradeElement = el;
-      let error = null;
-      try {
-        Object.setPrototypeOf(el, constructor.prototype);
-        Reflect.construct(constructor, []);
-      } catch(err) {
-        error = err;
-      }
-      HTMLElement.upgradeElement = null;
-
-      if (!error) {
-        if (isConnected && !connectHandled) {
-          el.connectedCallback && el.connectedCallback();
-        }
-      } else {
-        throw error;
-      }
-    } else {
-      throw new Error('cannot upgrade non-subclass of HTMLElement');
-    }
-  }
-}
-
 class PaymentRequest {
   constructor(methodData, details, options) {
     this.methodData = methodData;
@@ -231,7 +90,7 @@ class PaymentRequest {
 
     const listeners = window.listeners('paymentrequest');
     if (listeners.length > 0) {
-      self._postMessage({
+      self._postMessageUp({
         method: 'paymentRequest',
         event: {
           methodData,
@@ -242,111 +101,6 @@ class PaymentRequest {
     } else {
       throw new Error('no payment request handler');
     }
-  }
-}
-
-class MonitorManager {
-  getList() {
-    return nativeWindow.getMonitors();
-  }
-
-  select(index) {
-    nativeWindow.setMonitor(index);
-  }
-}
-
-class Screen {
-  constructor(window) {
-    this._window = window;
-  }
-
-  get top() {
-    return 0;
-  }
-  set top(top) {}
-  get left() {
-    return 0;
-  }
-  set left(left) {}
-  get width() {
-    return this._window.innerWidth;
-  }
-  set width(width) {}
-  get height() {
-    return this._window.innerHeight;
-  }
-  set height(height) {}
-  get colorDepth() {
-    return 24;
-  }
-  set colorDepth(colorDepth) {}
-  get orientation() {
-    return {
-      angle: 0,
-      type: 'landscape-primary',
-      onchange: null,
-    };
-  }
-  set orientation(orientation) {}
-
-  get pixelDepth() {
-    return this.colorDepth;
-  }
-  set pixelDepth(pixelDepth) {}
-  get availTop() {
-    return this.top;
-  }
-  set availTop(availTop) {}
-  get availLeft() {
-    return this.left;
-  }
-  set availLeft(availLeft) {}
-  get availWidth() {
-    return this.width;
-  }
-  set availWidth(availWidth) {}
-  get availHeight() {
-    return this.height;
-  }
-  set availHeight(availHeight) {}
-}
-
-class MediaRecorder extends EventTarget {
-  constructor() {
-    super();
-  }
-
-  start() {}
-
-  stop() {}
-
-  requestData() {}
-}
-
-class DataTransfer {
-  constructor({items = [], files = []} = {}) {
-    this.items = items;
-    this.files = files;
-  }
-}
-class DataTransferItem {
-  constructor(kind = 'string', type = 'text/plain', data = null) {
-    this.kind = kind;
-    this.type = type;
-    this.data = data;
-  }
-
-  getAsFile() {
-    return new Blob([this.data], {
-      type: this.type,
-    });
-  }
-
-  getAsString(callback) {
-    const {data} = this;
-    setImmediate(() => {
-      callback(data);
-    });
   }
 }
 
@@ -380,17 +134,15 @@ const _fetchText = src => fetch(src)
   });
 
 (async window => {
-  const htmlString = await _fetchText(options.url);
+  let htmlString = await _fetchText(options.url);
 
   /* for (const k in EventEmitter.prototype) {
     window[k] = EventEmitter.prototype[k];
   }
   EventEmitter.call(window); */
 
-  window.window = window;
-  // window.self = window;
-  window.parent = options.parent || window;
-  window.top = options.top || window;
+  // window.parent = options.parent || window;
+  // window.top = options.top || window;
 
   Object.defineProperty(window, 'innerWidth', {
     get() {
@@ -407,66 +159,30 @@ const _fetchText = src => fetch(src)
       return GlobalContext.xrState.devicePixelRatio[0];
     },
   });
-  window.document = null;
-  window.history = new History(location.href);
+  // window.document = null;
+  /* window.history = new History(location.href);
   window.matchMedia = media => ({
     media,
     matches: false,
+  }); */
+
+  window.navigator.getVRDisplays = async function getVRDisplays() {
+    return this.getVRDisplaysSync();
+  };
+  window.navigator.getGamepads = getGamepads;
+  const xr = new XR.XR(window);
+  Object.defineProperty(window.navigator, 'xr', {
+    get() {
+      return xr;
+    },
   });
 
-  window.navigator.getVRDisplays = function() {
-    return Promise.resolve(this.getVRDisplaysSync());
-  }
-  window.navigator.xr = new XR.XR(window);
-
   window.alert = console.log;
-  /* window.setTimeout = (setTimeout => (fn, timeout, args) => {
-    fn = fn.bind.apply(fn, [window].concat(args));
-    const id = _findFreeSlot(timeouts, 1);
-    timeouts[id] = fn;
-    fn[symbols.timeoutSymbol] = setTimeout(fn, timeout, args);
-    return id;
-  })(setTimeout);
-  window.clearTimeout = (clearTimeout => id => {
-    const fn = timeouts[id];
-    if (fn) {
-      clearTimeout(fn[symbols.timeoutSymbol]);
-      timeouts[id] = null;
-    }
-  })(clearTimeout);
-  window.setInterval = (setInterval => (fn, interval, args) => {
-    if (interval < 10) {
-      interval = 10;
-    }
-    fn = fn.bind.apply(fn, [window].concat(args));
-    const id = _findFreeSlot(intervals, 1);
-    intervals[id] = fn;
-    fn[symbols.timeoutSymbol] = setInterval(fn, interval, args);
-    return id;
-  })(setInterval);
-  window.clearInterval = (clearInterval => id => {
-    const fn = intervals[id];
-    if (fn) {
-      clearInterval(fn[symbols.timeoutSymbol]);
-      intervals[id] = null;
-    }
-  })(clearInterval); */
-  window.event = null;
-  window.localStorage = new LocalStorage();
-  window.sessionStorage = new LocalStorage();
-  // window.indexedDB = indexedDB;
-  window.screen = new Screen(window);
-  window.scrollTo = function(x = 0, y = 0) {
-    this.scrollX = x;
-    this.scrollY = y;
-  };
-  window.scrollX = 0;
-  window.scrollY = 0;
   window[symbols.optionsSymbol] = options;
   window[symbols.styleEpochSymbol] = 0;
 
   // DOM.
-  const {
+  /* const {
     Document,
     DocumentFragment,
     Range,
@@ -551,9 +267,6 @@ const _fetchText = src => fetch(src)
   window.NodeList = NodeList;
   window.HTMLCollection = HTMLCollection;
 
-  /* window.MediaStreamTrack = MediaStreamTrack;
-  window.RTCRtpReceiver = RTCRtpReceiver;
-  window.RTCRtpSender = RTCRtpSender; */
   window.MediaStream = class MediaStream {
     getAudioTracks() {
       return [];
@@ -561,7 +274,7 @@ const _fetchText = src => fetch(src)
     getVideoTracks() {
       return [];
     }
-  };
+  }; */
 
   /* window.RTCPeerConnection = RTCPeerConnection;
   window.webkitRTCPeerConnection = RTCPeerConnection; // for feature detection
@@ -575,185 +288,10 @@ const _fetchText = src => fetch(src)
 
   window.RTCRtpTransceiver = RTCRtpTransceiver; */
 
-  window.customElements = new CustomElementRegistry(window);
-  window.CustomElementRegistry = CustomElementRegistry;
-  window.MutationObserver = MutationObserver;
-  window.DOMRect = DOMRect;
-  window.DOMPoint = DOMPoint;
-  window.getComputedStyle = el => {
-    let styleSpec = el[symbols.computedStyleSymbol];
-    if (!styleSpec || styleSpec.epoch !== window[symbols.styleEpochSymbol]) {
-      const style = el.style.clone();
-      const stylesheetEls = el.ownerDocument.documentElement.getElementsByTagName('style')
-        .concat(el.ownerDocument.documentElement.getElementsByTagName('link'));
-      for (let i = 0; i < stylesheetEls.length; i++) {
-        const {stylesheet} = stylesheetEls[i];
-        if (stylesheet) {
-          const {rules} = stylesheet;
-          for (let j = 0; j < rules.length; j++) {
-            const rule = rules[j];
-            const {selectors} = rule;
-            if (selectors && selectors.some(selector => el.matches(selector))) {
-              const {declarations} = rule;
-              for (let k = 0; k < declarations.length; k++) {
-                const {property, value} = declarations[k];
-                style[property] = value;
-              }
-            }
-          }
-        }
-      }
-      styleSpec = {
-        style,
-        styleEpoch: window[symbols.styleEpochSymbol],
-      };
-      el[symbols.computedStyleSymbol] = styleSpec;
-    }
-    return styleSpec.style;
-  };
-  /* window.browser = {
-    devTools: DevTools,
-    http,
-    // https,
-    ws,
-    magicleap: nativeMl ? {
-      RequestMeshing: () => nativeMl.RequestMeshing(window),
-      RequestPlaneTracking: () => nativeMl.RequestPlaneTracking(window),
-      RequestHandTracking: () => nativeMl.RequestHandTracking(window),
-      RequestEyeTracking: () => nativeMl.RequestEyeTracking(window),
-      RequestImageTracking: (img, size) => nativeMl.RequestImageTracking(window, img, size),
-      RequestDepthPopulation: nativeMl.RequestDepthPopulation,
-      RequestCamera: nativeMl.RequestCamera,
-    } : null,
-    monitors: new MonitorManager(),
-    setSetting(key, value) {
-      args[key] = value;
-    },
-    inspect: util.inspect,
-    requestDomExport(el) {
-      const promises = [];
-      const _getExport = el => {
-        if (el.nodeType === Node.ELEMENT_NODE && el.tagName === 'IFRAME' && el.contentWindow) {
-          if (el.contentWindow.evalAsync) {
-            const promise = el.contentWindow.evalAsync(`browser.requestDomExport(document.body.parentNode)`)
-              .then(iframeResult => {
-                result.childNodes = [iframeResult];
-              });
-            promises.push(promise);
-          }
-        }
-
-        const result = {
-          nodeType: el.nodeType || 0,
-          tagName: el.tagName || '',
-          value: el.value || '',
-          attrs: el.attrs || [],
-          childNodes: el.childNodes.map(_getExport),
-        };
-        return result;
-      };
-      const result = _getExport(el);
-      return Promise.all(promises).then(() => result);
-    },
-    async applyDomEdit(rootEl, keypath, edit) {
-      const _getDomNode = (el, i = 0) => {
-        if (i < keypath.length) {
-          const key = keypath[i];
-          const childNode = el.childNodes[key];
-          if (childNode) {
-            return _getDomNode(childNode, i+1);
-          } else {
-            return [el, keypath.slice(i)];
-          }
-        } else {
-          return [el, []];
-        }
-      };
-      const [el, remainingKeypath] = _getDomNode(rootEl);
-      if (remainingKeypath.length === 0) {
-        const {type} = edit;
-        if (type === 'name') {
-          const {oldName, oldValue, newName} = edit;
-          el.removeAttribute(oldName);
-          el.setAttribute(newName, oldValue);
-        } else if (type === 'value') {
-          const {name, newValue} = edit;
-          el.setAttribute(name, newValue);
-        } else if (type === 'remove') {
-          el.parentNode.removeChild(el);
-        } else {
-          throw new Error(`unknown dom edit type: ${type}`);
-        }
-      } else {
-        if (el.tagName === 'IFRAME' && el.contentWindow) {
-          await el.contentWindow.evalAsync(`browser.applyDomEdit(document, ${JSON.stringify(remainingKeypath)}, ${JSON.stringify(edit)})`);
-        } else {
-          console.warn('unresolved dom edit', el, remainingKeypath);
-        }
-      }
-    },
-  }; */
-  window.DOMParser = class DOMParser {
-    parseFromString(htmlString, type) {
-      const _recurse = node => {
-        let nodeName = null;
-        let value = null;
-        if (node.type === 'text') {
-          nodeName = '#text';
-          value = node.text;
-        } else if (node.type === 'comment') {
-          nodeName = '#comment';
-          value = node.content;
-        }
-
-        const tagName = node.name || null;
-
-        const attrs = [];
-        if (node.attributes) {
-          for (const name in node.attributes) {
-            attrs.push({
-              name,
-              value: node.attributes[name],
-            });
-          }
-        }
-
-        const childNodes = node.children ? node.children.map(childNode => _recurse(childNode)) : [];
-
-        return {
-          nodeName,
-          tagName,
-          attrs,
-          value,
-          childNodes,
-        };
-      };
-      const xmlAst = parseXml(htmlString, {
-        // preserveComments: true,
-      });
-      const htmlAst = _recurse(xmlAst);
-      return _parseDocumentAst(htmlAst, window, false);
-    }
-  };
-  window._listeners = {}; // EventTarget
-  window.listeners = EventTarget.prototype.listeners.bind(window);
-  window.addEventListener = EventTarget.prototype.addEventListener.bind(window);
-  window.removeEventListener = EventTarget.prototype.removeEventListener.bind(window);
-  window.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(window);
-
-  window.Image = HTMLImageElement;
-  /* window.ImageData = ImageData;
-  window.ImageBitmap = ImageBitmap;
-  window.Path2D = Path2D;
-  window.CanvasGradient = CanvasGradient; */
   window.CanvasRenderingContext2D = CanvasRenderingContext2D;
   window.WebGLRenderingContext = WebGLRenderingContext;
   window.WebGL2RenderingContext = WebGL2RenderingContext;
-  window.Audio = HTMLAudioElement;
-  window.MediaRecorder = MediaRecorder;
-  window.DataTransfer = DataTransfer;
-  window.DataTransferItem = DataTransferItem;
-  window.Screen = Screen;
+  
   window.Gamepad = Gamepad;
   window.VRStageParameters = VRStageParameters;
   window.VRDisplay = VRDisplay;
@@ -779,41 +317,6 @@ const _fetchText = src => fetch(src)
     window.XRBoundedReferenceSpace = XR.XRBoundedReferenceSpace;
   }
   window.FakeXRDisplay = FakeXRDisplay;
-  window.TextEncoder = TextEncoder;
-  window.TextDecoder = TextDecoder;
-  window.AudioContext = AudioContext;
-  window.AudioNode = AudioNode;
-  window.AudioBufferSourceNode = AudioBufferSourceNode;
-  window.OscillatorNode = OscillatorNode;
-  window.AudioDestinationNode = AudioDestinationNode;
-  window.AudioParam = AudioParam;
-  window.AudioListener = AudioListener;
-  window.GainNode = GainNode;
-  window.AnalyserNode = AnalyserNode;
-  window.PannerNode = PannerNode;
-  window.StereoPannerNode = StereoPannerNode;
-  window.createImageBitmap = (createImageBitmapOld => function createImageBitmap(image, sx, sy, sw, sh, options) {
-    if (image && image.constructor && image.constructor.name === 'HTMLImageElement') {
-      image = image.imageBitmap;
-    }
-    if (image && image.constructor && image.constructor.name === 'HTMLCanvasElement') {
-      image = image._context.backingCanvas;
-    }
-    if (options !== undefined) {
-      return createImageBitmapOld(image, sx, sy, sw, sh, options);
-    } else if (sh !== undefined) {
-      return createImageBitmapOld(image, sx, sy, sw, sh);
-    } else if (sw !== undefined) {
-      return createImageBitmapOld(image, sx, sy, sw);
-    } else if (sy !== undefined) {
-      return createImageBitmapOld(image, sx, sy);
-    } else if (sx !== undefined) {
-      return createImageBitmapOld(image, sx);
-    } else {
-      return createImageBitmapOld(image);
-    }
-  })(window.createImageBitmap);
-  // window.Worker = Worker;
   window.PaymentRequest = PaymentRequest;
   window.requestAnimationFrame = _makeRequestAnimationFrame(window);
   window.cancelAnimationFrame = id => {
@@ -823,32 +326,14 @@ const _fetchText = src => fetch(src)
     }
   };
   window.postMessage = function(data, targetOrigin, transfer) {
-    if (window.top === window) {
-      Promise.resolve().then(() => {
+    if (!options.top) { // no top passed in so we are the top
+      // Promise.resolve().then(() => {
         window.dispatchEvent(new MessageEvent('message', {data}));
-      });
+      // });
     } else {
-      window._postMessage(data, transfer);
+      window._postMessageUp(data, transfer);
     }
   };
-  /*
-    Treat function onload() as a special case that disables automatic event attach for onload, because this is how browsers work. E.g.
-      <!doctype html><html><head><script>
-        function onload() {
-          console.log ('onload'); // NOT called; presence of top-level function onload() makes all the difference
-        }
-        window.onload = onload;
-      </script></head></html>
-  */
-  /* window[symbols.disabledEventsSymbol] = {
-    load: undefined,
-    error: undefined,
-  };
-  window._emit = function(type) {
-    if (!this[symbols.disabledEventsSymbol][type]) {
-      Node.prototype._emit.apply(this, arguments);
-    }
-  }; */
   Object.defineProperty(window, 'onload', {
     get() {
       return _elementGetter(window, 'load');
@@ -874,7 +359,7 @@ const _fetchText = src => fetch(src)
     },
   });
 
-  window.history.addEventListener('popstate', ({detail: {url, state}}) => {
+  /* window.history.addEventListener('popstate', ({detail: {url, state}}) => {
     window.location.set(url);
 
     window.dispatchEvent(new CustomEvent('popstate', {
@@ -891,7 +376,7 @@ const _fetchText = src => fetch(src)
       window.dispatchEvent(new CustomEvent('beforeunload'));
       window.dispatchEvent(new CustomEvent('unload'));
 
-      self._postMessage({
+      self._postMessageUp({
         method: 'emit',
         type: 'navigate',
         event: {
@@ -899,7 +384,7 @@ const _fetchText = src => fetch(src)
         },
       });
     }
-  });
+  }); */
 
   const rafCbs = [];
   window[symbols.rafCbsSymbol] = rafCbs;
@@ -992,7 +477,7 @@ const _fetchText = src => fetch(src)
     _recurse(0);
   });
   window.tickAnimationFrame = ({frame = null, layered = false}) => {
-    _emitXrEvents(); 
+    _emitXrEvents();
     return _render(frame, layered);
   };
 
@@ -1002,7 +487,7 @@ const _fetchText = src => fetch(src)
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          self._postMessage({
+          self._postMessageUp({
             method: 'request',
             type: 'requestPresent',
             keypath: [],
@@ -1036,7 +521,7 @@ const _fetchText = src => fetch(src)
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
 
-          self._postMessage({
+          self._postMessageUp({
             method: 'request',
             type: 'exitPresent',
             keypath: [],
@@ -1086,7 +571,7 @@ const _fetchText = src => fetch(src)
         }
       });
 
-      self._postMessage({
+      self._postMessageUp({
         method: 'request',
         type: 'requestHitTest',
         keypath: [],
@@ -1147,21 +632,49 @@ const _fetchText = src => fetch(src)
     }
   };
 
-  window.document = _parseDocument(htmlString, window);
-  window.document.hidden = options.hidden || false;
+  // window.document = _parseDocument(htmlString, window);
+  /* const numChildNodes = document.childNodes.length;
+  while (document.childNodes.length > 0) {
+    document.removeChild(document.childNodes[0]);
+  } */
+  /* for (let i = numChildNodes.length - 1; i--; i >= 0) {
+    document.childNodes.removeChild(document.childNodes[i]);
+  } */
+
   window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
+
+  {
+    const _insertAfter = s => {
+      htmlString = htmlString.slice(0, match.index) + match[0] + s + htmlString.slice();
+    };
+    const _insertBefore = s => {
+      htmlString = htmlString.slice(0, match.index) + s + match[0] + htmlString.slice();
+    };
+
+    let match = htmlString.match(/<[\s]*head[\s>]/i);
+    if (match) {
+      _insertAfter(`<base href="${encodeURI(GlobalContext.baseUrl)}" target="_blank">`);
+    } else if (match = htmlString.match(/<[\s]*body[\s>]/i)) {
+      _insertBefore(`<head><base href="${encodeURI(GlobalContext.baseUrl)}" target="_blank"></head>`);
+    } else {
+      throw new Error(`no head or body tag: ${htmlString}`);
+    }
+  }
+
+  document.open();
+  document.write(htmlString);
+  document.close();
+
 })(self).then(() => {
-  self.dispatchEvent(new CustomEvent('bootstrap', {
-    detail: {
-      error: null,
-    },
-  }));
+  self._onbootstrap({
+    error: null,
+  });
 }).catch(err => {
-  self.dispatchEvent(new CustomEvent('bootstrap', {
-    detail: {
-      error: err,
-    },
-  }));
+  console.warn(err.stack);
+
+  self._onbootstrap({
+    error: err,
+  });
 });
 
 self.onrunasync = req => {

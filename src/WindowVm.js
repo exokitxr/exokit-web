@@ -1,88 +1,94 @@
-import {EventTarget} from './Event.js';
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
-
-const workerScriptPath = `${import.meta.url.replace(/[^\/]+$/, '')}WindowBase.js`;
+ 
+const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
 
 class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
-    const worker = new Worker(workerScriptPath, {
-      type: 'module',
-    });
-    worker.postMessage({
-      method: 'init',
-      workerData: {
-        initModule: options.initModule,
-        args: options.args,
-      },
-    });
-    const _message = e => {
-      const {data: m} = e;
-      switch (m.method) {
-        case 'request': {
-          this.dispatchEvent(new CustomEvent('request', {
-            detail: m,
-          }));
-          break;
-        }
-        case 'response': {
-          const fn = this.queue[m.requestKey];
+    const iframe = document.createElement('iframe');
+    iframe.src = iframeSrc;
 
-          if (fn) {
-            fn(m.error, m.result);
-            delete this.queue[m.requestKey];
-          } else {
-            console.warn(`unknown response request key: ${m.requestKey}`);
+    iframe.addEventListener('load', () => {
+      const {contentWindow} = iframe;
+
+      contentWindow.onpostmessageup = m => {
+        switch (m.method) {
+          case 'request': {
+            this.dispatchEvent(new CustomEvent('request', {
+              detail: m,
+            }));
+            break;
           }
-          break;
-        }
-        case 'postMessage': {
-          this.dispatchEvent(new CustomEvent('message', {
-            detail: m,
-          }));
-          break;
-        }
-        case 'emit': {
-          const {type, event} = m;
-          const e = new CustomEvent(m.type);
-          for (const k in event) {
-            e[k] = event[k];
+          case 'response': {
+            const fn = this.queue[m.requestKey];
+
+            if (fn) {
+              fn(m.error, m.result);
+              delete this.queue[m.requestKey];
+            } else {
+              console.warn(`unknown response request key: ${m.requestKey}`);
+            }
+            break;
           }
-          this.dispatchEvent(e);
-          break;
+          case 'postMessage': {
+            this.dispatchEvent(new CustomEvent('message', {
+              detail: m,
+            }));
+            break;
+          }
+          case 'emit': {
+            const {type, event} = m;
+            const e = new CustomEvent(m.type);
+            for (const k in event) {
+              e[k] = event[k];
+            }
+            this.dispatchEvent(e);
+            break;
+          }
+          case 'load': {
+            this.dispatchEvent(new CustomEvent('load'));
+            break;
+          }
+          case 'error': {
+            const {error} = m;
+            this.dispatchEvent(new ErrorEvent('error', {
+              error,
+            }));
+            break;
+          }
+          default: {
+            // console.warn(`worker got unknown message: '${JSON.stringify(m)}'`);
+            break;
+          }
         }
-        case 'load': {
-          this.dispatchEvent(new CustomEvent('load'));
-          break;
-        }
-        case 'error': {
-          const {error} = m;
-          this.dispatchEvent(new ErrorEvent('error', {
-            error,
-          }));
-          break;
-        }
-        default: {
-          throw new Error(`worker got unknown message: '${JSON.stringify(m)}'`);
-          break;
-        }
-      }
-    };
-    worker.addEventListener('message', _message);
-    worker.addEventListener('load', () => {
+      };
+      contentWindow._postMessageDown = function _postMessageDown(data/*, transfer*/) {
+        contentWindow.dispatchEvent(new contentWindow.MessageEvent('message', {data}));
+      };
+      contentWindow._postMessageDown({
+        method: 'init',
+        workerData: {
+          initModule: options.initModule,
+          args: options.args,
+        },
+      });
+
       this.dispatchEvent(new CustomEvent('load'));
+    }, {
+      once: true,
     });
-    worker.addEventListener('error', err => {
+    iframe.addEventListener('error', err => {
       this.dispatchEvent(new ErrorEvent({
         error: err,
       }));
     });
-    worker.cleanup = () => {
-      worker.removeEventListener('message', _message);
+    iframe.cleanup = () => {
+      iframe.contentWindow.removeEventListener('postmessage', _postmessage);
     };
-    this.worker = worker;
+    this.iframe = iframe;
+    document.body.appendChild(iframe);
 
     this.requestKeys = 0;
     this.queue = {};
@@ -103,7 +109,7 @@ class WorkerVm extends EventTarget {
           reject(err);
         }
       });
-      this.worker.postMessage({
+      this.iframe.contentWindow._postMessageDown({
         method: 'runRepl',
         jsString,
         requestKey,
@@ -119,7 +125,7 @@ class WorkerVm extends EventTarget {
           reject(err);
         }
       });
-      this.worker.postMessage({
+      this.iframe.contentWindow._postMessageDown({
         method: 'runAsync',
         request,
         requestKey,
@@ -127,13 +133,13 @@ class WorkerVm extends EventTarget {
     });
   }
   postMessage(message, transferList) {
-    this.worker.postMessage({
+    this.iframe.contentWindow._postMessageDown({
       method: 'postMessage',
       message,
     }, transferList);
   }
   emit(type, event) {
-    this.worker.postMessage({
+    this.iframe.contentWindow._postMessageDown && this.iframe.contentWindow._postMessageDown({
       method: 'emit',
       type,
       event,
@@ -141,23 +147,10 @@ class WorkerVm extends EventTarget {
   }
   
   destroy() {
-    this.worker.terminate();
-    this.worker.cleanup();
-    this.worker = null;
+    document.body.removeChild(this.iframe);
+    this.iframe.cleanup();
+    this.iframe = null;
   }
-
-  get onmessage() {
-    return this.worker.onmessage;
-  }
-  set onmessage(onmessage) {
-    this.worker.onmessage = onmessage;
-  }
-  get onerror() {
-    return this.worker.onerror;
-  }
-  set onerror(onerror) {
-    this.worker.onerror = onerror;
-  } 
 }
 
 const _clean = o => {
