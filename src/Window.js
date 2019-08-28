@@ -54,6 +54,8 @@ import * as XR from './XR.js';
 import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 
+import './xr-iframe-window.js';
+
 // const isMac = os.platform() === 'darwin';
 
 const localVector = new THREE.Vector3();
