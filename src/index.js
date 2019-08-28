@@ -31,6 +31,13 @@ const args = {};
 core.setArgs(args);
 core.setVersion('0.0.1');
 
+function setOptions(opts) {
+  opts = opts || {};
+  if (opts.onbeforeload) {
+    GlobalContext.onbeforeload = onbeforeload;
+  }
+}
+
 const windows = [];
 GlobalContext.windows = windows;
 // const contexts = [];
@@ -696,3 +703,7 @@ bootstrapped = true;
 
 };
 _bootstrap();
+
+export {
+  setOptions,
+};
