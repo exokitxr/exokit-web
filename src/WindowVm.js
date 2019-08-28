@@ -163,7 +163,7 @@ const _clean = o => {
   }
   return result;
 };
-const _makeWindow = (options = {}, handlers = {}) => {
+const _makeWindow = (options = {}) => {
   const id = Atomics.add(GlobalContext.xrState.id, 0, 1) + 1;
   const window = new WorkerVm({
     initModule: './Window.js',

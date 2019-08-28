@@ -9,12 +9,10 @@ import {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR
 
 import GlobalContext from './GlobalContext.js';
 
-window.exokit = {
-  bootstrapped: false,
-  window: null,
-  bootstrap() {
+let bootstrapped = false;
+const _bootstrap = () => {
 
-if (this.bootstrapped) {
+if (bootstrapped) {
   return;
 }
 
@@ -634,43 +632,7 @@ const _startTopRenderLoop = () => {
   const _tickAnimationFrames = () => Promise.all(windows.filter(win => win.loaded).map(_tickAnimationFrame));
   const _submitFrame = async () => {
     for (let i = 0; i < windows.length; i++) {
-      const win = windows[i];
-
-      if (win.frame) {
-        const {color, depth} = win.frame;
-        let {canvas} = win;
-        if (!canvas) {
-          canvas = win.canvas = document.createElement('canvas');
-          canvas.ctx = canvas.getContext('bitmaprenderer');
-          document.body.appendChild(canvas);
-        }
-        const expectedWidth = Math.floor(color.width / window.devicePixelRatio);
-        const expectedHeight = Math.floor(color.height / window.devicePixelRatio);
-        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-          canvas.width = expectedWidth;
-          canvas.height = expectedHeight;
-        }
-        canvas.ctx.transferFromImageBitmap(color);
-        // color.close();
-
-        /* const j = index++;
-        let canvas = canvases[j];
-        if (!canvas) {
-          canvas = canvases[j] = document.createElement('canvas');
-          canvas.ctx = canvas.getContext('bitmaprenderer');
-          document.body.appendChild(canvas);
-        }
-        const expectedWidth = Math.floor(depth.width / window.devicePixelRatio);
-        const expectedHeight = Math.floor(depth.height / window.devicePixelRatio);
-        if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-          canvas.width = expectedWidth;
-          canvas.height = expectedHeight;
-        }
-        canvas.ctx.transferFromImageBitmap(depth); */
-        depth.close();
-
-        win.frame = null;
-      }
+      windows[i].submit();
     }
   };
   let animating = false;
@@ -727,58 +689,95 @@ const _startFakePlaneTracker = () => {
   topVrPresentState.planeTracker = planeTracker;
 };
 
-this.bootstrapped = true;
+bootstrapped = true;
 
-  },
-  load(u) {
-    this.bootstrap();
-
-    const replacements = {};/* (() => {
-      const result = {};
-      for (let i = 0; i < args.replace.length; i++) {
-        const replaceArg = args.replace[i];
-        const replace = replaceArg.split(' ');
-        if (replace.length === 2) {
-          result[replace[0]] = window.location.protocol + '://' + replace[1];
-        } else {
-          console.warn(`invalid replace argument: ${replaceArg}`);
-        }
-      }
-      return result;
-    })(); */
-    const _onnavigate = u => {
-      if (this.window) {
-        this.window.destroy();
-        this.window = null;
-      }
-      const window = core.load(u, {
-        dataPath: null,
-        args: GlobalContext.args,
-        replacements,
-        onnavigate: _onnavigate,
-        onrequest: GlobalContext.handleRequest,
-        onpointerlock: GlobalContext.handlePointerLock,
-        onhapticpulse: GlobalContext.handleHapticPulse,
-        onpaymentrequest: GlobalContext.handlePaymentRequest,
-      });
-      window.frame = null;
-      window.canvas = null;
-      window.destroy = (destroy => function() {
-        if (window.frame) {
-          window.frame.color.close();
-          window.frame.depth.close();
-          window.frame = null;
-        }
-        if (window.canvas) {
-          document.body.removeChild(window.canvas);
-          window.canvas = null;
-        }
-
-        return destroy.apply(this, arguments);
-      })(window.destroy);
-      this.window = window;
-    };
-    _onnavigate(u);
-  },
 };
-export default window.exokit;
+
+class XRIFrame extends HTMLElement {
+  constructor() {
+    super();
+
+    _bootstrap();
+
+    this.window = null;
+    this.canvas = null;
+    this.shadow = null;
+  }
+  attributeChangedCallback() {
+    const src = this.getAttribute('src');
+
+    if (src) {
+      const _onnavigate = u => {
+        if (this.window) {
+          this.window.destroy();
+          this.window = null;
+        }
+        const win = core.load(u, {
+          dataPath: null,
+          args: GlobalContext.args,
+          replacements: {},
+          onnavigate: _onnavigate,
+          onrequest: GlobalContext.handleRequest,
+          onpointerlock: GlobalContext.handlePointerLock,
+          onhapticpulse: GlobalContext.handleHapticPulse,
+          onpaymentrequest: GlobalContext.handlePaymentRequest,
+        });
+        win.frame = null;
+        win.submit = () => {
+          if (win.frame) {
+            const {color, depth} = win.frame;
+            if (!this.canvas) {
+              this.canvas = document.createElement('canvas');
+              this.canvas.style.width = '100%';
+              this.canvas.style.height = '100%';
+              this.canvas.ctx = this.canvas.getContext('bitmaprenderer');
+
+              if (!this.shadow) {
+                this.shadow = this.attachShadow({mode: 'closed'});
+              }
+              this.shadow.appendChild(this.canvas);
+            }
+            const expectedWidth = Math.floor(color.width / window.devicePixelRatio);
+            const expectedHeight = Math.floor(color.height / window.devicePixelRatio);
+            if (this.canvas.width !== expectedWidth || this.canvas.height !== expectedHeight) {
+              this.canvas.width = expectedWidth;
+              this.canvas.height = expectedHeight;
+            }
+            this.canvas.ctx.transferFromImageBitmap(color);
+
+            depth.close();
+
+            win.frame = null;
+          }
+        };
+        win.destroy = (destroy => function() {
+          if (win.frame) {
+            win.frame.color.close();
+            win.frame.depth.close();
+            win.frame = null;
+          }
+          if (this.canvas) {
+            this.shadow.removeChild(this.canvas);
+            this.canvas = null;
+          }
+
+          return destroy.apply(this, arguments);
+        })(win.destroy);
+        this.window = win;
+      };
+      _onnavigate(src);
+    }
+  }
+  static get observedAttributes() {
+    return [
+      'src',
+    ];
+  }
+  get src() {
+    return this.getAttribute('src');
+  }
+  set src(src) {
+    this.setAttribute('src', src);
+  }
+}
+customElements.define('xr-iframe', XRIFrame);
