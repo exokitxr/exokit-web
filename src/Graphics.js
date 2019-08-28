@@ -187,6 +187,12 @@ WebGLRenderingContext.prototype.bindFramebuffer = (oldBindframebuffer => functio
   }
   oldBindframebuffer.call(this, target, fbo);
 })(WebGLRenderingContext.prototype.bindFramebuffer);
+WebGLRenderingContext.prototype._exokitClear = (oldClear => function _exokitClear() {
+  oldClear.call(this, this.COLOR_BUFFER_BIT|this.DEPTH_BUFFER_BIT|this.STENCIL_BUFFER_BIT);
+})(WebGLRenderingContext.prototype.clear);
+WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
+  this._enabled.clear = enabled;
+};
 WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
     oldClear.apply(this, arguments);
@@ -515,12 +521,6 @@ WebGLRenderingContext.prototype._exokitPutFrame = function _exokitPutFrame(frame
   if (oldScissorTest) {
     gl.enable(gl.SCISSOR_TEST);
   }
-};
-WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
-  this._enabled.clear = enabled;
-};
-WebGLRenderingContext.prototype._exokitClear = function _exokitClear() {
-  this.clear(this.COLOR_BUFFER_BIT|this.DEPTH_BUFFER_BIT|this.STENCIL_BUFFER_BIT);
 };
 WebGLRenderingContext.prototype.destroy = function destroy() {
   GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
