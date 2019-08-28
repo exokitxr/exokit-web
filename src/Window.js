@@ -297,7 +297,7 @@ const _fetchText = src => fetch(src)
   window.VRDisplay = VRDisplay;
   // window.ARDisplay = ARDisplay;
   window.VRFrameData = VRFrameData;
-  if (window.navigator.xr) {
+  // if (window.navigator.xr) {
     window.XR = XR.XR;
     // window.XRDevice = XR.XRDevice;
     window.XRSession = XR.XRSession;
@@ -315,7 +315,7 @@ const _fetchText = src => fetch(src)
     window.XRSpace = XR.XRSpace;
     window.XRReferenceSpace = XR.XRReferenceSpace;
     window.XRBoundedReferenceSpace = XR.XRBoundedReferenceSpace;
-  }
+  // }
   window.FakeXRDisplay = FakeXRDisplay;
   window.PaymentRequest = PaymentRequest;
   window.requestAnimationFrame = _makeRequestAnimationFrame(window);
