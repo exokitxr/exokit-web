@@ -100,7 +100,7 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
     };
     gl._defaultFramebuffer = defaultFramebuffer;
     const enabled = {
-      clear: false,
+      clear: true,
     };
     gl._enabled = enabled;
 
