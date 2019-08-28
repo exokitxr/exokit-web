@@ -173,6 +173,7 @@ const _makeWindow = (options = {}) => {
       args: GlobalContext.args,
       version: GlobalContext.version,
       xrState: GlobalContext.xrState,
+      onbeforeload: GlobalContext.onbeforeload,
     },
   });
   window.id = id;

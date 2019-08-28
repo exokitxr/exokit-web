@@ -17,7 +17,7 @@ self._postMessageUp = function _postMessageUp(data/*, transfer*/) {
   window.dispatchEvent(new MessageEvent('message', {data}));
 }; */
 
-const _oninitmessage = e => {
+const _oninitmessage = async e => {
   self.removeEventListener('message', _oninitmessage);
 
   const {workerData} = e.data;
@@ -229,6 +229,11 @@ const _oninitmessage = e => {
     console.warn('unhandled rejection:', (err && err.stack) || err);
   }); */
 
-  import(initModule);
+  if (args.onbeforeload) {
+    GlobalContext.onbeforeload = args.onbeforeload;
+    await import(args.onbeforeload);
+  }
+
+  await import(initModule);
 };
 self.addEventListener('message', _oninitmessage);
