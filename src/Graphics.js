@@ -468,7 +468,7 @@ WebGLRenderingContext.prototype._exokitPutFrame = function _exokitPutFrame(frame
   const {color, depth} = frame;
 
   const gl = this;
-  const {canvas, _extensions: extensions} = this;
+  const {canvas, _defaultFramebuffer: defaultFramebuffer, _extensions: extensions} = this;
 
   const oldFramebuffer = gl._exokitGetParameter(gl.FRAMEBUFFER_BINDING);
   const oldActiveTexture = gl._exokitGetParameter(gl.ACTIVE_TEXTURE);
