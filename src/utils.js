@@ -52,7 +52,12 @@ function _normalizeUrl(src, baseUrl) {
 }
 module.exports._normalizeUrl = _normalizeUrl;
 
-const _makeHtmlCollectionProxy = (el, query) => new Proxy(el, {
+function _getProxyUrl(u) {
+  return /^[a-z]+:/.test(u) ? ('/p/' + u) : u;
+}
+module.exports._getProxyUrl = _getProxyUrl;
+
+/* const _makeHtmlCollectionProxy = (el, query) => new Proxy(el, {
   get(target, prop) {
     const propN = parseIntStrict(prop);
     if (propN !== undefined) {
@@ -79,7 +84,7 @@ const _makeHtmlCollectionProxy = (el, query) => new Proxy(el, {
     }
   },
 });
-module.exports._makeHtmlCollectionProxy = _makeHtmlCollectionProxy;
+module.exports._makeHtmlCollectionProxy = _makeHtmlCollectionProxy; */
 
 const _elementGetter = (self, attribute) => self.listeners(attribute).filter(l => l[symbols.listenerSymbol])[0];
 module.exports._elementGetter = _elementGetter;
