@@ -1,5 +1,8 @@
 import core from './core.js';
 
+import utils from './utils.js';
+const {_getBaseUrl, _getProxyUrl} = utils;
+
 import GlobalContext from './GlobalContext.js';
 
 class XRIFrame extends HTMLElement {
@@ -19,7 +22,12 @@ class XRIFrame extends HTMLElement {
           this.contentWindow.destroy();
           this.contentWindow = null;
         }
+
+        const baseUrl = _getBaseUrl(u);
+        u = _getProxyUrl(u);
+
         const win = core.load(u, {
+          baseUrl,
           dataPath: null,
           args: GlobalContext.args,
           replacements: {},

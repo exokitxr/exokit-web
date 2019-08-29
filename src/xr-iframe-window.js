@@ -3,7 +3,7 @@ import {_makeWindow} from './WindowVm.js';
 import {XRRigidTransform} from './XR.js';
 
 import utils from './utils.js';
-const {_normalizeUrl} = utils;
+const {_normalizeUrl, _getProxyUrl} = utils;
 
 import symbols from './symbols.js';
 
@@ -21,12 +21,14 @@ class XRIFrame extends HTMLElement {
       const parentWindow = window;
       const options = parentWindow[symbols.optionsSymbol];
 
-      url = _normalizeUrl(url, options.baseUrl);
+      const baseUrl = _normalizeUrl(url, options.baseUrl);
+      url = _getProxyUrl(baseUrl);
+
       const parent = {};
       const top = parentWindow === parentWindow.top ? parent : {};
       this.contentWindow = _makeWindow({
         url,
-        baseUrl: url,
+        baseUrl,
         args: options.args,
         dataPath: options.dataPath,
         replacements: options.replacements,
