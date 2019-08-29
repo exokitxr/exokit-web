@@ -71,7 +71,7 @@ GlobalContext.contexts = contexts;
 
 const vrPresentState = {
   hmdType: null,
-  vrContext: null,
+  topGlContext: null,
   glContext: null,
   fbo: 0,
   msFbo: 0,
@@ -433,61 +433,39 @@ const _fetchText = src => fetch(src)
       _clearLocalCbs(); // release garbage
     }
   };
-  const _renderLocal = (frame, layered) => {
+  const _renderLocal = layered => {
     for (let i = 0; i < contexts.length; i++) {
       const context = contexts[i];
       context._exokitClearEnabled && context._exokitClearEnabled(true);
     }
     const layerContext = layered ? vrPresentState.glContext : null;
     if (layerContext) {
-      if (frame) {
-        layerContext._exokitPutFrame(frame);
-        frame = null;
-      } else {
-        layerContext._exokitClear();
-      }
       layerContext._exokitClearEnabled(false);
     }
     _tickLocalRafs();
-    if (layerContext) {
-      frame = layerContext._exokitGetFrame();
-    }
-    return Promise.resolve(frame);
   };
-  const _makeRenderChild = window => (frame, layered) => window.runAsync({
+  const _renderChild = (window, layered) => window.runAsync({
     method: 'tickAnimationFrame',
-    frame,
     layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
-  }, frame ? [frame.color, frame.depth] : undefined);
-  const _collectRenders = () => windows.filter(window => window.loaded).map(_makeRenderChild).concat([_renderLocal]);
-  const _render = (frame, layered) => new Promise((accept, reject) => {
-    const renders = _collectRenders();
-    const _recurse = i => {
-      if (i < renders.length) {
-        renders[i](frame, layered)
-          .then(newFrame => {
-            frame = newFrame;
-            _recurse(i+1);
-          })
-          .catch(err => {
-            _recurse(i+1);
-          });
-      } else {
-        accept(frame);
-      }
-    };
-    _recurse(0);
   });
-  window.tickAnimationFrame = ({frame = null, layered = false}) => {
+  const _render = layered => {
+    for (let i = 0; i < windows.length; i++) {
+      _renderChild(windows[i], layered);
+    }
+    _renderLocal(layered);
+  };
+  window.tickAnimationFrame = ({layered = false}) => {
     _emitXrEvents();
-    return _render(frame, layered);
+    _render(layered);
   };
 
   const _makeMrDisplays = () => {
     const _onrequestpresent = async () => {
       // if (!GlobalContext.xrState.isPresenting[0]) {
-        await new Promise((accept, reject) => {
-          vrPresentState.responseAccepts.push(accept);
+        vrPresentState.topGlContext = await new Promise((accept, reject) => {
+          vrPresentState.responseAccepts.push(({result}) => {
+            accept(result);
+          });
 
           self._postMessageUp({
             method: 'request',
@@ -506,12 +484,14 @@ const _fetchText = src => fetch(src)
           vrPresentState.glContext.setClearEnabled(true);
         } */
 
+        context.setProxyContext(vrPresentState.topGlContext);
+
         vrPresentState.glContext = context;
-        vrPresentState.fbo = context.createFramebuffer().id;
-        vrPresentState.msFbo = context.createFramebuffer().id;
+        vrPresentState.fbo = vrPresentState.topGlContext.createFramebuffer().id;
+        vrPresentState.msFbo = vrPresentState.topGlContext.createFramebuffer().id;
         // vrPresentState.glContext.setClearEnabled(false);
 
-        window.document.dispatchEvent(new CustomEvent('domchange')); // open mirror window
+        // window.document.dispatchEvent(new CustomEvent('domchange')); // open mirror window
       }
 
       return {
@@ -684,10 +664,8 @@ self.onrunasync = req => {
 
   switch (method) {
     case 'tickAnimationFrame':
-      return self.tickAnimationFrame(req).then(frame => {
-        const transfers = frame && [frame.color, frame.depth];
-        return Promise.resolve([frame, transfers]);
-      });
+      self.tickAnimationFrame(req);
+      return Promise.resolve();
     case 'response': {
       const {keypath} = req;
 

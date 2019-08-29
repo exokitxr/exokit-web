@@ -11,7 +11,13 @@ class XRIFrame extends HTMLElement {
 
     this.contentWindow = null;
     this.canvas = null;
+    this.ctx = null;
     this.shadow = null;
+
+    /* window.addEventListener('resize', e => { // XXX
+      this.shadow.childNodes[0].style.width = `${window.innerWidth}px`;
+      this.shadow.childNodes[0].style.height = `${window.innerHeight}px`;
+    }); */
   }
   attributeChangedCallback() {
     const src = this.getAttribute('src');
@@ -37,40 +43,25 @@ class XRIFrame extends HTMLElement {
           onhapticpulse: GlobalContext.handleHapticPulse,
           onpaymentrequest: GlobalContext.handlePaymentRequest,
         });
-        win.frame = null;
-        win.submit = () => {
-          if (win.frame) {
-            const {color, depth} = win.frame;
-            if (!this.canvas) {
-              this.canvas = document.createElement('canvas');
-              this.canvas.style.width = '100%';
-              this.canvas.style.height = '100%';
-              this.canvas.ctx = this.canvas.getContext('bitmaprenderer');
-
-              if (!this.shadow) {
-                this.shadow = this.attachShadow({mode: 'closed'});
-              }
-              this.shadow.appendChild(this.canvas);
+        win.install = () => {
+          if (!this.canvas) {
+            this.canvas = document.createElement('canvas');
+            this.canvas.style.width = '100%';
+            this.canvas.style.height = '100%';
+            this.ctx = this.canvas.getContext('webgl');
+            const extensions = this.ctx.getSupportedExtensions();
+            for (let i = 0; i < extensions.length; i++) {
+              this.ctx.getExtension(extensions[i]);
             }
-            const expectedWidth = Math.floor(color.width / window.devicePixelRatio);
-            const expectedHeight = Math.floor(color.height / window.devicePixelRatio);
-            if (this.canvas.width !== expectedWidth || this.canvas.height !== expectedHeight) {
-              this.canvas.width = expectedWidth;
-              this.canvas.height = expectedHeight;
+
+            if (!this.shadow) {
+              this.shadow = this.attachShadow({mode: 'closed'});
             }
-            this.canvas.ctx.transferFromImageBitmap(color);
-
-            depth.close();
-
-            win.frame = null;
+            this.shadow.appendChild(this.canvas);
           }
+          return this.ctx;
         };
         win.destroy = (destroy => function() {
-          if (win.frame) {
-            win.frame.color.close();
-            win.frame.depth.close();
-            win.frame = null;
-          }
           if (this.canvas) {
             this.shadow.removeChild(this.canvas);
             this.canvas = null;

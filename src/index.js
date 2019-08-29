@@ -336,11 +336,12 @@ GlobalContext.handleRequest = handleRequest;
 const _handleRequestImmediate = req => {
   const {type, keypath} = req;
 
+  const windowId = keypath.pop();
+  const win = windows.find(win => win.id === windowId);
+
   const _respond = (error, result) => {
-    const windowId = keypath.pop();
-    const window = windows.find(win => win.id === windowId);
-    if (window) {
-      window.runAsync({
+    if (win) {
+      win.runAsync({
         method: 'response',
         keypath,
         error,
@@ -352,6 +353,56 @@ const _handleRequestImmediate = req => {
   };
 
   switch (type) {
+    case 'requestPresent': {
+      if (topVrPresentState.hmdType === null) {
+        const hmdType = getHMDType();
+        // console.log('request present', hmdType);
+
+        /* if (!topVrPresentState.windowHandle) {
+          topVrPresentState.windowHandle = nativeBindings.nativeWindow.createWindowHandle(1, 1, false);
+        }
+        nativeBindings.nativeWindow.setCurrentWindowContext(topVrPresentState.windowHandle); */
+
+        /* if (hmdType === 'fake') {
+          const width = xrState.renderWidth[0]*2;
+          const height = xrState.renderHeight[0];
+
+          const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = nativeBindings.nativeWindow.createVrTopRenderTarget(width, height);
+
+          topVrPresentState.fbo = fbo;
+          topVrPresentState.msFbo = msFbo;
+          xrState.tex[0] = tex;
+          xrState.depthTex[0] = depthTex;
+          xrState.msTex[0] = msTex;
+          xrState.msDepthTex[0] = msDepthTex;
+        } */
+
+        topVrPresentState.hmdType = hmdType;
+
+        xrState.isPresenting[0] = 1;
+        xrState.hmdType[0] = lookupHMDTypeIndex(hmdType);
+      }
+      const ctx = win.install();
+      _respond(null, ctx);
+      break;
+    }
+    case 'exitPresent': {
+      if (topVrPresentState.hmdType !== null) {
+        if (topVrPresentState.hmdType === 'fake') {
+          // XXX destroy fbo
+        } else {
+          throw new Error(`fail to exit present for hmd type ${topVrPresentState.hmdType}`);
+        }
+
+        topVrPresentState.hmdType = null;
+        topVrPresentState.fbo = null;
+
+        xrState.isPresenting[0] = 0;
+        xrState.hmdType[0] = 0;
+      }
+      _respond(null, null);
+      break;
+    }
     case 'requestHitTest': {
       const {origin, direction, coordinateSystem} = req;
 
@@ -360,14 +411,6 @@ const _handleRequestImmediate = req => {
           _startFakeMesher();
         }
         topVrPresentState.mesher.requestHitTest(origin, direction, coordinateSystem)
-          .then(result => {
-            _respond(null, result);
-          })
-          .catch(err => {
-            _respond(err);
-          });
-      } else if (topVrPresentState.hmdType === 'magicleap') {
-        topVrPresentState.vrContext.requestHitTest(origin, direction, coordinateSystem)
           .then(result => {
             _respond(null, result);
           })
@@ -384,71 +427,18 @@ const _handleRequestImmediate = req => {
       return false;
   }
 };
-const _waitHandleRequests = () => {
+/* const _waitHandleRequests = () => {
   for (let i = 0; i < requests.length; i++) {
     _waitHandleRequest(requests[i]);
   }
   requests.length = 0;
-};
-const _waitHandleRequest = ({type, keypath}) => {
-  if (type === 'requestPresent' && topVrPresentState.hmdType === null) {
-    const hmdType = getHMDType();
-    // console.log('request present', hmdType);
-
-    /* if (!topVrPresentState.windowHandle) {
-      topVrPresentState.windowHandle = nativeBindings.nativeWindow.createWindowHandle(1, 1, false);
-    }
-    nativeBindings.nativeWindow.setCurrentWindowContext(topVrPresentState.windowHandle); */
-
-    /* if (hmdType === 'fake') {
-      const width = xrState.renderWidth[0]*2;
-      const height = xrState.renderHeight[0];
-
-      const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = nativeBindings.nativeWindow.createVrTopRenderTarget(width, height);
-
-      topVrPresentState.fbo = fbo;
-      topVrPresentState.msFbo = msFbo;
-      xrState.tex[0] = tex;
-      xrState.depthTex[0] = depthTex;
-      xrState.msTex[0] = msTex;
-      xrState.msDepthTex[0] = msDepthTex;
-    } */
-
-    topVrPresentState.hmdType = hmdType;
-
-    xrState.isPresenting[0] = 1;
-    xrState.hmdType[0] = lookupHMDTypeIndex(hmdType);
-  } else if (topVrPresentState.hmdType !== null && type === 'exitPresent') {
-    if (topVrPresentState.hmdType === 'fake') {
-      // XXX destroy fbo
-    } else {
-      throw new Error(`fail to exit present for hmd type ${topVrPresentState.hmdType}`);
-    }
-
-    topVrPresentState.hmdType = null;
-    topVrPresentState.fbo = null;
-
-    xrState.isPresenting[0] = 0;
-    xrState.hmdType[0] = 0;
-  }
-
-  const windowId = keypath.pop();
-  const window = windows.find(win => win.id === windowId);
-  if (window) {
-    window.runAsync({
-      method: 'response',
-      keypath,
-    });
-  } else {
-    console.warn('cannot find window to respond request to', windowId, windows.map(win => win.id));
-  }
-};
+}; */
 const handlePointerLock = () => {
   window.document.body.requestPointerLock();
 };
 GlobalContext.handlePointerLock = handlePointerLock;
 const handleHapticPulse = ({index, value, duration}) => {
-  if (topVrPresentState.hmdType === 'openvr') {
+  /* if (topVrPresentState.hmdType === 'openvr') {
     value = Math.min(Math.max(value, 0), 1);
     const deviceIndex = topVrPresentState.vrSystem.GetTrackedDeviceIndexForControllerRole(index + 1);
 
@@ -460,10 +450,10 @@ const handleHapticPulse = ({index, value, duration}) => {
       }
     };
     setTimeout(_recurse, 50);
-  } else {
+  } else { */
     console.warn(`ignoring haptic pulse: ${index}/${value}/${duration}`);
     // TODO: handle the other HMD cases...
-  }
+  // }
 };
 GlobalContext.handleHapticPulse = handleHapticPulse;
 const handlePaymentRequest = () => {
@@ -627,45 +617,41 @@ const _startTopRenderLoop = () => {
       if (err.code !== 'ECANCEL') {
         console.warn(err);
       }
-      return Promise.resolve([]);
-    })
-    .then(newFrame => {
-      win.frame = newFrame;
     });
-  const _tickAnimationFrames = () => Promise.all(windows.filter(win => win.loaded).map(_tickAnimationFrame));
-  const _submitFrame = async () => {
+  const _tickAnimationFrames = () => {
+    for (let i = 0; i < windows.length; i++) {
+      const win = windows[i];
+      if (win.loaded) {
+        _tickAnimationFrame(win);
+      }
+    }
+  };
+  /* const _submitFrame = async () => {
     for (let i = 0; i < windows.length; i++) {
       windows[i].submit();
     }
-  };
-  let animating = false;
-  const _topRenderLoop = async () => {
-    if (!animating) {
-      animating = true;
-
-      _waitHandleRequests();
-      // await _waitGetPoses();
-
-      _computeDerivedGamepadsData();
-      await _tickAnimationFrames();
-      _submitFrame();
-
-      animating = false;
-    }
+  }; */
+  let animationFrame;
+  const _topRenderLoop = () => {
     animationFrame = requestAnimationFrame(_topRenderLoop);
+
+    // _waitHandleRequests();
+
+    _computeDerivedGamepadsData();
+    _tickAnimationFrames();
+    // _submitFrame();
   };
-  let animationFrame = requestAnimationFrame(_topRenderLoop);
+  _topRenderLoop();
 
   return {
     stop() {
       cancelAnimationFrame(animationFrame);
-      immediate = null;
     },
   };
 };
 _startTopRenderLoop();
 
-const _startFakeMesher = () => {
+/* const _startFakeMesher = () => {
   const mesher = new FakeMesher();
   mesher.addEventListener('meshes', ({detail: {updates}}) => {
     const request = {
@@ -690,7 +676,7 @@ const _startFakePlaneTracker = () => {
     }
   });
   topVrPresentState.planeTracker = planeTracker;
-};
+}; */
 
 bootstrapped = true;
 
