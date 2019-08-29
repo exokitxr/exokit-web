@@ -305,7 +305,8 @@ WebGLRenderingContext.prototype._exokitEnsureShaders = function _exokitEnsureSha
             return enc;
           }
           void main() {
-            gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
+            // gl_FragColor = EncodeFloatRGBA(texture2D(uColorTex, vTexCoords).r);
+            gl_FragColor = vec4(vec3(texture2D(uColorTex, vTexCoords).r), 1.0);
           }
         `;
         const shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -371,10 +372,13 @@ WebGLRenderingContext.prototype._exokitEnsureShaders = function _exokitEnsureSha
           }
           void main() {
             gl_FragColor = texture2D(uColorTex, vTexCoords);
-            float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
+            // gl_FragColor.rgb = vec3(texture2D(uDepthTex, vTexCoords).r);
+            // gl_FragColor.a = 1.0;
+            float depth  = texture2D(uDepthTex, vTexCoords).r;
+            /* float depth = DecodeFloatRGBA(texture2D(uDepthTex, vTexCoords));
             if (depth == 0.0) {
               depth = 1.0;
-            }
+            } */
             gl_FragDepthEXT = depth;
           }
         `;
