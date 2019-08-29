@@ -545,7 +545,7 @@ GlobalContext.XRInputSourceEvent = XRInputSourceEvent;
 
 class XRRigidTransform {
   constructor(position, orientation, scale) {
-    if (position instanceof SharedArrayBuffer) {
+    if (position && position.constructor && position.constructor.name === 'SharedArrayBuffer') {
       const inverse = orientation instanceof XRRigidTransform ? orientation : null;
 
       this.initialize(position, inverse);
