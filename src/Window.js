@@ -645,7 +645,7 @@ const _fetchText = src => fetch(src)
 
   window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
 
-  {
+  /* {
     const _insertAfter = s => {
       htmlString = htmlString.slice(0, match.index) + match[0] + s + htmlString.slice();
     };
@@ -661,7 +661,7 @@ const _fetchText = src => fetch(src)
     } else {
       throw new Error(`no head or body tag: ${htmlString}`);
     }
-  }
+  } */
 
   document.open();
   document.write(htmlString);
