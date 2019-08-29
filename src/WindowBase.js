@@ -7,20 +7,8 @@ import GlobalContext from './GlobalContext.js';
 
 import utils from './utils.js';
 
-/* self._postMessage = ((postMessage, parent) => function _postMessage(data, transfer) {
-  return postMessage.call(parent, data, transfer);
-})(self.parent.postMessage, self.parent); */
-self._postMessageUp = function _postMessageUp(data/*, transfer*/) {
-  self.onpostmessageup(data);
-};
-/* self._postMessageDown = function _postMessageDown(data, transfer) {
-  window.dispatchEvent(new MessageEvent('message', {data}));
-}; */
-
 const _oninitmessage = async e => {
-  self.removeEventListener('message', _oninitmessage);
-
-  const {workerData} = e.data;
+  const {workerData, messagePort} = e.data;
   const {
     initModule,
     args,
@@ -30,6 +18,10 @@ const _oninitmessage = async e => {
     args,
   };
   GlobalContext.xrState = args.xrState;
+
+  self._postMessageUp = function _postMessageUp(data, transfer) {
+    messagePort.postMessage(data, transfer);
+  };
 
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
@@ -63,25 +55,27 @@ const _oninitmessage = async e => {
     }
   })(self.XMLHttpRequest); */
  
-  const messageQueue = [];
+  /* const messageQueue = [];
   const _onmessageQueue = e => {
     messageQueue.push(e);
   };
-  self.addEventListener('message', _onmessageQueue);
+  messagePort.addEventListener('message', _onmessageQueue); */
   self._onbootstrap = e => {
     const {error} = e;
 
-    self.removeEventListener('message', _onmessageQueue);
+    // messagePort.removeEventListener('message', _onmessageQueue);
 
     if (!error) {
       self._postMessageUp({
         method: 'load',
       });
 
-      self.addEventListener('message', _onmessageHandle);
+      messagePort.addEventListener('message', _onmessageHandle);
+      messagePort.start();
+      /* console.log('flush messages', messageQueue.length);
       for (let i = 0; i < messageQueue.length; i++) {
         self.dispatchEvent(messageQueue[i]);
-      }
+      } */
     } else {
       self._postMessageUp({
         method: 'error',
@@ -89,7 +83,7 @@ const _oninitmessage = async e => {
       });
     }
 
-    messageQueue.length = 0;
+    // messageQueue.length = 0;
     self._onbootstrap = undefined;
   };
   const _onmessageHandle = e => {
@@ -236,4 +230,4 @@ const _oninitmessage = async e => {
 
   await import(initModule);
 };
-self.addEventListener('message', _oninitmessage);
+self.addEventListener('message', _oninitmessage, {once: true});

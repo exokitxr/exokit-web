@@ -10,70 +10,78 @@ class WorkerVm extends EventTarget {
     const iframe = document.createElement('iframe');
     iframe.src = iframeSrc;
 
+    const messageChannel = new MessageChannel();
+    messageChannel.port1.addEventListener('message', e => {
+      const {data: m} = e;
+      switch (m.method) {
+        case 'request': {
+          this.dispatchEvent(new CustomEvent('request', {
+            detail: m,
+          }));
+          break;
+        }
+        case 'response': {
+          const fn = this.queue[m.requestKey];
+
+          if (fn) {
+            fn(m.error, m.result);
+            delete this.queue[m.requestKey];
+          } else {
+            console.warn(`unknown response request key: ${m.requestKey}`);
+          }
+          break;
+        }
+        case 'postMessage': {
+          this.dispatchEvent(new CustomEvent('message', {
+            detail: m,
+          }));
+          break;
+        }
+        case 'emit': {
+          const {type, event} = m;
+          const e = new CustomEvent(m.type);
+          for (const k in event) {
+            e[k] = event[k];
+          }
+          this.dispatchEvent(e);
+          break;
+        }
+        case 'load': {
+          this.dispatchEvent(new CustomEvent('load'));
+          break;
+        }
+        case 'error': {
+          const {error} = m;
+          this.dispatchEvent(new ErrorEvent('error', {
+            error,
+          }));
+          break;
+        }
+        default: {
+          // console.warn(`worker got unknown message: '${JSON.stringify(m)}'`);
+          break;
+        }
+      }
+    });
+    messageChannel.port1.start();
+
     iframe.addEventListener('load', () => {
       const {contentWindow} = iframe;
 
-      contentWindow.onpostmessageup = m => {
-        switch (m.method) {
-          case 'request': {
-            this.dispatchEvent(new CustomEvent('request', {
-              detail: m,
-            }));
-            break;
-          }
-          case 'response': {
-            const fn = this.queue[m.requestKey];
-
-            if (fn) {
-              fn(m.error, m.result);
-              delete this.queue[m.requestKey];
-            } else {
-              console.warn(`unknown response request key: ${m.requestKey}`);
-            }
-            break;
-          }
-          case 'postMessage': {
-            this.dispatchEvent(new CustomEvent('message', {
-              detail: m,
-            }));
-            break;
-          }
-          case 'emit': {
-            const {type, event} = m;
-            const e = new CustomEvent(m.type);
-            for (const k in event) {
-              e[k] = event[k];
-            }
-            this.dispatchEvent(e);
-            break;
-          }
-          case 'load': {
-            this.dispatchEvent(new CustomEvent('load'));
-            break;
-          }
-          case 'error': {
-            const {error} = m;
-            this.dispatchEvent(new ErrorEvent('error', {
-              error,
-            }));
-            break;
-          }
-          default: {
-            // console.warn(`worker got unknown message: '${JSON.stringify(m)}'`);
-            break;
-          }
-        }
-      };
-      contentWindow._postMessageDown = function _postMessageDown(data/*, transfer*/) {
+      /* contentWindow._postMessageDown = function _postMessageDown(data, transfer) {
         contentWindow.dispatchEvent(new contentWindow.MessageEvent('message', {data}));
-      };
-      contentWindow._postMessageDown({
+      }; */
+      contentWindow.postMessage({
         method: 'init',
         workerData: {
           initModule: options.initModule,
           args: options.args,
         },
-      });
+        messagePort: messageChannel.port2,
+      }, '*', [messageChannel.port2]);
+      contentWindow._postMessageDown = function _postMessageDown(data, transfer) {
+        messageChannel.port1.postMessage(data, transfer);
+      };
 
       this.dispatchEvent(new CustomEvent('load'));
     }, {
