@@ -3,6 +3,26 @@ import GlobalContext from './GlobalContext.js';
  
 const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
 
+class MessagePort2 extends EventTarget {
+  constructor() {
+    super();
+
+    this.remotePort = null;
+  }
+  postMessage(data, transfer) {
+    this.remotePort.dispatchEvent(new MessageEvent('message', {data}));
+  }
+  start() {}
+}
+class MessageChannel2 {
+  constructor() {
+    this.port1 = new MessagePort2();
+    this.port2 = new MessagePort2();
+    this.port1.remotePort = this.port2;
+    this.port2.remotePort = this.port1;
+  }
+}
+
 class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
@@ -10,7 +30,7 @@ class WorkerVm extends EventTarget {
     const iframe = document.createElement('iframe');
     iframe.src = iframeSrc;
 
-    const messageChannel = new MessageChannel();
+    const messageChannel = new MessageChannel2();
     messageChannel.port1.addEventListener('message', e => {
       const {data: m} = e;
       switch (m.method) {
@@ -71,19 +91,18 @@ class WorkerVm extends EventTarget {
       /* contentWindow._postMessageDown = function _postMessageDown(data, transfer) {
         contentWindow.dispatchEvent(new contentWindow.MessageEvent('message', {data}));
       }; */
-      contentWindow.postMessage({
-        method: 'init',
-        workerData: {
-          initModule: options.initModule,
-          args: options.args,
+      contentWindow.dispatchEvent(new MessageEvent('message', {
+        data: {
+          method: 'init',
+          workerData: {
+            initModule: options.initModule,
+            args: options.args,
+          },
+          messagePort: messageChannel.port2,
         },
-        messagePort: messageChannel.port2,
-      }, '*', [messageChannel.port2]);
-      contentWindow._postMessageDown = function _postMessageDown(data, transfer) {
-        messageChannel.port1.postMessage(data, transfer);
-      };
+      }));
 
-      this.dispatchEvent(new CustomEvent('load'));
+      // this.dispatchEvent(new CustomEvent('load'));
     }, {
       once: true,
     });
@@ -92,6 +111,9 @@ class WorkerVm extends EventTarget {
         error: err,
       }));
     });
+    iframe._postMessageDown = function _postMessageDown(data, transfer) {
+      messageChannel.port1.postMessage(data, transfer);
+    };
     iframe.cleanup = () => {
       iframe.contentWindow.removeEventListener('postmessage', _postmessage);
     };
@@ -117,7 +139,7 @@ class WorkerVm extends EventTarget {
           reject(err);
         }
       });
-      this.iframe.contentWindow._postMessageDown({
+      this.iframe._postMessageDown({
         method: 'runRepl',
         jsString,
         requestKey,
@@ -133,7 +155,7 @@ class WorkerVm extends EventTarget {
           reject(err);
         }
       });
-      this.iframe.contentWindow._postMessageDown({
+      this.iframe._postMessageDown({
         method: 'runAsync',
         request,
         requestKey,
@@ -141,13 +163,13 @@ class WorkerVm extends EventTarget {
     });
   }
   postMessage(message, transferList) {
-    this.iframe.contentWindow._postMessageDown({
+    this.iframe._postMessageDown({
       method: 'postMessage',
       message,
     }, transferList);
   }
   emit(type, event) {
-    this.iframe.contentWindow._postMessageDown && this.iframe.contentWindow._postMessageDown({
+    this.iframe._postMessageDown && this.iframe._postMessageDown({
       method: 'emit',
       type,
       event,
