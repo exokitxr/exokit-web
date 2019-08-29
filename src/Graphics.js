@@ -124,6 +124,7 @@ WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabl
 WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxyContext) {
   const ctx = this;
   const {canvas} = ctx;
+  this._proxyContext = proxyContext;
 
   const _resize = () => {
     proxyContext.canvas.width = canvas.width;
@@ -147,7 +148,7 @@ WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxy
     setTimeout(() => {
       // console.log('load 1');
       this._extensions.WEBGL_lose_context.restoreContext();
-      this._proxyContext = proxyContext;
+      // this._proxyContext = proxyContext;
       // console.log('load 2');
     });
   }, {once: true});
