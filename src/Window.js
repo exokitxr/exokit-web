@@ -461,24 +461,16 @@ const _fetchText = src => fetch(src)
   };
 
   const _makeXrCompatible = (context, opts) => {
-    console.log('make xr compat 1', context.hasProxyContext());
     if (!context.hasProxyContext()) {
-      console.log('make xr compat 2');
       vrPresentState.responseAccepts.push(({result}) => {
-        console.log('make xr compat 3');
         context.setProxyContext(result, opts);
-        console.log('make xr compat 4');
       });
-
-      console.log('make xr compat 5');
 
       self._postMessageUp({
         method: 'request',
         type: 'makeXrCompatible',
         keypath: [],
       });
-
-      console.log('make xr compat 6');
     }
   };
   const _makeMrDisplays = () => {
