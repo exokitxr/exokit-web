@@ -460,13 +460,32 @@ const _fetchText = src => fetch(src)
     _render(layered);
   };
 
+  const _makeXrCompatible = (context, opts) => {
+    console.log('make xr compat 1', context.hasProxyContext());
+    if (!context.hasProxyContext()) {
+      console.log('make xr compat 2');
+      vrPresentState.responseAccepts.push(({result}) => {
+        console.log('make xr compat 3');
+        context.setProxyContext(result, opts);
+        console.log('make xr compat 4');
+      });
+
+      console.log('make xr compat 5');
+
+      self._postMessageUp({
+        method: 'request',
+        type: 'makeXrCompatible',
+        keypath: [],
+      });
+
+      console.log('make xr compat 6');
+    }
+  };
   const _makeMrDisplays = () => {
     const _onrequestpresent = async () => {
       // if (!GlobalContext.xrState.isPresenting[0]) {
-        vrPresentState.topGlContext = await new Promise((accept, reject) => {
-          vrPresentState.responseAccepts.push(({result}) => {
-            accept(result);
-          });
+        await new Promise((accept, reject) => {
+          vrPresentState.responseAccepts.push(accept);
 
           self._postMessageUp({
             method: 'request',
@@ -485,11 +504,9 @@ const _fetchText = src => fetch(src)
           vrPresentState.glContext.setClearEnabled(true);
         } */
 
-        context.setProxyContext(vrPresentState.topGlContext);
-
         vrPresentState.glContext = context;
-        vrPresentState.fbo = vrPresentState.topGlContext.createFramebuffer().id;
-        vrPresentState.msFbo = vrPresentState.topGlContext.createFramebuffer().id;
+        vrPresentState.fbo = context.createFramebuffer().id;
+        vrPresentState.msFbo = context.createFramebuffer().id;
         // vrPresentState.glContext.setClearEnabled(false);
 
         // window.document.dispatchEvent(new CustomEvent('domchange')); // open mirror window
@@ -605,6 +622,7 @@ const _fetchText = src => fetch(src)
       xrSession,
     };
   };
+  window[symbols.makeXrCompatible] = _makeXrCompatible;
   window[symbols.mrDisplaysSymbol] = _makeMrDisplays();
   window.vrdisplayactivate = () => {
     const displays = window.navigator.getVRDisplaysSync();

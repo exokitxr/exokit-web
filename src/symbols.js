@@ -11,6 +11,7 @@ module.exports.styleEpochSymbol = Symbol('styleEpochSymbol');
 module.exports.listenerSymbol = Symbol('listenerSymbol');
 module.exports.canvas2dWindowHandle = Symbol('canvas2dWindowHandle');
 module.exports.canvas2dGrContext = Symbol('canvas2dGrContext');
+module.exports.makeXrCompatible = Symbol('makeXrCompatible');
 module.exports.mrDisplaysSymbol = Symbol('mrDisplaysSymbol');
 module.exports.optionsSymbol = Symbol('optionsSymbol');
 module.exports.pointerLockElementSymbol = Symbol('pointerLockElementSymbol');

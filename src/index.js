@@ -353,6 +353,11 @@ const _handleRequestImmediate = req => {
   };
 
   switch (type) {
+    case 'makeXrCompatible': {
+      const ctx = win.install();
+      _respond(null, ctx);
+      break;
+    }
     case 'requestPresent': {
       if (topVrPresentState.hmdType === null) {
         const hmdType = getHMDType();

@@ -332,6 +332,9 @@ class XRWebGLLayer {
     this.stencil = stencil;
     this.alpha = alpha;
 
+    window[symbols.makeXrCompatible](context, {
+      reset: true,
+    });
     const {fbo} = this.session.onmakeswapchain(context);
     
     this.framebuffer = {

@@ -1,3 +1,5 @@
+import symbols from './symbols.js';
+
 import GlobalContext from './GlobalContext.js';
 
 /* const {OffscreenCanvasRenderingContext2D, WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
@@ -111,7 +113,7 @@ const _makeState = gl => ({
     return result;
   })(),
 });
-HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init) {
+HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
   if (/^(?:experimental-)?webgl2?$/.test(type)) {
     const canvas = this;
     const gl = oldGetContext.call(canvas, type, init);
@@ -148,6 +150,12 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
       attributes: true,
       attributeFilter: ['width', 'height'],
     }); */
+
+    if (init.xrCompatible) {
+      window[symbols.makeXrCompatible](gl, {
+        reset: false,
+      });
+    }
 
     const vao = extensions.OES_vertex_array_object.createVertexArrayOES();
     extensions.OES_vertex_array_object.bindVertexArrayOES(vao);
@@ -203,16 +211,31 @@ WebGLRenderingContext.prototype._exokitClear = (oldClear => function _exokitClea
 WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
   this._enabled.clear = enabled;
 };
-WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxyContext) {
+WebGLRenderingContext.prototype.hasProxyContext = function hasProxyContext() {
+  return !!this._proxyContext;
+};
+WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxyContext, {reset}) {
   const ctx = this;
   const {canvas} = ctx;
   this._proxyContext = proxyContext;
 
-  const _resize = () => {
+  if (reset) {
+    canvas.addEventListener('webglcontextlost', e => {
+      e.preventDefault();
+      setTimeout(() => {
+        this.state = _makeState(this);
+        this._extensions.WEBGL_lose_context.restoreContext();
+      });
+    }, {once: true});
+    this._extensions.WEBGL_lose_context.loseContext();
+  } else {
+    this.state = _makeState(this);
+  }
+
+  new MutationObserver(() => {
     proxyContext.canvas.width = canvas.width;
     proxyContext.canvas.height = canvas.height;
-  };
-  new MutationObserver(_resize).observe(canvas, {
+  }).observe(canvas, {
     attributes: true,
     attributeFilter: ['width', 'height'],
   });
