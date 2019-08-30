@@ -571,9 +571,9 @@ WebGLRenderingContext.prototype.clearStencil = (_clearStencil => function stenci
 })(WebGLRenderingContext.prototype.clearStencil);
 WebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindTexture(target, texture) {
   if (this.state) {
-    if (target === this._TEXTURE_2D) {
+    if (target === this.TEXTURE_2D) {
       this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].texture2D = texture;
-    } else if (target === this._TEXTURE_CUBE_MAP) {
+    } else if (target === this.TEXTURE_CUBE_MAP) {
       this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].textureCubemap = texture;
     }
   }
