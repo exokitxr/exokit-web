@@ -61,6 +61,11 @@ class XRIFrame extends HTMLElement {
           }
           return this.ctx;
         };
+        win.clear = () => {
+          if (this.ctx) {
+            this.ctx.clear(this.ctx.COLOR_BUFFER_BIT|this.ctx.STENCIL_BUFFER_BIT|this.ctx.DEPTH_BUFFER_BIT);
+          }
+        };
         win.destroy = (destroy => function() {
           if (this.canvas) {
             this.shadow.removeChild(this.canvas);
