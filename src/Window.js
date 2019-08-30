@@ -440,6 +440,7 @@ const _fetchText = src => fetch(src)
     }
     const layerContext = layered ? vrPresentState.glContext : null;
     if (layerContext) {
+      layerContext.setProxyState();
       layerContext._exokitClearEnabled(false);
     }
     _tickLocalRafs();
