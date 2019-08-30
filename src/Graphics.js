@@ -207,7 +207,6 @@ WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxy
   const ctx = this;
   const {canvas} = ctx;
   this._proxyContext = proxyContext;
-  this.state = _makeState(this);
 
   const _resize = () => {
     proxyContext.canvas.width = canvas.width;
@@ -230,6 +229,7 @@ WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxy
     e.preventDefault();
     setTimeout(() => {
       // console.log('load 1');
+      this.state = _makeState(this);
       this._extensions.WEBGL_lose_context.restoreContext();
       // this._proxyContext = proxyContext;
       // console.log('load 2');
