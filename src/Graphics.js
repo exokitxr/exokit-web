@@ -239,26 +239,6 @@ WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxy
     attributes: true,
     attributeFilter: ['width', 'height'],
   });
-
-  /* canvas.addEventListener('webglcontextrestored', e => {
-    console.log('re-init 1');
-    const ks = ctx.getSupportedExtensions();
-    for (let i = 0; i < ks.length; i++) {
-      ctx.getExtension(ks[i]);
-    }
-    console.log('re-init 2');
-  }); */
-  canvas.addEventListener('webglcontextlost', e => {
-    e.preventDefault();
-    setTimeout(() => {
-      // console.log('load 1');
-      this.state = _makeState(this);
-      this._extensions.WEBGL_lose_context.restoreContext();
-      // this._proxyContext = proxyContext;
-      // console.log('load 2');
-    });
-  }, {once: true});
-  this._extensions.WEBGL_lose_context.loseContext();
 };
 WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
