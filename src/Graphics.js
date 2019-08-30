@@ -242,9 +242,74 @@ WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
     oldClear.apply(this, arguments);
   }
 })(WebGLRenderingContext.prototype.clear);
+function enableDisable(gl, feature, enable) {
+  if (enable) {
+    gl.enable(feature);
+  } else {
+    gl.disable(feature);
+  }
+}
+WebGLRenderingContext.prototype.setProxyState = function setProxyState() {
+  const {_proxyContext: gl, state} = this;
+
+  if (state) {
+    gl.getExtension('OES_vertex_array_object').bindVertexArrayOES(state.vao);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
+    for (const k in state.renderbuffer) {
+      gl.bindRenderbuffer(k, state.renderbuffer[k]);
+    }
+    for (const k in state.framebuffer) {
+      gl.bindFramebuffer(k, state.framebuffer[k]);
+    }
+
+    enableDisable(gl, gl.BLEND, state.blend);
+    enableDisable(gl, gl.CULL_FACE, state.cullFace);
+    enableDisable(gl, gl.DEPTH_TEST, state.depthTest);
+    enableDisable(gl, gl.DITHER, state.dither);
+    enableDisable(gl, gl.POLYGON_OFFSET_FILL, state.polygonOffsetFill);
+    enableDisable(gl, gl.SAMPLE_ALPHA_TO_COVERAGE, state.sampleAlphaToCoverage);
+    enableDisable(gl, gl.SAMPLE_COVERAGE, state.sampleCoverage);
+    enableDisable(gl, gl.SCISSOR_TEST, state.scissorTest);
+    enableDisable(gl, gl.STENCIL_TEST, state.stencilTest);
+
+    gl.pixelStorei(gl.PACK_ALIGNMENT, state.packAlignment);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, state.unpackAlignment);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, state.unpackColorspaceConversion);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, state.unpackFlipY);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, state.unpackPremultiplyAlpha);
+
+    gl.useProgram(state.currentProgram);
+
+    gl.viewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3]);
+    gl.scissor(state.scissor[0], state.scissor[1], state.scissor[2], state.scissor[3]);
+    gl.blendFuncSeparate(state.blendSrcRgb, state.blendDstRgb, state.blendSrcAlpha, state.blendDstAlpha);
+    gl.blendEquationSeparate(state.blendEquationRgb, state.blendEquationAlpha);
+    gl.blendColor(state.blendColor[0], state.blendColor[1], state.blendColor[2], state.blendColor[3]);
+    gl.clearColor(state.colorClearValue[0], state.colorClearValue[1], state.colorClearValue[2], state.colorClearValue[3]);
+    gl.colorMask(state.colorMask[0], state.colorMask[1], state.colorMask[2], state.colorMask[3]);
+    gl.cullFace(state.cullFaceMode);
+    gl.clearDepth(state.depthClearValue);
+    gl.depthFunc(state.depthFunc);
+    gl.depthRange(state.depthRange[0], state.depthRange[1], state.depthRange[2], state.depthRange[3]);
+    gl.depthMask(state.depthMask);
+    gl.frontFace(state.frontFace);
+    gl.hint(gl.GENERATE_MIPMAP_HINT, state.generateMipmapHint);
+    gl.lineWidth(state.lineWidth);
+    gl.polygonOffset(state.polygonOffsetFactor, state.polygonOffsetUnits);
+    gl.sampleCoverage(state.sampleCoverageValue, state.sampleCoverageUnits);
+    gl.stencilFuncSeparate(gl.BACK, state.stencilBackFunc, state.stencilBackRef, state.stencilBackValueMask);
+    gl.stencilFuncSeparate(gl.FRONT, state.stencilFunc, state.stencilRef, state.stencilValueMask);
+    gl.stencilOpSeparate(gl.BACK, state.stencilBackFail, state.stencilBackPassDepthFail, state.stencilBackPassDepthPass);
+    gl.stencilOpSeparate(gl.FRONT, state.stencilFail, state.stencilPassDepthFail, state.stencilPassDepthPass);
+    gl.stencilMaskSeparate(gl.BACK, state.stencilBackWriteMask);
+    gl.stencilMaskSeparate(gl.FRONT, state.stencilWriteMask);
+    gl.clearStencil(state.stencilClearValue);
+  }
+};
 WebGLRenderingContext.prototype.destroy = function destroy() {
   GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
-}
+};
 
 // state memoization
 
