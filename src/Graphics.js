@@ -305,6 +305,13 @@ WebGLRenderingContext.prototype.setProxyState = function setProxyState() {
     gl.stencilMaskSeparate(gl.BACK, state.stencilBackWriteMask);
     gl.stencilMaskSeparate(gl.FRONT, state.stencilWriteMask);
     gl.clearStencil(state.stencilClearValue);
+
+    for (let i = 0; i < state.textureUnits.length; i++) {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, state.textureUnits[i].texture2D);
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, state.textureUnits[i].textureCubemap);
+    }
+    gl.activeTexture(state.activeTexture);
   }
 };
 WebGLRenderingContext.prototype.destroy = function destroy() {
