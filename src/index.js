@@ -609,15 +609,18 @@ const _startTopRenderLoop = () => {
       _deriveGamepadData(xrState.eye);
     }
   };
-  const _tickAnimationFrame = win => win.runAsync({
-    method: 'tickAnimationFrame',
-    layered: true,
-  })
-    .catch(err => {
-      if (err.code !== 'ECANCEL') {
-        console.warn(err);
-      }
-    });
+  const _tickAnimationFrame = win => {
+    win.clear();
+    return win.runAsync({
+      method: 'tickAnimationFrame',
+      layered: true,
+    })
+      .catch(err => {
+        if (err.code !== 'ECANCEL') {
+          console.warn(err);
+        }
+      });
+  };
   const _tickAnimationFrames = () => {
     for (let i = 0; i < windows.length; i++) {
       const win = windows[i];
