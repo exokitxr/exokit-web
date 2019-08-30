@@ -137,7 +137,6 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
     gl._enabled = enabled;
     const extensions = {
       WEBGL_lose_context: gl._exokitGetExtension('WEBGL_lose_context'),
-      OES_vertex_array_object: gl.getExtension('OES_vertex_array_object'),
     };
     gl._extensions = extensions;
 
@@ -157,8 +156,14 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
       });
     }
 
-    const vao = extensions.OES_vertex_array_object.createVertexArrayOES();
-    extensions.OES_vertex_array_object.bindVertexArrayOES(vao);
+    if (gl.createVertexArray) {
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+    } else {
+      const extension = gl.getExtension('OES_vertex_array_object');
+      const vao = extension.createVertexArrayOES();
+      extension.bindVertexArrayOES(vao);
+    }
 
     return gl;
   } else {
@@ -175,6 +180,8 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
     return this.height;
   },
 });
+
+[WebGLRenderingContext, WebGL2RenderingContext].forEach(WebGLRenderingContext => {
 
 WebGLRenderingContext.prototype._exokitGetExtension = (oldGetExtension => function _exokitGetExtension() {
   return oldGetExtension.apply(this, arguments);
@@ -328,6 +335,14 @@ WebGLRenderingContext.prototype.destroy = function destroy() {
 
 // state memoization
 
+if (WebGLRenderingContext.prototype.bindVertexArray) {
+  WebGLRenderingContext.prototype.bindVertexArray = (_bindVertexArray => function bindVertexArray(name) {
+    if (this.state) {
+      this.state.vao = vao;
+    }
+    return _bindVertexArray.apply(this, arguments);
+  })(WebGLRenderingContext.prototype.bindVertexArray);
+}
 WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;
   const extension = _getExtension.apply(this, arguments);
@@ -595,6 +610,8 @@ WebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindText
   }
   return _bindTexture.apply(this, arguments);
 })(WebGLRenderingContext.prototype.bindTexture);
+
+});
 
 export {
   WebGLRenderingContext,
