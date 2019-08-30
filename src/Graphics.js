@@ -245,6 +245,11 @@ WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
     oldClear.apply(this, arguments);
   }
 })(WebGLRenderingContext.prototype.clear);
+WebGLRenderingContext.prototype.makeXrCompatible = function makeXrCompatible() {
+  window[symbols.makeXrCompatible](gl, {
+    reset: true,
+  });
+};
 function enableDisable(gl, feature, enable) {
   if (enable) {
     gl.enable(feature);
