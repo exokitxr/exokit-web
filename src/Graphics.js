@@ -331,11 +331,12 @@ WebGLRenderingContext.prototype.destroy = function destroy() {
 WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;
   const extension = _getExtension.apply(this, arguments);
-  if (this.state && name === 'OES_vertex_array_object') {
+  if (this.state && name === 'OES_vertex_array_object' && !extension.bindVertexArrayOES._bound) {
     extension.bindVertexArrayOES = (_bindVertexArrayOES => function bindVertexArrayOES(vao) {
       gl.state.vao = vao;
       return _bindVertexArrayOES.apply(this, arguments);
     })(extension.bindVertexArrayOES);
+    extension.bindVertexArrayOES._bound = true;
   }
   return extension;
 })(WebGLRenderingContext.prototype.getExtension);
