@@ -18,6 +18,7 @@ import {
   GamepadButton,
   lookupHMDTypeString,
   getGamepads,
+  getHMDType,
 } from './VR.js';
 
 import {maxNumTrackers} from './constants.js';
@@ -169,7 +170,7 @@ const _fetchText = src => fetch(src)
   }); */
 
   window.navigator.getVRDisplays = async function getVRDisplays() {
-    return this.getVRDisplaysSync();
+    return getHMDType() ? [window[symbols.mrDisplaysSymbol].vrDisplay] : []
   };
   window.navigator.getGamepads = getGamepads;
   const xr = new XR.XR(window);
