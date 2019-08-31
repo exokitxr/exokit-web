@@ -123,7 +123,8 @@ class GamepadHapticActuator {
   }
 }
 class Gamepad {
-  constructor(id, hand, xrGamepad, hapticActuator) {
+  constructor(index, id, hand, xrGamepad, hapticActuator) {
+    this.index = index;
     this.id = id;
     this.hand = hand;
     this._xrGamepad = xrGamepad;
@@ -677,12 +678,15 @@ const lookupHMDTypeString = i => hmdTypeStringMap[i];
 const createFakeXRDisplay = () => new FakeXRDisplay();
 
 let globalGamepads = null;
-const _makeGlobalGamepads = () => ({
-  main: [
-    new Gamepad('gamepad', 'left', GlobalContext.xrState.gamepads[0], new GamepadHapticActuator(0)),
-    new Gamepad('gamepad', 'right', GlobalContext.xrState.gamepads[1], new GamepadHapticActuator(1)),
-  ],
-});
+const _makeGlobalGamepads = () => {
+  let index = 0;
+  return {
+    main: [
+      new Gamepad(index++, 'gamepad', 'left', GlobalContext.xrState.gamepads[0], new GamepadHapticActuator(0)),
+      new Gamepad(index++, 'gamepad', 'right', GlobalContext.xrState.gamepads[1], new GamepadHapticActuator(1)),
+    ],
+  };
+};
 
 const controllerIDs = {
   fake: 'OpenVR Gamepad',
