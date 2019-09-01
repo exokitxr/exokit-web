@@ -336,7 +336,7 @@ WebGLRenderingContext.prototype.destroy = function destroy() {
 // state memoization
 
 if (WebGLRenderingContext.prototype.bindVertexArray) {
-  WebGLRenderingContext.prototype.bindVertexArray = (_bindVertexArray => function bindVertexArray(name) {
+  WebGLRenderingContext.prototype.bindVertexArray = (_bindVertexArray => function bindVertexArray(vao) {
     if (this.state) {
       this.state.vao = vao;
     }
