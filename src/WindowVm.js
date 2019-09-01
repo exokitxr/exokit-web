@@ -105,10 +105,12 @@ class WorkerVm extends EventTarget {
         }
         case 'emit': {
           const {type, event} = m;
-          const e = new CustomEvent(m.type);
-          for (const k in event) {
+          const e = new CustomEvent(m.type, {
+            detail: event,
+          });
+          /* for (const k in event) {
             e[k] = event[k];
-          }
+          } */
           this.dispatchEvent(e);
           break;
         }
