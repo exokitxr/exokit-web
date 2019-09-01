@@ -145,7 +145,7 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
         this._proxyContext.canvas.width = canvas.width;
         this._proxyContext.canvas.height = canvas.height;
       }
-    }).observe(this, {
+    }).observe(canvas, {
       attributes: true,
       attributeFilter: ['width', 'height'],
     }); */
