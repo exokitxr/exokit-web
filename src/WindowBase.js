@@ -35,6 +35,7 @@ const _oninitmessage = async e => {
       return self.innerHeight;
     },
   });
+  ServiceWorkerContainer.prototype.register = async function register() {};
   MediaDevices.prototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
     return _enumerateDevices.apply(this, arguments)
       .then(ds => ds.map((d, i) => {
