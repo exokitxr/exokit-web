@@ -22,7 +22,8 @@ class XRIFrame extends HTMLElement {
       const options = parentWindow[symbols.optionsSymbol];
 
       const baseUrl = _normalizeUrl(url, options.baseUrl);
-      url = _getProxyUrl(baseUrl);
+      // url = _getProxyUrl(baseUrl);
+      url = baseUrl;
 
       const parent = {};
       const top = parentWindow === parentWindow.top ? parent : {};

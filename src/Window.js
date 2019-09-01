@@ -337,7 +337,7 @@ const _fetchText = src => fetch(src)
       window._postMessageUp(data, transfer);
     }
   };
-  Object.defineProperty(window, 'onload', {
+  /* Object.defineProperty(window, 'onload', {
     get() {
       return _elementGetter(window, 'load');
     },
@@ -360,7 +360,7 @@ const _fetchText = src => fetch(src)
     set(onpopstate) {
       _elementSetter(window, 'popstate', onpopstate);
     },
-  });
+  }); */
 
   /* window.history.addEventListener('popstate', ({detail: {url, state}}) => {
     window.location.set(url);
@@ -476,6 +476,7 @@ const _fetchText = src => fetch(src)
   };
   const _makeMrDisplays = () => {
     const _onrequestpresent = async () => {
+      console.log('on request present', new Error().stack);
       // if (!GlobalContext.xrState.isPresenting[0]) {
         await new Promise((accept, reject) => {
           vrPresentState.responseAccepts.push(accept);
@@ -492,6 +493,7 @@ const _fetchText = src => fetch(src)
       // GlobalContext.clearGamepads();
     };
     const _onmakeswapchain = context => {
+      console.log('on make swapchain', !!context, !!vrPresentState.glContext, context !== vrPresentState.glContext, new Error().stack);
       if (context !== vrPresentState.glContext) {
         /* if (vrPresentState.glContext) {
           vrPresentState.glContext.setClearEnabled(true);

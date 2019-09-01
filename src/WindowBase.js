@@ -19,6 +19,39 @@ const _oninitmessage = async e => {
   };
   GlobalContext.xrState = args.xrState;
 
+  self.WebSocket = (OldWebSocket => class WebSocket extends OldWebSocket {
+    constructor(url, protocols) {
+      console.log('construct websocket', url);
+
+      super(url, protocols);
+    }
+  })(self.WebSocket);
+  History.prototype.pushState = (_pushState => function pushState(data, title, url) {
+    console.log('pushState 1', Array.from(arguments));
+    /* const baseEl = document.querySelector('base');
+    if (baseEl) {
+      url = new URL(url, baseEl.href).href;
+    } */
+    url = self.location.origin + url;
+    console.log('pushState 2', url);
+    const result = _pushState.call(this, data, title, url);
+    console.log('pushState 3', result);
+    return result;
+  })(History.prototype.pushState);
+  MediaDevices.prototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
+    return _enumerateDevices.apply(this, arguments)
+      .then(ds => ds.map((d, i) => {
+        d = JSON.parse(JSON.stringify(d));
+        d.label = `Fake device (${i})`;
+        return d;
+      }))
+      .then(ds => {
+        console.log('got fake devices', ds);
+        return ds;
+      });
+  })(MediaDevices.prototype.enumerateDevices);
+  Element.prototype.requestFullscreen = async function requestFullscreen() {};
+
   self._postMessageUp = function _postMessageUp(data, transfer) {
     messagePort.postMessage(data, transfer);
   };
@@ -54,6 +87,31 @@ const _oninitmessage = async e => {
       }
     }
   })(self.XMLHttpRequest); */
+  self.fetch = (_fetch => function fetch(u, opts) {
+    if (u === 'https://uploads-prod.reticulum.io/files/128e210e-2f20-4dab-846d-a4282333e77b.bin') {
+      // console.log('fetch replace!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', new Error().stack);
+      u = '/p/https://uploads-prod.reticulum.io/files/128e210e-2f20-4dab-846d-a4282333e77b.bin';
+    }
+    return _fetch(u, opts);
+  })(self.fetch);
+  self.XMLHttpRequest = (_XMLHttpRequest => class XMLHttpRequest extends _XMLHttpRequest {
+    open(method, url, async, user, password) {
+      if (url === 'https://uploads-prod.reticulum.io/files/128e210e-2f20-4dab-846d-a4282333e77b.bin') {
+        // console.log('XHR replace!!!!!!!!!!!!!!!!!!', new Error().stack);
+        url = '/p/https://uploads-prod.reticulum.io/files/128e210e-2f20-4dab-846d-a4282333e77b.bin';
+      }
+
+      if (password !== undefined) {
+        return super.open(method, url, async, user, password);
+      } else if (user !== undefined) {
+        return super.open(method, url, async, user);
+      } else if (async !== undefined) {
+        return super.open(method, url, async);
+      } else {
+        return super.open(method, url);
+      }
+    }
+  })(self.XMLHttpRequest);
  
   /* const messageQueue = [];
   const _onmessageQueue = e => {

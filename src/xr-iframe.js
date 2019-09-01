@@ -30,7 +30,7 @@ class XRIFrame extends HTMLElement {
         }
 
         const baseUrl = _getBaseUrl(u);
-        u = _getProxyUrl(u);
+        // u = _getProxyUrl(u);
 
         const win = core.load(u, {
           baseUrl,
@@ -48,7 +48,7 @@ class XRIFrame extends HTMLElement {
             this.canvas = document.createElement('canvas');
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
-            this.ctx = this.canvas.getContext('webgl');
+            this.ctx = this.canvas.getContext('webgl2');
             const extensions = this.ctx.getSupportedExtensions();
             for (let i = 0; i < extensions.length; i++) {
               this.ctx.getExtension(extensions[i]);

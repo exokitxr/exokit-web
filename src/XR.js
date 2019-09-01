@@ -65,7 +65,7 @@ class XR extends EventTarget {
     }
     return Promise.resolve(this.session);
   }
-  /* async requestDevice() {
+  async requestDevice() {
     const hmdType = getHMDType();
 
     if (hmdType) {
@@ -73,7 +73,7 @@ class XR extends EventTarget {
     } else {
       return Promise.resolve(null);
     }
-  } */
+  }
   get onvrdevicechange() {
     return _elementGetter(this, 'vrdevicechange');
   }
@@ -82,7 +82,7 @@ class XR extends EventTarget {
   }
 };
 
-/* class XRDevice { // non-standard
+class XRDevice { // non-standard
   constructor(xr) {
     this.xr = xr;
   }
@@ -93,7 +93,7 @@ class XR extends EventTarget {
   requestSession(opts) {
     return this.xr.requestSession();
   }
-} */
+}
 
 class XRSession extends EventTarget {
   constructor({exclusive = false, outputContext = null} = {}, window) {
