@@ -24,6 +24,11 @@ const _oninitmessage = async e => {
     const result = _pushState.call(this, data, title, url);
     return result;
   })(History.prototype.pushState);
+  History.prototype.replaceState = (_replaceState => function replaceState(data, title, url) {
+    url = self.location.origin + url;
+    const result = _replaceState.call(this, data, title, url);
+    return result;
+  })(History.prototype.replaceState);
   Element.prototype.requestFullscreen = async function requestFullscreen() {};
   Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
     get() {
