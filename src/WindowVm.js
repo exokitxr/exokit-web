@@ -1,10 +1,11 @@
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
 
-import utils from './utils.js';
-const {_getProxyUrl} = utils;
+/* import utils from './utils.js';
+const {_getProxyUrl} = utils; */
  
 const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
+const entrypointSrc = `${import.meta.url.replace(/[^\/]+$/, '')}WindowBase.js`;
 
 class MessagePort2 extends EventTarget {
   constructor() {
@@ -33,7 +34,14 @@ class WorkerVm extends EventTarget {
     const iframe = document.createElement('iframe');
     {
       const src = window.location.origin + options.args.options.url.replace(/^[a-z]+:\/\/[a-zA-Z0-9\-\.]+(?:[0-9]+)?/, '');
-      const dst = iframeSrc;
+      const dst = `\
+<!doctype html>
+<html>
+  <body>
+    <script type=module src="${entrypointSrc}"></script>
+  </body>
+</html>
+`;
 
       const mc = new MessageChannel();
       navigator.serviceWorker.controller.postMessage({
@@ -46,7 +54,7 @@ class WorkerVm extends EventTarget {
 
         iframe.addEventListener('load', () => {
           const {contentWindow} = iframe;
-          options.args.options.url = _getProxyUrl(options.args.options.url);
+          // options.args.options.url = _getProxyUrl(options.args.options.url);
           contentWindow.dispatchEvent(new MessageEvent('message', {
             data: {
               method: 'init',
