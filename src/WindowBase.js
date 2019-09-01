@@ -25,6 +25,16 @@ const _oninitmessage = async e => {
     return result;
   })(History.prototype.pushState);
   Element.prototype.requestFullscreen = async function requestFullscreen() {};
+  Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+    get() {
+      return self.innerWidth;
+    },
+  });
+  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+    get() {
+      return self.innerHeight;
+    },
+  });
   MediaDevices.prototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
     return _enumerateDevices.apply(this, arguments)
       .then(ds => ds.map((d, i) => {
