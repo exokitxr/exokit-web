@@ -24,6 +24,7 @@ const _oninitmessage = async e => {
     const result = _pushState.call(this, data, title, url);
     return result;
   })(History.prototype.pushState);
+  Element.prototype.requestFullscreen = async function requestFullscreen() {};
 
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
