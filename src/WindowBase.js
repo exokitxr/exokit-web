@@ -19,6 +19,12 @@ const _oninitmessage = async e => {
   };
   GlobalContext.xrState = args.xrState;
 
+  History.prototype.pushState = (_pushState => function pushState(data, title, url) {
+    url = self.location.origin + url;
+    const result = _pushState.call(this, data, title, url);
+    return result;
+  })(History.prototype.pushState);
+
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
   Object.defineProperty(self, 'navigator', {
