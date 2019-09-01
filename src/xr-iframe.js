@@ -30,7 +30,7 @@ class XRIFrame extends HTMLElement {
         }
 
         const baseUrl = _getBaseUrl(u);
-        u = _getProxyUrl(u);
+        // u = _getProxyUrl(u);
 
         const win = core.load(u, {
           baseUrl,

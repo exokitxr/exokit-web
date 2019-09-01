@@ -1,5 +1,8 @@
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
+
+import utils from './utils.js';
+const {_getProxyUrl} = utils;
  
 const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
 
@@ -28,7 +31,42 @@ class WorkerVm extends EventTarget {
     super();
 
     const iframe = document.createElement('iframe');
-    iframe.src = iframeSrc;
+    {
+      const src = window.location.origin + options.args.options.url.replace(/^[a-z]+:\/\/[a-zA-Z0-9\-\.]+(?:[0-9]+)?/, '');
+      const dst = iframeSrc;
+
+      const mc = new MessageChannel();
+      navigator.serviceWorker.controller.postMessage({
+        method: 'redirect',
+        src,
+        dst,
+      }, [mc.port2]);
+      mc.port1.onmessage = () => {
+        iframe.src = src;
+
+        iframe.addEventListener('load', () => {
+          const {contentWindow} = iframe;
+          options.args.options.url = _getProxyUrl(options.args.options.url);
+          contentWindow.dispatchEvent(new MessageEvent('message', {
+            data: {
+              method: 'init',
+              workerData: {
+                initModule: options.initModule,
+                args: options.args,
+              },
+              messagePort: messageChannel.port2,
+            },
+          }));
+        }, {
+          once: true,
+        });
+        iframe.addEventListener('error', err => {
+          this.dispatchEvent(new ErrorEvent({
+            error: err,
+          }));
+        });
+      };
+    }
 
     const messageChannel = new MessageChannel2();
     messageChannel.port1.addEventListener('message', e => {
@@ -85,32 +123,6 @@ class WorkerVm extends EventTarget {
     });
     messageChannel.port1.start();
 
-    iframe.addEventListener('load', () => {
-      const {contentWindow} = iframe;
-
-      /* contentWindow._postMessageDown = function _postMessageDown(data, transfer) {
-        contentWindow.dispatchEvent(new contentWindow.MessageEvent('message', {data}));
-      }; */
-      contentWindow.dispatchEvent(new MessageEvent('message', {
-        data: {
-          method: 'init',
-          workerData: {
-            initModule: options.initModule,
-            args: options.args,
-          },
-          messagePort: messageChannel.port2,
-        },
-      }));
-
-      // this.dispatchEvent(new CustomEvent('load'));
-    }, {
-      once: true,
-    });
-    iframe.addEventListener('error', err => {
-      this.dispatchEvent(new ErrorEvent({
-        error: err,
-      }));
-    });
     iframe._postMessageDown = function _postMessageDown(data, transfer) {
       messageChannel.port1.postMessage(data, transfer);
     };
