@@ -53,17 +53,26 @@ const _oninitmessage = async e => {
     },
   }); */
 
-  /* self.fetch = (_fetch => function fetch(u, opts) {
-    return _fetch(utils._normalizeUrl(u, GlobalContext.baseUrl), opts);
-  })(self.fetch); */
   /* self.Request = Request;
   self.Response = Response;
   self.Headers = Headers;
   self.Blob = Blob;
-  self.FormData = FormData;
-  self.XMLHttpRequest = (Old => class XMLHttpRequest extends Old {
+  self.FormData = FormData; */
+  const _proxifyUrl = u => {
+    if ((/^https?:\/\//.test(u) && !u.startsWith(self.location.origin)) || !/^[a-z]+:/.test(u)) {
+      u = self.location.origin + '/p/' + new URL(u, GlobalContext.baseUrl).href;
+    }
+    return u;
+  };
+  self.fetch = (_fetch => function fetch(u, opts) {
+    const oldUrl = u;
+    u = _proxifyUrl(u);
+    return _fetch.call(this, u, opts);
+  })(self.fetch);
+  self.XMLHttpRequest = (_XMLHttpRequest => class XMLHttpRequest extends _XMLHttpRequest {
     open(method, url, async, user, password) {
-      url = utils._normalizeUrl(url, GlobalContext.baseUrl);
+      const oldUrl = url;
+      url = _proxifyUrl(url);
 
       if (password !== undefined) {
         return super.open(method, url, async, user, password);
@@ -75,7 +84,7 @@ const _oninitmessage = async e => {
         return super.open(method, url);
       }
     }
-  })(self.XMLHttpRequest); */
+  })(self.XMLHttpRequest);
  
   /* const messageQueue = [];
   const _onmessageQueue = e => {
