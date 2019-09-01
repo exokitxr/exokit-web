@@ -337,7 +337,7 @@ const _fetchText = src => fetch(src)
       window._postMessageUp(data, transfer);
     }
   };
-  Object.defineProperty(window, 'onload', {
+  /* Object.defineProperty(window, 'onload', {
     get() {
       return _elementGetter(window, 'load');
     },
@@ -360,7 +360,7 @@ const _fetchText = src => fetch(src)
     set(onpopstate) {
       _elementSetter(window, 'popstate', onpopstate);
     },
-  });
+  }); */
 
   /* window.history.addEventListener('popstate', ({detail: {url, state}}) => {
     window.location.set(url);
