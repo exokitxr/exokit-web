@@ -118,18 +118,18 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
   const match = type.match(/^(?:experimental-)?(webgl2?)$/);
   if (match) {
     const canvas = this;
-    const gl = oldGetContext.call(canvas, 'webgl2', init);
-    gl.version = match[1] === 'webgl2' ? 2 : 1;
+    const gl = oldGetContext.call(canvas, type, init);
+    // gl.version = match[1] === 'webgl2' ? 2 : 1;
     gl.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     gl._proxyContext = null;
-    Object.defineProperty(gl, 'canvas', {
+    Object.defineProperty(gl, 'canvas', { // Object.defineProperty to avoid proxying
       get() {
         return canvas;
       },
     });
-    /* canvas.getContext = function getContext() {
+    canvas.getContext = function getContext() {
       return gl;
-    }; */
+    };
 
     GlobalContext.contexts.push(gl);
 
@@ -159,14 +159,14 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
       });
     }
 
-    // if (gl.createVertexArray) {
+    if (gl.createVertexArray) {
       const vao = gl.createVertexArray();
       gl.bindVertexArray(vao);
-    /* } else {
+    } else {
       const extension = gl.getExtension('OES_vertex_array_object');
       const vao = extension.createVertexArrayOES();
       extension.bindVertexArrayOES(vao);
-    } */
+    }
 
     return gl;
   } else {
@@ -184,11 +184,9 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
   },
 });
 
-[WebGL2RenderingContext].forEach(WebGLRenderingContext => {
+[WebGLRenderingContext, WebGL2RenderingContext].forEach(WebGLRenderingContext => {
 
-WebGLRenderingContext.prototype._exokitGetExtension = (oldGetExtension => function _exokitGetExtension() {
-  return oldGetExtension.apply(this, arguments);
-})(WebGLRenderingContext.prototype.getExtension);
+const {getExtension} = WebGLRenderingContext.prototype;
 for (const k in WebGLRenderingContext.prototype) {
   const o = Object.getOwnPropertyDescriptor(WebGLRenderingContext.prototype, k);
   if (o.get) {
@@ -202,9 +200,14 @@ for (const k in WebGLRenderingContext.prototype) {
   } else {
     const {value} = o;
     if (typeof value === 'function') {
-      const {getError} = WebGLRenderingContext.prototype;
+      // const {getError} = WebGLRenderingContext.prototype;
       WebGLRenderingContext.prototype[k] = function() {
-        const result = value.apply(this._proxyContext || this, arguments);
+        let result;
+        if (this._proxyContext) {
+          result = this._proxyContext[k].apply(this._proxyContext, arguments)
+        } else {
+          result = value.apply(this, arguments)
+        }
         /* const error = getError.call(this);
         if (error) {
           Error.stackTraceLimit = 300;
@@ -215,12 +218,70 @@ for (const k in WebGLRenderingContext.prototype) {
     }
   }
 }
+WebGLRenderingContext.prototype._exokitGetExtension = getExtension;
 WebGLRenderingContext.prototype._exokitClear = (oldClear => function _exokitClear() {
   oldClear.call(this, this.COLOR_BUFFER_BIT|this.DEPTH_BUFFER_BIT|this.STENCIL_BUFFER_BIT);
 })(WebGLRenderingContext.prototype.clear);
 WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
   this._enabled.clear = enabled;
 };
+class OES_vertex_array_object {
+  constructor(gl) {
+    this.gl = gl;
+    this.extension = this.gl._exokitGetExtension('OES_vertex_array_object');
+
+    this.VERTEX_ARRAY_BINDING_OES = OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES;
+  }
+  createVertexArrayOES() {
+    if (this.gl._proxyContext) {
+      return this.gl._proxyContext.createVertexArray();
+    } else if (this.extension) {
+      return this.extension.createVertexArrayOES();
+    } else {
+      return this.gl.createVertexArray();
+    }
+  }
+  bindVertexArrayOES(vao) {
+    if (this.gl.state) {
+      this.gl.state.vao = vao;
+    }
+    if (this.gl._proxyContext) {
+      return this.gl._proxyContext.bindVertexArray(vao);
+    } else if (this.extension) {
+      return this.extension.bindVertexArrayOES(vao);
+    } else {
+      return this.gl.bindVertexArray(vao);
+    }
+  }
+  deleteVertexArrayOES(vao) {
+    if (this.gl._proxyContext) {
+      return this.gl._proxyContext.deleteVertexArray(vao);
+    } else if (this.extension) {
+      return this.extension.deleteVertexArrayOES(vao);
+    } else {
+      return this.gl.deleteVertexArray(vao);
+    }
+  }
+  isVertexArrayOES(vao) {
+    if (this.gl._proxyContext) {
+      return this.gl._proxyContext.isVertexArray(vao);
+    } else if (this.extension) {
+      return this.extension.isVertexArrayOES(vao);
+    } else {
+      return this.gl.isVertexArray(vao);
+    }
+  }
+  static get VERTEX_ARRAY_BINDING_OES() {
+    return WebGL2RenderingContext.VERTEX_ARRAY_BINDING;
+  }
+}
+WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
+  if (name === 'OES_vertex_array_object') {
+    return new OES_vertex_array_object(this);
+  } else {
+    return _getExtension.call(this, name);
+  }
+})(getExtension);
 WebGLRenderingContext.prototype.hasProxyContext = function hasProxyContext() {
   return !!this._proxyContext;
 };
@@ -614,16 +675,22 @@ WebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindText
   return _bindTexture.apply(this, arguments);
 })(WebGLRenderingContext.prototype.bindTexture);
 
+});
+
+[WebGLRenderingContext].forEach(WebGLRenderingContext => {
+
 // WebGL1 -> WebGL2 translations
 
 const glslVersion = '300 es';
 WebGLRenderingContext.prototype.createShader = (_createShader => function createShader(type) {
   const result = _createShader.call(this, type);
-  result.type = type;
+  if (this._proxyContext) {
+    result.type = type;
+  }
   return result;
 })(WebGLRenderingContext.prototype.createShader);
 WebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shaderSource(shader, source) {
-  if (this.version === 1) {
+  if (this._proxyContext) {
     if (shader.type === this.VERTEX_SHADER) {
       // const oldSource = source;
       source = webGlToOpenGl.vertex(source, glslVersion);
@@ -638,7 +705,7 @@ WebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shader
 })(WebGLRenderingContext.prototype.shaderSource);
 WebGLRenderingContext.prototype.getActiveAttrib = (_getActiveAttrib => function getActiveAttrib(program, index) {
   let result = _getActiveAttrib.call(this, program, index);
-  if (this.version === 1 && result) {
+  if (this._proxyContext && result) {
     result = {
       size: result.size,
       type: result.type,
@@ -649,7 +716,7 @@ WebGLRenderingContext.prototype.getActiveAttrib = (_getActiveAttrib => function 
 })(WebGLRenderingContext.prototype.getActiveAttrib);
 WebGLRenderingContext.prototype.getActiveUniform = (_getActiveUniform => function getActiveUniform(program, index) {
   let result = _getActiveUniform.call(this, program, index);
-  if (this.version === 1 && result) {
+  if (this._proxyContext && result) {
     result = {
       size: result.size,
       type: result.type,
@@ -659,13 +726,13 @@ WebGLRenderingContext.prototype.getActiveUniform = (_getActiveUniform => functio
   return result;
 })(WebGLRenderingContext.prototype.getActiveUniform);
 WebGLRenderingContext.prototype.getAttribLocation = (_getAttribLocation => function getAttribLocation(program, path) {
-  if (this.version === 1) {
+  if (this._proxyContext) {
     path = webGlToOpenGl.mapName(path);
   }
   return _getAttribLocation.call(this, program, path);
 })(WebGLRenderingContext.prototype.getAttribLocation);
 WebGLRenderingContext.prototype.getUniformLocation = (_getUniformLocation => function getUniformLocation(program, path) {
-  if (this.version === 1) {
+  if (this._proxyContext) {
     path = webGlToOpenGl.mapName(path);
   }
   return _getUniformLocation.call(this, program, path);
