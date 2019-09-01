@@ -19,10 +19,6 @@ const _oninitmessage = async e => {
   };
   GlobalContext.xrState = args.xrState;
 
-  self._postMessageUp = function _postMessageUp(data, transfer) {
-    messagePort.postMessage(data, transfer);
-  };
-
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
   Object.defineProperty(self, 'navigator', {
@@ -85,6 +81,9 @@ const _oninitmessage = async e => {
 
     // messageQueue.length = 0;
     self._onbootstrap = undefined;
+  };
+  self._postMessageUp = function _postMessageUp(data, transfer) {
+    messagePort.postMessage(data, transfer);
   };
   const _onmessageHandle = e => {
     const {data: m} = e;
