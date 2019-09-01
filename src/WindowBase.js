@@ -44,20 +44,6 @@ const _oninitmessage = async e => {
         return d;
       }));
   })(MediaDevices.prototype.enumerateDevices);
-
-  /* self.Navigator = Navigator;
-  const navigator = new Navigator();
-  Object.defineProperty(self, 'navigator', {
-    get() {
-      return navigator;
-    },
-  }); */
-
-  /* self.Request = Request;
-  self.Response = Response;
-  self.Headers = Headers;
-  self.Blob = Blob;
-  self.FormData = FormData; */
   const _proxifyUrl = u => {
     if ((/^https?:\/\//.test(u) && !u.startsWith(self.location.origin)) || !/^[a-z]+:/.test(u)) {
       u = self.location.origin + '/p/' + new URL(u, GlobalContext.baseUrl).href;
@@ -85,6 +71,26 @@ const _oninitmessage = async e => {
       }
     }
   })(self.XMLHttpRequest);
+  self.Worker = (_Worker => class Worker extends _Worker {
+    constructor(url, options) {
+      url = _proxifyUrl(url);
+      super(url, options);
+    }
+  })(self.Worker);
+
+  /* self.Navigator = Navigator;
+  const navigator = new Navigator();
+  Object.defineProperty(self, 'navigator', {
+    get() {
+      return navigator;
+    },
+  }); */
+
+  /* self.Request = Request;
+  self.Response = Response;
+  self.Headers = Headers;
+  self.Blob = Blob;
+  self.FormData = FormData; */
  
   /* const messageQueue = [];
   const _onmessageQueue = e => {
