@@ -169,16 +169,15 @@ const _fetchText = src => fetch(src)
     matches: false,
   }); */
 
-  window.navigator.getVRDisplays = async function getVRDisplays() {
+  window.navigator.getVRDisplaysSync = function getVRDisplays() {
     return getHMDType() ? [window[symbols.mrDisplaysSymbol].vrDisplay] : []
   };
+  window.navigator.getVRDisplays = async function getVRDisplays() {
+    return this.getVRDisplaysSync();
+  };
   window.navigator.getGamepads = getGamepads;
-  const xr = new XR.XR(window);
-  Object.defineProperty(window.navigator, 'xr', {
-    get() {
-      return xr;
-    },
-  });
+  delete Navigator.prototype.xr;
+  window.navigator.xr = new XR.XR(window);
 
   window.alert = console.log;
   window[symbols.optionsSymbol] = options;
