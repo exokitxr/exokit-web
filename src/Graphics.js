@@ -1,5 +1,6 @@
-import symbols from './symbols.js';
+import webGlToOpenGl from '../modules/webgl-to-opengl.js';
 
+import symbols from './symbols.js';
 import GlobalContext from './GlobalContext.js';
 
 /* const {OffscreenCanvasRenderingContext2D, WebGLRenderingContext: OffscreenWebGLRenderingContext, WebGL2RenderingContext: OffscreenWebGL2RenderingContext} = self;
@@ -114,9 +115,11 @@ const _makeState = gl => ({
   })(),
 });
 HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
-  if (/^(?:experimental-)?webgl2?$/.test(type)) {
+  const match = type.match(/^(?:experimental-)?(webgl2?)$/);
+  if (match) {
     const canvas = this;
-    const gl = oldGetContext.call(canvas, type, init);
+    const gl = oldGetContext.call(canvas, 'webgl2', init);
+    gl.version = match[1] === 'webgl2' ? 2 : 1;
     gl.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
     gl._proxyContext = null;
     Object.defineProperty(gl, 'canvas', {
@@ -156,14 +159,14 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
       });
     }
 
-    if (gl.createVertexArray) {
+    // if (gl.createVertexArray) {
       const vao = gl.createVertexArray();
       gl.bindVertexArray(vao);
-    } else {
+    /* } else {
       const extension = gl.getExtension('OES_vertex_array_object');
       const vao = extension.createVertexArrayOES();
       extension.bindVertexArrayOES(vao);
-    }
+    } */
 
     return gl;
   } else {
@@ -181,7 +184,7 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
   },
 });
 
-[WebGLRenderingContext, WebGL2RenderingContext].forEach(WebGLRenderingContext => {
+[WebGL2RenderingContext].forEach(WebGLRenderingContext => {
 
 WebGLRenderingContext.prototype._exokitGetExtension = (oldGetExtension => function _exokitGetExtension() {
   return oldGetExtension.apply(this, arguments);
@@ -268,7 +271,7 @@ WebGLRenderingContext.prototype.setProxyState = function setProxyState() {
   const {_proxyContext: gl, state} = this;
 
   if (state) {
-    gl.getExtension('OES_vertex_array_object').bindVertexArrayOES(state.vao);
+    gl.bindVertexArray(state.vao);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
     for (const k in state.renderbuffer) {
@@ -343,7 +346,7 @@ if (WebGLRenderingContext.prototype.bindVertexArray) {
     return _bindVertexArray.apply(this, arguments);
   })(WebGLRenderingContext.prototype.bindVertexArray);
 }
-WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
+/* WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;
   const extension = _getExtension.apply(this, arguments);
   if (this.state && name === 'OES_vertex_array_object' && !extension.bindVertexArrayOES._bound) {
@@ -354,7 +357,7 @@ WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExt
     extension.bindVertexArrayOES._bound = true;
   }
   return extension;
-})(WebGLRenderingContext.prototype.getExtension);
+})(WebGLRenderingContext.prototype.getExtension); */
 WebGLRenderingContext.prototype.bindBuffer = (_bindBuffer => function bindBuffer(target, b) {
   if (this.state && target === this.ARRAY_BUFFER) {
     this.state.arrayBuffer = b;
@@ -610,6 +613,63 @@ WebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindText
   }
   return _bindTexture.apply(this, arguments);
 })(WebGLRenderingContext.prototype.bindTexture);
+
+// WebGL1 -> WebGL2 translations
+
+const glslVersion = '300 es';
+WebGLRenderingContext.prototype.createShader = (_createShader => function createShader(type) {
+  const result = _createShader.call(this, type);
+  result.type = type;
+  return result;
+})(WebGLRenderingContext.prototype.createShader);
+WebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shaderSource(shader, source) {
+  if (this.version === 1) {
+    if (shader.type === this.VERTEX_SHADER) {
+      // const oldSource = source;
+      source = webGlToOpenGl.vertex(source, glslVersion);
+      // console.log('change source 1', this, oldSource, source);
+    } else if (shader.type === this.FRAGMENT_SHADER) {
+      // const oldSource = source;
+      source = webGlToOpenGl.fragment(source, glslVersion);
+      // console.log('change source 2', this, oldSource, source);
+    }
+  }
+  return _shaderSource.call(this, shader, source);
+})(WebGLRenderingContext.prototype.shaderSource);
+WebGLRenderingContext.prototype.getActiveAttrib = (_getActiveAttrib => function getActiveAttrib(program, index) {
+  let result = _getActiveAttrib.call(this, program, index);
+  if (this.version === 1 && result) {
+    result = {
+      size: result.size,
+      type: result.type,
+      name: webGlToOpenGl.unmapName(result.name),
+    };
+  }
+  return result;
+})(WebGLRenderingContext.prototype.getActiveAttrib);
+WebGLRenderingContext.prototype.getActiveUniform = (_getActiveUniform => function getActiveUniform(program, index) {
+  let result = _getActiveUniform.call(this, program, index);
+  if (this.version === 1 && result) {
+    result = {
+      size: result.size,
+      type: result.type,
+      name: webGlToOpenGl.unmapName(result.name),
+    };
+  }
+  return result;
+})(WebGLRenderingContext.prototype.getActiveUniform);
+WebGLRenderingContext.prototype.getAttribLocation = (_getAttribLocation => function getAttribLocation(program, path) {
+  if (this.version === 1) {
+    path = webGlToOpenGl.mapName(path);
+  }
+  return _getAttribLocation.call(this, program, path);
+})(WebGLRenderingContext.prototype.getAttribLocation);
+WebGLRenderingContext.prototype.getUniformLocation = (_getUniformLocation => function getUniformLocation(program, path) {
+  if (this.version === 1) {
+    path = webGlToOpenGl.mapName(path);
+  }
+  return _getUniformLocation.call(this, program, path);
+})(WebGLRenderingContext.prototype.getUniformLocation);
 
 });
 
