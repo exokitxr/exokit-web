@@ -46,6 +46,8 @@ class XRIFrame extends HTMLElement {
         win.install = () => {
           if (!this.canvas) {
             this.canvas = document.createElement('canvas');
+            this.canvas.width = GlobalContext.xrState.renderWidth[0] * 2;
+            this.canvas.height = GlobalContext.xrState.renderHeight[0];
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
             this.ctx = this.canvas.getContext('webgl');

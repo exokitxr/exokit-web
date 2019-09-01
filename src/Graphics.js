@@ -239,13 +239,13 @@ WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxy
     this.state = _makeState(this);
   }
 
-  new MutationObserver(() => {
+  /* new MutationObserver(() => {
     proxyContext.canvas.width = canvas.width;
     proxyContext.canvas.height = canvas.height;
   }).observe(canvas, {
     attributes: true,
     attributeFilter: ['width', 'height'],
-  });
+  }); */
 };
 WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
