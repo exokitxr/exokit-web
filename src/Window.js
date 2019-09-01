@@ -298,7 +298,6 @@ const _fetchText = src => fetch(src)
   window.Gamepad = Gamepad;
   window.VRStageParameters = VRStageParameters;
   window.VRDisplay = VRDisplay;
-  // window.ARDisplay = ARDisplay;
   window.VRFrameData = VRFrameData;
   // if (window.navigator.xr) {
     window.XR = XR.XR;
