@@ -618,7 +618,7 @@ const _fetchText = src => fetch(src)
   window[symbols.mrDisplaysSymbol] = _makeMrDisplays();
   window.vrdisplayactivate = () => {
     const displays = window.navigator.getVRDisplaysSync();
-    if (displays.length > 0 && (!window[symbols.optionsSymbol].args || ['all', 'webvr'].includes(window[symbols.optionsSymbol].args.xr)) && !displays[0].isPresenting) {
+    if (displays.length > 0 && !displays[0].isPresenting) {
       const e = new CustomEvent('vrdisplayactivate');
       e.display = displays[0];
       window.dispatchEvent(e);

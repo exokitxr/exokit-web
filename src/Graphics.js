@@ -168,6 +168,10 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
       extension.bindVertexArrayOES(vao);
     }
 
+    setTimeout(() => {
+      window.vrdisplayactivate();
+    });
+
     return gl;
   } else {
     return oldGetContext.call(this, type, init);
