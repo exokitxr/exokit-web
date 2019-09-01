@@ -25,6 +25,14 @@ const _oninitmessage = async e => {
     return result;
   })(History.prototype.pushState);
   Element.prototype.requestFullscreen = async function requestFullscreen() {};
+  MediaDevices.prototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
+    return _enumerateDevices.apply(this, arguments)
+      .then(ds => ds.map((d, i) => {
+        d = JSON.parse(JSON.stringify(d));
+        d.label = `Fake device (${i})`;
+        return d;
+      }));
+  })(MediaDevices.prototype.enumerateDevices);
 
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
