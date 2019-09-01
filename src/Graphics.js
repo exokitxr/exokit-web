@@ -256,7 +256,7 @@ WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   }
 })(WebGLRenderingContext.prototype.clear);
 WebGLRenderingContext.prototype.makeXrCompatible = function makeXrCompatible() {
-  window[symbols.makeXrCompatible](gl, {
+  window[symbols.makeXrCompatible](this, {
     reset: true,
   });
 };
