@@ -50,7 +50,9 @@ class XRIFrame extends HTMLElement {
             this.canvas.height = GlobalContext.xrState.renderHeight[0];
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
-            this.ctx = this.canvas.getContext('webgl2');
+            this.ctx = this.canvas.getContext('webgl2', {
+              xrCompatible: true,
+            });
             const extensions = this.ctx.getSupportedExtensions();
             for (let i = 0; i < extensions.length; i++) {
               this.ctx.getExtension(extensions[i]);
