@@ -157,10 +157,6 @@ const xrState = (() => {
   result.msDepthTex = _makeTypedArray(Uint32Array, 1);
   result.aaEnabled = _makeTypedArray(Uint32Array, 1);
   result.fakeVrDisplayEnabled = _makeTypedArray(Uint32Array, 1);
-  result.meshing = _makeTypedArray(Uint32Array, 1);
-  result.planeTracking = _makeTypedArray(Uint32Array, 1);
-  result.handTracking = _makeTypedArray(Uint32Array, 1);
-  result.eyeTracking = _makeTypedArray(Uint32Array, 1);
   result.blobId = _makeTypedArray(Uint32Array, 1);
 
   return result;
@@ -467,128 +463,6 @@ const handlePaymentRequest = () => {
 GlobalContext.handlePaymentRequest = handlePaymentRequest;
 
 const _startTopRenderLoop = () => {
-  /* const timestamps = {
-    frames: 0,
-    last: Date.now(),
-    idle: 0,
-    wait: 0,
-    events: 0,
-    media: 0,
-    user: 0,
-    submit: 0,
-    total: 0,
-  }; */
-  // const TIMESTAMP_FRAMES = 100;
-  // let lastFrameTime = Date.now();
-  // let frame = null;
-  // const canvases = [];
-
-  /* if (nativeBindings.nativeWindow.pollEvents) {
-    setInterval(() => {
-      nativeBindings.nativeWindow.pollEvents();
-    }, 1000/60); // XXX make this run at the native frame rate
-  }
-  if (nativeBindings.nativeBrowser && nativeBindings.nativeBrowser.Browser && nativeBindings.nativeBrowser.Browser.pollEvents) {
-    setInterval(() => {
-      nativeBindings.nativeBrowser.Browser.pollEvents();
-    }, 1000/60);
-  } */
-
-  /* const _waitGetPoses = async () => {
-    if (!args.uncapped) {
-      const fps = 60;// nativeBindings.nativeWindow.getRefreshRate();
-      const expectedTimeDiff = 1000 / fps;
-
-      const now = Date.now();
-      const timeDiff = now - lastFrameTime;
-      const waitTime = Math.max(expectedTimeDiff - timeDiff, 0) / 2;
-      lastFrameTime = now;
-
-      if (waitTime > 0) {
-        await new Promise((accept, reject) => {
-          setTimeout(accept, waitTime);
-        });
-      }
-    }
-
-    const _updateMeshing = () => {
-      if (xrState.meshing[0] && !topVrPresentState.mesher) {
-        _startFakeMesher();
-      }
-    };
-    _updateMeshing();
-
-    const _updatePlanes = () => {
-      if (xrState.planeTracking[0] && !topVrPresentState.planeTracker) {
-        _startFakePlaneTracker();
-      }
-    };
-    _updatePlanes();
-
-    const _updateHandTracking = () => {
-      if (xrState.handTracking[0]) {
-        for (let i = 0; i < xrState.hands.length; i++) {
-          const hand = xrState.hands[i];
-          const xrGamepad = xrState.gamepads[i];
-
-          localMatrix.compose(
-            localVector.fromArray(xrGamepad.position),
-            localQuaternion.fromArray(xrGamepad.orientation),
-            localVector2.set(1, 1, 1)
-          );
-
-          // wrist
-          {
-            localVector.set(0, 0, 0).applyMatrix4(localMatrix).toArray(hand.wrist[0]);
-            localVector.set(-0.02, 0, -0.02).applyMatrix4(localMatrix).toArray(hand.wrist[1]);
-            localVector.set(0.02, 0, -0.02).applyMatrix4(localMatrix).toArray(hand.wrist[2]);
-          }
-
-          // fingers
-          for (let j = 0; j < hand.fingers.length; j++) {
-            const finger = hand.fingers[j];
-            const angle = j/(hand.fingers.length-1)*Math.PI;
-            const x = -Math.cos(angle);
-            const y = -Math.sin(angle);
-
-            for (let k = 0; k < finger.length; k++) {
-              const bone = finger[k];
-              localVector.set(x, 0, y).multiplyScalar(0.03*k).applyMatrix4(localMatrix).toArray(bone);
-            }
-          }
-
-          hand.connected[0] = 1;
-        }
-      }
-    };
-    _updateHandTracking();
-
-    const _updateEyeTracking = () => {
-      if (xrState.eyeTracking[0]) {
-        const blink = (Date.now() % 2000) < 200;
-        const blinkAxis = blink ? -1 : 1;
-
-        const eye = xrState.eye;
-        localMatrix
-          .fromArray(GlobalContext.xrState.leftViewMatrix)
-          .getInverse(localMatrix)
-          .decompose(localVector, localQuaternion, localVector2);
-        localVector
-          .add(
-            localVector2.set(0, 0, -1)
-              .applyQuaternion(localQuaternion)
-          )
-          .toArray(eye.position);
-        localQuaternion.toArray(eye.orientation);
-
-        eye.axes[0] = blinkAxis;
-        eye.axes[1] = blinkAxis;
-
-        eye.connected[0] = 1;
-      }
-    };
-    _updateEyeTracking();
-  }; */
   const _computeDerivedGamepadsData = () => {
     const _deriveGamepadData = gamepad => {
       localQuaternion.fromArray(gamepad.orientation);
@@ -605,11 +479,6 @@ const _startTopRenderLoop = () => {
     for (let i = 0; i < xrState.gamepads.length; i++) {
       _deriveGamepadData(xrState.gamepads[i]);
     }
-    /* if (xrState.handTracking[0]) {
-      for (let i = 0; i < xrState.hands.length; i++) {
-        _deriveGamepadData(xrState.hands[i]);
-      }
-    } */
     if (xrState.eyeTracking[0]) {
       _deriveGamepadData(xrState.eye);
     }
@@ -634,20 +503,12 @@ const _startTopRenderLoop = () => {
       }
     }
   };
-  /* const _submitFrame = async () => {
-    for (let i = 0; i < windows.length; i++) {
-      windows[i].submit();
-    }
-  }; */
   let animationFrame;
   const _topRenderLoop = () => {
     animationFrame = requestAnimationFrame(_topRenderLoop);
 
-    // _waitHandleRequests();
-
     _computeDerivedGamepadsData();
     _tickAnimationFrames();
-    // _submitFrame();
   };
   _topRenderLoop();
 
