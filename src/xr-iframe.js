@@ -76,6 +76,12 @@ class XRIFrame extends HTMLElement {
 
           return destroy.apply(this, arguments);
         })(win.destroy);
+        win.addEventListener('message', m => {
+          const {data} = m;
+          this.dispatchEvent(new MessageEvent('message', {
+            data,
+          }));
+        });
         this.contentWindow = win;
       };
       _onnavigate(src);
@@ -91,6 +97,10 @@ class XRIFrame extends HTMLElement {
   }
   set src(src) {
     this.setAttribute('src', src);
+  }
+  
+  postMessage(m, transfers) {
+    this.contentWindow.postMessage(m, transfers);
   }
 }
 customElements.define('xr-iframe', XRIFrame);

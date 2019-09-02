@@ -108,8 +108,9 @@ class WorkerVm extends EventTarget {
           break;
         }
         case 'postMessage': {
-          this.dispatchEvent(new CustomEvent('message', {
-            detail: m,
+          const {data} = m;
+          this.dispatchEvent(new MessageEvent('message', {
+            data,
           }));
           break;
         }
