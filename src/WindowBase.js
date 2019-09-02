@@ -82,6 +82,15 @@ const _oninitmessage = async e => {
       super(url, options);
     }
   })(self.Worker);
+  Object.defineProperty(self.HTMLImageElement.prototype, 'src', {
+    get() {
+      return this.getAttribute('src');
+    },
+    set(newSrc) {
+      newSrc = _proxifyUrl(newSrc);
+      this.setAttribute('src', newSrc);
+    },
+  });
 
   /* self.Navigator = Navigator;
   const navigator = new Navigator();
