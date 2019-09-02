@@ -6,6 +6,7 @@ import {DragEvent, KeyboardEvent, MouseEvent, WheelEvent} from './Event.js';
 import GlobalContext from './GlobalContext.js';
 
 import utils from './utils.js';
+const {_getProxyUrl} = utils;
 
 const _oninitmessage = async e => {
   const {workerData, messagePort} = e.data;
@@ -49,21 +50,15 @@ const _oninitmessage = async e => {
         return d;
       }));
   })(MediaDevices.prototype.enumerateDevices);
-  const _proxifyUrl = u => {
-    if ((/^https?:\/\//.test(u) && !u.startsWith(self.location.origin)) || !/^[a-z]+:/.test(u)) {
-      u = self.location.origin + '/.p/' + new URL(u, GlobalContext.baseUrl).href;
-    }
-    return u;
-  };
   self.fetch = (_fetch => function fetch(u, opts) {
     const oldUrl = u;
-    u = _proxifyUrl(u);
+    u = _getProxyUrl(u);
     return _fetch.call(this, u, opts);
   })(self.fetch);
   self.XMLHttpRequest = (_XMLHttpRequest => class XMLHttpRequest extends _XMLHttpRequest {
     open(method, url, async, user, password) {
       const oldUrl = url;
-      url = _proxifyUrl(url);
+      url = _getProxyUrl(url);
 
       if (password !== undefined) {
         return super.open(method, url, async, user, password);
@@ -78,7 +73,7 @@ const _oninitmessage = async e => {
   })(self.XMLHttpRequest);
   self.Worker = (_Worker => class Worker extends _Worker {
     constructor(url, options) {
-      url = _proxifyUrl(url);
+      url = _getProxyUrl(url);
       super(url, options);
     }
   })(self.Worker);
@@ -87,7 +82,7 @@ const _oninitmessage = async e => {
       return this.getAttribute('src');
     },
     set(newSrc) {
-      newSrc = _proxifyUrl(newSrc);
+      newSrc = _getProxyUrl(newSrc);
       this.setAttribute('src', newSrc);
     },
   });

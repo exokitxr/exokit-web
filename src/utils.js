@@ -6,6 +6,8 @@ import parseIntStrict from '../modules/parse-int.js';
 
 import symbols from './symbols.js';
 
+import GlobalContext from './GlobalContext.js';
+
 const module = {exports: {}};
 
 function _getBaseUrl(u, currentBaseUrl = '') {
@@ -53,7 +55,12 @@ function _normalizeUrl(src, baseUrl) {
 module.exports._normalizeUrl = _normalizeUrl;
 
 function _getProxyUrl(u) {
-  return /^[a-z]+:/.test(u) ? ('/.p/' + u) : u;
+  if (/^https?:\/\//.test(u) && !u.startsWith(self.location.origin) || !/^(?:[a-z]+:|\/\.[pdf]\/)/.test(u)) {
+    const el = document.querySelector('base');
+    const baseUrl = (el && el.href) || self.location.origin;
+    u = self.location.origin + '/.p/' + new URL(u, baseUrl).href;
+  }
+  return u;
 }
 module.exports._getProxyUrl = _getProxyUrl;
 
