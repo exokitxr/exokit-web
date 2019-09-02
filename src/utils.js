@@ -53,7 +53,7 @@ function _normalizeUrl(src, baseUrl) {
 module.exports._normalizeUrl = _normalizeUrl;
 
 function _getProxyUrl(u) {
-  return /^[a-z]+:/.test(u) ? ('/p/' + u) : u;
+  return /^[a-z]+:/.test(u) ? ('/.p/' + u) : u;
 }
 module.exports._getProxyUrl = _getProxyUrl;
 

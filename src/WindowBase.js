@@ -51,7 +51,7 @@ const _oninitmessage = async e => {
   })(MediaDevices.prototype.enumerateDevices);
   const _proxifyUrl = u => {
     if ((/^https?:\/\//.test(u) && !u.startsWith(self.location.origin)) || !/^[a-z]+:/.test(u)) {
-      u = self.location.origin + '/p/' + new URL(u, GlobalContext.baseUrl).href;
+      u = self.location.origin + '/.p/' + new URL(u, GlobalContext.baseUrl).href;
     }
     return u;
   };
