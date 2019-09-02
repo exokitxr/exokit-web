@@ -4,7 +4,7 @@ import GlobalContext from './GlobalContext.js';
 /* import utils from './utils.js';
 const {_getProxyUrl} = utils; */
  
-const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
+// const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
 const entrypointSrc = `${import.meta.url.replace(/[^\/]+$/, '')}WindowBase.js`;
 
 class MessagePort2 extends EventTarget {
