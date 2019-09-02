@@ -29,9 +29,18 @@ class WorkerVm extends EventTarget {
     super();
 
     const iframe = document.createElement('iframe');
-    {
-      const src = window.location.origin + options.args.options.url.replace(/^[a-z]+:\/\/[a-zA-Z0-9\-\.]+(?:[0-9]+)?/, '');
-      const dst = `\
+    const _getFollowUrl = u => {
+      if (/^[a-z]+:\/\//.test(u) && !u.startsWith(location.origin)) {
+        return fetch('/.f/' + u)
+          .then(res => res.text());
+      } else {
+        return Promise.resolve(u);
+      }
+    };
+    _getFollowUrl(options.args.options.url)
+      .then(followUrl => new Promise((accept, reject) => {
+        const src = window.location.origin + options.args.options.url.replace(/^[a-z]+:\/\/[a-zA-Z0-9\-\.]+(?:[0-9]+)?/, '');
+        const dst = `\
 <!doctype html>
 <html>
   <body>
@@ -40,38 +49,42 @@ class WorkerVm extends EventTarget {
 </html>
 `;
 
-      const mc = new MessageChannel();
-      navigator.serviceWorker.controller.postMessage({
-        method: 'redirect',
-        src,
-        dst,
-      }, [mc.port2]);
-      mc.port1.onmessage = () => {
-        iframe.src = src;
+        const mc = new MessageChannel();
+        navigator.serviceWorker.controller.postMessage({
+          method: 'redirect',
+          src,
+          dst,
+        }, [mc.port2]);
+        mc.port1.onmessage = () => {
+          iframe.src = src;
 
-        iframe.addEventListener('load', () => {
-          const {contentWindow} = iframe;
-          // options.args.options.url = _getProxyUrl(options.args.options.url);
-          contentWindow.dispatchEvent(new MessageEvent('message', {
-            data: {
-              method: 'init',
-              workerData: {
-                initModule: options.initModule,
-                args: options.args,
+          iframe.addEventListener('load', () => {
+            const {contentWindow} = iframe;
+            options.args.options.url = followUrl;
+            contentWindow.dispatchEvent(new MessageEvent('message', {
+              data: {
+                method: 'init',
+                workerData: {
+                  initModule: options.initModule,
+                  args: options.args,
+                },
+                messagePort: messageChannel.port2,
               },
-              messagePort: messageChannel.port2,
-            },
-          }));
-        }, {
-          once: true,
-        });
-        iframe.addEventListener('error', err => {
-          this.dispatchEvent(new ErrorEvent({
-            error: err,
-          }));
-        });
-      };
-    }
+            }));
+
+            accept();
+          }, {
+            once: true,
+          });
+          iframe.addEventListener('error', reject);
+        };
+      }))
+      .catch(err => {
+        console.warn(err);
+        this.dispatchEvent(new ErrorEvent({
+          error: err,
+        }));
+      });
 
     const messageChannel = new MessageChannel2();
     messageChannel.port1.addEventListener('message', e => {
