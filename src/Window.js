@@ -616,11 +616,20 @@ const _fetchText = src => fetch(src)
   window[symbols.makeXrCompatible] = _makeXrCompatible;
   window[symbols.mrDisplaysSymbol] = _makeMrDisplays();
   window.vrdisplayactivate = () => {
-    const displays = window.navigator.getVRDisplaysSync();
-    if (displays.length > 0 && !displays[0].isPresenting) {
-      const e = new CustomEvent('vrdisplayactivate');
-      e.display = displays[0];
-      window.dispatchEvent(e);
+    const _emit = () => {
+      const displays = window.navigator.getVRDisplaysSync();
+      if (displays.length > 0 && !displays[0].isPresenting) {
+        const e = new CustomEvent('vrdisplayactivate');
+        e.display = displays[0];
+        window.dispatchEvent(e);
+      }
+    };
+    if (document.readyState === 'complete') {
+      _emit();
+    } else {
+      window.addEventListener('load', _emit, {
+        once: true,
+      });
     }
   };
 
