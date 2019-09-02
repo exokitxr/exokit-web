@@ -27,7 +27,7 @@ class XRIFrame extends HTMLElement {
 
       const parent = {};
       const top = parentWindow === parentWindow.top ? parent : {};
-      this.contentWindow = _makeWindow({
+      const win = _makeWindow({
         url,
         baseUrl,
         args: options.args,
@@ -73,6 +73,13 @@ class XRIFrame extends HTMLElement {
           }
         },
       });
+      win.addEventListener('message', m => {
+        const {data} = m;
+        this.dispatchEvent(new MessageEvent('message', {
+          data,
+        }));
+      });
+      this.contentWindow = win;
     }
   }
   static get observedAttributes() {
@@ -85,6 +92,10 @@ class XRIFrame extends HTMLElement {
   }
   set src(src) {
     this.setAttribute('src', src);
+  }
+
+  postMessage(m, transfers) {
+    this.contentWindow.postMessage(m, transfers);
   }
 }
 customElements.define('xr-iframe', XRIFrame);
