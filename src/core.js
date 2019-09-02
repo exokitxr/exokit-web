@@ -60,5 +60,33 @@ exokit.setArgs = newArgs => {
 exokit.setVersion = newVersion => {
   GlobalContext.version = newVersion;
 };
+exokit.animate = function animate() {};
+let animationContext = null;
+let animationFrame = null;
+const _setAnimationContext = newAnimationContext => {
+  if (animationContext) {
+    animationContext.cancelAnimationFrame(animationFrame);
+    animationContext = null;
+    animationFrame = null;
+  }
+  animationContext = newAnimationContext;
+  const _recurse = () => {
+    animationFrame = animationContext.requestAnimationFrame((frame, timestamp) => {
+      _recurse();
+      exokit.animate(frame, timestamp);
+    });
+  };
+  _recurse();
+};
+let session = null;
+exokit.getSession = () => session;
+exokit.setSession = newSession => {
+  if (newSession) {
+    _setAnimationContext(newSession);
+  } else {
+    _setAnimationContext(window);
+  }
+  session = newSession;
+};
 
 export default exokit;

@@ -462,90 +462,90 @@ const handlePaymentRequest = () => {
 };
 GlobalContext.handlePaymentRequest = handlePaymentRequest;
 
-const _startTopRenderLoop = () => {
-  const _computeDerivedGamepadsData = () => {
-    const _deriveGamepadData = gamepad => {
-      localQuaternion.fromArray(gamepad.orientation);
-      localVector
-        .set(0, 0, -1)
-        .applyQuaternion(localQuaternion)
-        .toArray(gamepad.direction);
-      localVector.fromArray(gamepad.position);
-      localVector2.set(1, 1, 1);
-      localMatrix
-        .compose(localVector, localQuaternion, localVector2)
-        .toArray(gamepad.transformMatrix);
-    };
-    for (let i = 0; i < xrState.gamepads.length; i++) {
-      _deriveGamepadData(xrState.gamepads[i]);
-    }
-    if (xrState.eyeTracking[0]) {
-      _deriveGamepadData(xrState.eye);
-    }
+const _computeDerivedGamepadsData = () => {
+  const _deriveGamepadData = gamepad => {
+    localQuaternion.fromArray(gamepad.orientation);
+    localVector
+      .set(0, 0, -1)
+      .applyQuaternion(localQuaternion)
+      .toArray(gamepad.direction);
+    localVector.fromArray(gamepad.position);
+    localVector2.set(1, 1, 1);
+    localMatrix
+      .compose(localVector, localQuaternion, localVector2)
+      .toArray(gamepad.transformMatrix);
   };
-  const _tickAnimationFrame = win => {
-    win.clear();
-    return win.runAsync({
-      method: 'tickAnimationFrame',
-      layered: true,
-    })
-      .catch(err => {
-        if (err.code !== 'ECANCEL') {
-          console.warn(err);
-        }
-      });
-  };
-  const _tickAnimationFrames = () => {
-    for (let i = 0; i < windows.length; i++) {
-      const win = windows[i];
-      if (win.loaded) {
-        _tickAnimationFrame(win);
+  for (let i = 0; i < xrState.gamepads.length; i++) {
+    _deriveGamepadData(xrState.gamepads[i]);
+  }
+};
+const _tickAnimationFrame = win => {
+  win.clear();
+  return win.runAsync({
+    method: 'tickAnimationFrame',
+    layered: true,
+  })
+    .catch(err => {
+      if (err.code !== 'ECANCEL') {
+        console.warn(err);
       }
-    }
-  };
-  let animationFrame;
-  const _topRenderLoop = () => {
-    animationFrame = requestAnimationFrame(_topRenderLoop);
-
-    _computeDerivedGamepadsData();
-    _tickAnimationFrames();
-  };
-  _topRenderLoop();
-
-  return {
-    stop() {
-      cancelAnimationFrame(animationFrame);
-    },
-  };
+    });
 };
-_startTopRenderLoop();
-
-/* const _startFakeMesher = () => {
-  const mesher = new FakeMesher();
-  mesher.addEventListener('meshes', ({detail: {updates}}) => {
-    const request = {
-      method: 'meshes',
-      updates,
-    };
-    for (let i = 0; i < windows.length; i++) {
-      windows[i].runAsync(request);
+const _tickAnimationFrames = () => {
+  for (let i = 0; i < windows.length; i++) {
+    const win = windows[i];
+    if (win.loaded) {
+      _tickAnimationFrame(win);
     }
-  });
-  topVrPresentState.mesher = mesher;
+  }
 };
-const _startFakePlaneTracker = () => {
-  const planeTracker = new FakePlaneTracker();
-  planeTracker.addEventListener('planes', ({detail: {updates}}) => {
-    const request = {
-      method: 'planes',
-      updates,
-    };
-    for (let i = 0; i < windows.length; i++) {
-      windows[i].runAsync(request);
+core.animate = (frame, timestamp) => {
+  const session = core.getSession();
+  if (session) {
+    console.log('animate session', session);
+    debugger;
+    const pose = frame.getViewerPose(referenceSpace);
+    const {views} = pose;
+    const {baseLayer} = session.renderState;
+    const {framebuffer} = baseLayer;
+
+    xrState.leftViewMatrix.set(view[0].transform.inverse.matrix);
+    xrState.leftProjectionMatrix.set(view[0].projectionMatrix);
+    xrState.rightViewMatrix.set(view[1].transform.inverse.matrix);
+    xrState.rightProjectionMatrix.set(view[1].projectionMatrix);
+    
+    const win = windows[0];
+    const {canvas, ctx} = win;
+    ctx.bindFrameBuffer(ctx.FRAMEBUFFER, framebuffer);
+    
+    
+    for (let i = 0; i < views.length; i++) {
+      
     }
-  });
-  topVrPresentState.planeTracker = planeTracker;
-}; */
+    
+    const viewport = baseLayer.getViewport(pose.views[0]);
+    
+    
+    var views = pose.views;
+    var baseLayer = session.renderState.baseLayer;
+
+    for ( var i = 0; i < views.length; i ++ ) {
+
+      var view = views[ i ];
+      // var viewport = baseLayer.getViewport( view );
+      var viewMatrix = view.transform.inverse.matrix;
+
+      var camera = cameraVR.cameras[ i ];
+      camera.matrix.fromArray( viewMatrix ).getInverse( camera.matrix );
+      camera.projectionMatrix.fromArray( view.projectionMatrix );
+      camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
+    }
+  }
+  
+  _computeDerivedGamepadsData();
+  _tickAnimationFrames();
+};
+core.setSession(null);
 
 bootstrapped = true;
 

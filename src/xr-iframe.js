@@ -13,6 +13,8 @@ class XRIFrame extends HTMLElement {
     this.canvas = null;
     this.ctx = null;
     this.shadow = null;
+    this.session = null;
+    this.baseLayer = null;
 
     /* window.addEventListener('resize', e => { // XXX
       this.shadow.childNodes[0].style.width = `${window.innerWidth}px`;
@@ -103,6 +105,50 @@ class XRIFrame extends HTMLElement {
   
   postMessage(m, transfers) {
     this.contentWindow.postMessage(m, transfers);
+  }
+
+  async enterXr() {
+    if (navigator.xr) {
+      if (!this.session) {
+        if (this.canvas) {
+          const session = await navigator.xr.requestSession('immersive-vr');
+          const referenceSpace = await session.requestReferenceSpace('local');
+          const baseLayer = new XRWebGLLayer(session, this.ctx);
+          
+          session.updateRenderState({baseLayer});
+
+          session.requestAnimationFrame((timestamp, frame) => {
+            const pose = frame.getViewerPose(referenceSpace);
+            const viewport = baseLayer.getViewport(pose.views[0]);
+            // const width = viewport.width;
+            const height = viewport.height;
+            const fullWidth = (() => {
+              let result = 0;
+              for (let i = 0; i < pose.views.length; i++) {
+                result += baseLayer.getViewport(pose.views[i]).width;
+              }
+              return result;
+            })();
+            
+            GlobalContext.xrState.renderWidth[0] = fullWidth;
+            GlobalContext.xrState.renderHeight[0] = height;
+            
+            this.canvas.width = fullWidth;
+            this.canvas.height = height;
+
+            console.log('XR setup complete');
+          });
+          core.setSession(session);
+
+          this.session = session;
+          this.baseLayer = baseLayer;
+        } else {
+          throw new Error('not loaded');
+        }
+      }
+    } else {
+      throw new Error('no webxr');
+    }
   }
 }
 customElements.define('xr-iframe', XRIFrame);
