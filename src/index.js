@@ -519,7 +519,7 @@ core.animate = (frame, timestamp) => {
     ctx.bindFrameBuffer(ctx.FRAMEBUFFER, framebuffer);
     
     
-    for (let i = 0; i < views.length; i++) {
+    /* for (let i = 0; i < views.length; i++) {
       
     }
     
@@ -539,7 +539,7 @@ core.animate = (frame, timestamp) => {
       camera.matrix.fromArray( viewMatrix ).getInverse( camera.matrix );
       camera.projectionMatrix.fromArray( view.projectionMatrix );
       camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
-    }
+    } */
   }
   
   _computeDerivedGamepadsData();
