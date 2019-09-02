@@ -291,7 +291,7 @@ class VRDisplay extends EventTarget {
 
     if (this.onvrdisplaypresentchange && !this.isPresenting) {
       this.isPresenting = true;
-      setImmediate(() => {
+      Promise.resolve().then(() => {
         this.onvrdisplaypresentchange();
       });
     } else {
@@ -309,7 +309,7 @@ class VRDisplay extends EventTarget {
 
     if (this.onvrdisplaypresentchange && this.isPresenting) {
       this.isPresenting = false;
-      setImmediate(() => {
+      Promise.resolve().then(() => {
         this.onvrdisplaypresentchange();
       });
     } else {
