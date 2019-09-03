@@ -71,9 +71,9 @@ const _setAnimationContext = newAnimationContext => {
   }
   animationContext = newAnimationContext;
   const _recurse = () => {
-    animationFrame = animationContext.requestAnimationFrame((frame, timestamp) => {
+    animationFrame = animationContext.requestAnimationFrame((timestamp, frame) => {
       _recurse();
-      exokit.animate(frame, timestamp);
+      exokit.animate(timestamp, frame, referenceSpace);
     });
   };
   _recurse();
@@ -87,6 +87,10 @@ exokit.setSession = newSession => {
     _setAnimationContext(window);
   }
   session = newSession;
+};
+let referenceSpace = null;
+exokit.setReferenceSpace = newReferenceSpace => {
+  referenceSpace = newReferenceSpace;
 };
 
 export default exokit;

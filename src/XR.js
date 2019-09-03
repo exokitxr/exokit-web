@@ -1,6 +1,3 @@
-// const {EventEmitter} = require('events');
-// import {EventTarget} from './Event.js';
-import {getHMDType} from './VR.js';
 import GlobalContext from './GlobalContext.js';
 import THREE from '../lib/three-min.js';
 import symbols from './symbols.js';
@@ -29,25 +26,19 @@ class XR extends EventTarget {
   }
   async requestSession({exclusive = false, outputContext = null, extensions = {}} = {}) {
     if (!this.session) {
-      const hmdType = getHMDType();
+      const session = this._window[symbols.mrDisplaysSymbol].xrSession;
+      session.exclusive = exclusive;
+      session.outputContext = outputContext;
 
-      if (hmdType) {
-        const session = this._window[symbols.mrDisplaysSymbol].xrSession;
-        session.exclusive = exclusive;
-        session.outputContext = outputContext;
-
-        await session.onrequestpresent();
-        session.isPresenting = true;
-        session.addEventListener('end', () => {
-          session.isPresenting = false;
-          this.session = null;
-        }, {
-          once: true,
-        });
-        this.session = session;
-      } else {
-        return Promise.reject(null);
-      }
+      await session.onrequestpresent();
+      session.isPresenting = true;
+      session.addEventListener('end', () => {
+        session.isPresenting = false;
+        this.session = null;
+      }, {
+        once: true,
+      });
+      this.session = session;
     }
     if (this.session) {
       if (extensions.meshing) {
@@ -66,13 +57,7 @@ class XR extends EventTarget {
     return Promise.resolve(this.session);
   }
   /* async requestDevice() {
-    const hmdType = getHMDType();
-
-    if (hmdType) {
-      return new XRDevice(this);
-    } else {
-      return Promise.resolve(null);
-    }
+    return new XRDevice(this);
   } */
   get onvrdevicechange() {
     return _elementGetter(this, 'vrdevicechange');

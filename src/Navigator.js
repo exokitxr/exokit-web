@@ -1,21 +1,5 @@
-// const os = require('os');
-
-/* const {
-  getGamepads,
-  getHMDType,
-} = require('./VR.js');
-const {
-  nativeAudio: {
-    MicrophoneMediaStream,
-  },
-  nativeVideo: {
-    VideoDevice,
-  },
-  nativeWindow,
-} = require('./native-bindings'); */
 import {
   getGamepads,
-  getHMDType,
 } from './VR.js';
 import symbols from './symbols.js';
 import GlobalContext from './GlobalContext.js';
@@ -85,7 +69,7 @@ class Navigator {
     this.webkitGetUserMedia = getUserMedia; // for feature detection
   }
   getVRDisplaysSync() {
-    return getHMDType() ? [window[symbols.mrDisplaysSymbol].vrDisplay] : [];
+    return [window[symbols.mrDisplaysSymbol].vrDisplay];
   }
   getGamepads() {
     return getGamepads();

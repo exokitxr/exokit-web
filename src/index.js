@@ -5,7 +5,7 @@ import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 
-import {getHMDType, lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
+// import {lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
 
 import GlobalContext from './GlobalContext.js';
 
@@ -355,52 +355,14 @@ const _handleRequestImmediate = req => {
       break;
     }
     case 'requestPresent': {
-      if (topVrPresentState.hmdType === null) {
-        const hmdType = getHMDType();
-        // console.log('request present', hmdType);
-
-        /* if (!topVrPresentState.windowHandle) {
-          topVrPresentState.windowHandle = nativeBindings.nativeWindow.createWindowHandle(1, 1, false);
-        }
-        nativeBindings.nativeWindow.setCurrentWindowContext(topVrPresentState.windowHandle); */
-
-        /* if (hmdType === 'fake') {
-          const width = xrState.renderWidth[0]*2;
-          const height = xrState.renderHeight[0];
-
-          const [fbo, tex, depthTex, msFbo, msTex, msDepthTex] = nativeBindings.nativeWindow.createVrTopRenderTarget(width, height);
-
-          topVrPresentState.fbo = fbo;
-          topVrPresentState.msFbo = msFbo;
-          xrState.tex[0] = tex;
-          xrState.depthTex[0] = depthTex;
-          xrState.msTex[0] = msTex;
-          xrState.msDepthTex[0] = msDepthTex;
-        } */
-
-        topVrPresentState.hmdType = hmdType;
-
-        xrState.isPresenting[0] = 1;
-        xrState.hmdType[0] = lookupHMDTypeIndex(hmdType);
-      }
+      xrState.isPresenting[0] = 1;
       const ctx = win.install();
       _respond(null, ctx);
       break;
     }
     case 'exitPresent': {
-      if (topVrPresentState.hmdType !== null) {
-        if (topVrPresentState.hmdType === 'fake') {
-          // XXX destroy fbo
-        } else {
-          throw new Error(`fail to exit present for hmd type ${topVrPresentState.hmdType}`);
-        }
-
-        topVrPresentState.hmdType = null;
-        topVrPresentState.fbo = null;
-
-        xrState.isPresenting[0] = 0;
-        xrState.hmdType[0] = 0;
-      }
+      topVrPresentState.fbo = null;
+      xrState.isPresenting[0] = 0;
       _respond(null, null);
       break;
     }
@@ -499,7 +461,7 @@ const _tickAnimationFrames = () => {
     }
   }
 };
-core.animate = (frame, timestamp) => {
+core.animate = (timestamp, frame, referenceSpace) => {
   const session = core.getSession();
   if (session) {
     console.log('animate session', session);

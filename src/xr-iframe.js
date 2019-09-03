@@ -45,37 +45,42 @@ class XRIFrame extends HTMLElement {
           onhapticpulse: GlobalContext.handleHapticPulse,
           onpaymentrequest: GlobalContext.handlePaymentRequest,
         });
+        win.canvas = null;
+        win.ctx = null;
+        win.session = null;
+        win.baseLayer = null;
         win.install = () => {
-          if (!this.canvas) {
-            this.canvas = document.createElement('canvas');
-            this.canvas.width = GlobalContext.xrState.renderWidth[0] * 2;
-            this.canvas.height = GlobalContext.xrState.renderHeight[0];
-            this.canvas.style.width = '100%';
-            this.canvas.style.height = '100%';
-            this.ctx = this.canvas.getContext('webgl2', {
+          if (!win.canvas) {
+            win.canvas = document.createElement('canvas');
+            win.canvas.width = GlobalContext.xrState.renderWidth[0] * 2;
+            win.canvas.height = GlobalContext.xrState.renderHeight[0];
+            win.canvas.style.width = '100%';
+            win.canvas.style.height = '100%';
+            win.ctx = win.canvas.getContext('webgl2', {
               xrCompatible: true,
             });
-            const extensions = this.ctx.getSupportedExtensions();
+            const extensions = win.ctx.getSupportedExtensions();
             for (let i = 0; i < extensions.length; i++) {
-              this.ctx.getExtension(extensions[i]);
+              win.ctx.getExtension(extensions[i]);
             }
 
             if (!this.shadow) {
               this.shadow = this.attachShadow({mode: 'closed'});
             }
-            this.shadow.appendChild(this.canvas);
+            this.shadow.appendChild(win.canvas);
           }
-          return this.ctx;
+          return win.ctx;
         };
         win.clear = () => {
-          if (this.ctx) {
-            this.ctx.clear(this.ctx.COLOR_BUFFER_BIT|this.ctx.STENCIL_BUFFER_BIT|this.ctx.DEPTH_BUFFER_BIT);
+          if (win.ctx) {
+            win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
           }
         };
         win.destroy = (destroy => function() {
-          if (this.canvas) {
-            this.shadow.removeChild(this.canvas);
-            this.canvas = null;
+          if (win.canvas) {
+            this.shadow.removeChild(win.canvas);
+            win.canvas = null;
+            win.ctx = null;
           }
 
           return destroy.apply(this, arguments);
@@ -109,11 +114,12 @@ class XRIFrame extends HTMLElement {
 
   async enterXr() {
     if (navigator.xr) {
-      if (!this.session) {
-        if (this.canvas) {
+      const {contentWindow: win} = this;
+      if (!win.session) {
+        if (win.canvas) {
           const session = await navigator.xr.requestSession('immersive-vr');
           const referenceSpace = await session.requestReferenceSpace('local');
-          const baseLayer = new XRWebGLLayer(session, this.ctx);
+          const baseLayer = new XRWebGLLayer(session, win.ctx);
           
           session.updateRenderState({baseLayer});
 
@@ -130,18 +136,20 @@ class XRIFrame extends HTMLElement {
               return result;
             })();
             
+            GlobalContext.xrState.isPresentingReal[0] = 1;
             GlobalContext.xrState.renderWidth[0] = fullWidth;
             GlobalContext.xrState.renderHeight[0] = height;
             
-            this.canvas.width = fullWidth;
-            this.canvas.height = height;
+            win.canvas.width = fullWidth;
+            win.canvas.height = height;
 
             console.log('XR setup complete');
           });
           core.setSession(session);
+          core.setReferenceSpace(referenceSpace);
 
-          this.session = session;
-          this.baseLayer = baseLayer;
+          win.session = session;
+          win.baseLayer = baseLayer;
         } else {
           throw new Error('not loaded');
         }

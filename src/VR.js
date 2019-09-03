@@ -648,13 +648,6 @@ class FakeXRDisplay {
   set texture(texture) {}
 }
 
-const getHMDType = () => {
-  if (GlobalContext.xrState.fakeVrDisplayEnabled[0]) {
-    return 'fake';
-  } else {
-    return null;
-  }
-};
 const hmdTypes = [
   'fake',
 ];
@@ -709,7 +702,7 @@ function getControllerID(hmdType, hand) {
 }
 function getGamepads() {
   if (GlobalContext.xrState.isPresenting[0]) {
-    const hmdType = getHMDType();
+    const hmdType = 'fake';
 
     if (!globalGamepads) {
       globalGamepads = _makeGlobalGamepads();
@@ -740,7 +733,6 @@ export {
   FakeXRDisplay,
   FakeMesher,
   FakePlaneTracker,
-  getHMDType,
   lookupHMDTypeString,
   lookupHMDTypeIndex,
   createFakeXRDisplay,
