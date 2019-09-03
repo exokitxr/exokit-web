@@ -125,7 +125,8 @@ class XRIFrame extends HTMLElement {
       if (!win.session) {
         if (win.canvas) {
           const session = await navigator.xr.requestSession('immersive-vr');
-          const referenceSpace = await session.requestReferenceSpace('local');
+          let referenceSpace = await session.requestReferenceSpace('local');
+          referenceSpace = referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(new DOMPoint(0, -1.6, 0))); // hack: should use local-floor space
           const baseLayer = new XRWebGLLayer(session, win.ctx);
           
           session.updateRenderState({baseLayer});
