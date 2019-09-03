@@ -469,19 +469,65 @@ core.animate = (timestamp, frame, referenceSpace) => {
     // debugger;
     const pose = frame.getViewerPose(referenceSpace);
     const {views} = pose;
-    const {baseLayer} = session.renderState;
-    const {framebuffer} = baseLayer;
+    const {inputSources, renderState: {baseLayer: {framebuffer}}} = session;
+    // const gamepads = Array.from(inputSources).map(inputSource => inputSource.gamepad);
 
-    xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
-    xrState.leftProjectionMatrix.set(views[0].projectionMatrix);
-    xrState.rightViewMatrix.set(views[1].transform.inverse.matrix);
-    xrState.rightProjectionMatrix.set(views[1].projectionMatrix);
-    
+    const _loadHmd = () => {
+      xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
+      xrState.leftProjectionMatrix.set(views[0].projectionMatrix);
+      xrState.rightViewMatrix.set(views[1].transform.inverse.matrix);
+      xrState.rightProjectionMatrix.set(views[1].projectionMatrix);
+    };
+    _loadHmd();
+ 
+    // console.log('got gamepads', gamepads);
+    // debugger;
+    const _loadGamepad = i => {
+      const inputSource = inputSources[i];
+      const xrGamepad = xrState.gamepads[i];
+
+      let pose, gamepad;
+      if (inputSource && (pose = frame.getPose(inputSource.targetRaySpace, referenceSpace)) && (gamepad = inputSource.gamepad)) {
+        const {transform} = pose;
+        const {position, orientation} = transform;
+        const {gamepad} = inputSource;
+
+        xrGamepad.position[0] = position.x;
+        xrGamepad.position[1] = position.y;
+        xrGamepad.position[2] = position.z;
+
+        xrGamepad.orientation[0] = orientation.x;
+        xrGamepad.orientation[1] = orientation.y;
+        xrGamepad.orientation[2] = orientation.z;
+        xrGamepad.orientation[3] = orientation.w;
+        
+        for (let j = 0; j < gamepad.buttons.length; j++) {
+          const button = gamepad.buttons[j];
+          const xrButton = xrGamepad.buttons[j];
+          xrButton.pressed[0] = button.pressed;
+          xrButton.touched[0] = button.touched;
+          xrButton.value[0] = button.value;
+        }
+        
+        for (let j = 0; j < gamepad.axes.length; j++) {
+          xrGamepad.axes[j] = gamepad.axes[j];
+        }
+        
+        xrGamepad.connected[0] = 1;
+      } else {
+        xrGamepad.connected[0] = 0;
+      }
+    };
+    _loadGamepad(0);
+    _loadGamepad(1);
+
     const win = windows[0];
     const {canvas, ctx} = win;
-    ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
+    ctx.xrFramebuffer = framebuffer;
+    
+    /* ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
     ctx.clearColor(1, 1, 0, 1);
-    ctx.clear(ctx.COLOR_BUFFER_BIT|ctx.DEPTH_BUFFER_BIT|ctx.STENCIL_BUFFER_BIT);
+    ctx.clear(ctx.COLOR_BUFFER_BIT|ctx.DEPTH_BUFFER_BIT|ctx.STENCIL_BUFFER_BIT); */
     
     // XXX three.js
     /* const viewport = baseLayer.getViewport(pose.views[0]);
@@ -539,46 +585,7 @@ core.animate = (timestamp, frame, referenceSpace) => {
     // stageParameters.sittingToStandingTransform.set(localFloat32MatrixArray);
 
     // build gamepads data
-    const _loadGamepad = i => {
-      const gamepad = xrState.gamepads[i];
-      if (topVrPresentState.vrSystem.GetControllerState(i, localGamepadArray)) {
-        gamepad.connected[0] = 1;
-
-        localMatrix.fromArray(localFloat32GamepadPoseArrays[i]);
-        localMatrix.decompose(localVector, localQuaternion, localVector2);
-        localVector.toArray(gamepad.position);
-        localQuaternion.toArray(gamepad.orientation);
-
-        gamepad.buttons[0].pressed[0] = localGamepadArray[4]; // pad
-        gamepad.buttons[1].pressed[0] = localGamepadArray[5]; // trigger
-        gamepad.buttons[2].pressed[0] = localGamepadArray[3]; // grip
-        gamepad.buttons[3].pressed[0] = localGamepadArray[2]; // menu
-        gamepad.buttons[4].pressed[0] = localGamepadArray[1]; // system
-
-        gamepad.buttons[0].touched[0] = localGamepadArray[9]; // pad
-        gamepad.buttons[1].touched[0] = localGamepadArray[10]; // trigger
-        gamepad.buttons[2].touched[0] = localGamepadArray[8]; // grip
-        gamepad.buttons[3].touched[0] = localGamepadArray[7]; // menu
-        gamepad.buttons[4].touched[0] = localGamepadArray[6]; // system
-
-        gamepad.axes.set(localGamepadArray.slice(11, 21));
-        gamepad.buttons[1].value[0] = gamepad.axes[2]; // trigger
-
-        for (let i = 0; i < 5; i++) {
-          const button = gamepad.buttons[5 + i];
-          const value = localGamepadArray[21 + i];
-          button.value[0] = value;
-          button.touched[0] = value >= 0.5 ? 1 : 0;
-          button.pressed[0] = value >= 0.9 ? 1 : 0;
-        }
-
-        gamepad.bones.set(localGamepadArray.slice(26, 26 + 31*(3+4)));
-      } else {
-        gamepad.connected[0] = 0;
-      }
-    };
-    _loadGamepad(0);
-    _loadGamepad(1); */
+     */
   }
   
   _computeDerivedGamepadsData();
