@@ -15,7 +15,7 @@ try {
 
 console.log('app 1');
 
-const DEFAULT_URL = '/examples/tutorial.html';
+let xrIframe = null;
 
 // main
 
@@ -150,6 +150,13 @@ scene.add(directionalLight);
 // bootstrap
 
 function animate() {
+  const rate = 5000;
+  const f = (Date.now() % rate) / rate;
+  xrIframe.position = [0, Math.sin(f * Math.PI*2) / 2, 0];
+  xrIframe.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (-1 + Math.sin(f * Math.PI*4) * 2) * 0.1, 'YXZ')).toArray();
+  const s = 0.3 + (1 + Math.sin(f * Math.PI*4)) / 2 * 0.7;
+  xrIframe.scale = [s, s, s];
+
   renderer.render(scene, camera);
 }
 const _startFakeVrDisplay = async (width, height) => {
@@ -204,7 +211,7 @@ const _enterXr = async () => {
 };
 _startFakeVrDisplay()
   .then(() => {
-    const xrIframe = document.createElement('xr-iframe');
+    xrIframe = document.createElement('xr-iframe');
     xrIframe.src = 'examples/tutorial.html';
     layers.push(xrIframe);
 
