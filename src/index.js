@@ -49,6 +49,7 @@ const xrState = (() => {
 
   const result = {};
   result.isPresenting = _makeTypedArray(Uint32Array, 1);
+  result.isPresentingReal = _makeTypedArray(Uint32Array, 1);
   result.renderWidth = _makeTypedArray(Float32Array, 1);
   result.renderWidth[0] = 1920/2;
   result.renderHeight = _makeTypedArray(Float32Array, 1);
@@ -464,30 +465,27 @@ const _tickAnimationFrames = () => {
 core.animate = (timestamp, frame, referenceSpace) => {
   const session = core.getSession();
   if (session) {
-    console.log('animate session', session);
-    debugger;
+    // console.log('animate session', session, frame, referenceSpace);
+    // debugger;
     const pose = frame.getViewerPose(referenceSpace);
     const {views} = pose;
     const {baseLayer} = session.renderState;
     const {framebuffer} = baseLayer;
 
-    xrState.leftViewMatrix.set(view[0].transform.inverse.matrix);
-    xrState.leftProjectionMatrix.set(view[0].projectionMatrix);
-    xrState.rightViewMatrix.set(view[1].transform.inverse.matrix);
-    xrState.rightProjectionMatrix.set(view[1].projectionMatrix);
+    xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
+    xrState.leftProjectionMatrix.set(views[0].projectionMatrix);
+    xrState.rightViewMatrix.set(views[1].transform.inverse.matrix);
+    xrState.rightProjectionMatrix.set(views[1].projectionMatrix);
     
     const win = windows[0];
     const {canvas, ctx} = win;
-    ctx.bindFrameBuffer(ctx.FRAMEBUFFER, framebuffer);
+    ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
+    ctx.clearColor(1, 1, 0, 1);
+    ctx.clear(ctx.COLOR_BUFFER_BIT|ctx.DEPTH_BUFFER_BIT|ctx.STENCIL_BUFFER_BIT);
     
-    
-    /* for (let i = 0; i < views.length; i++) {
-      
-    }
-    
-    const viewport = baseLayer.getViewport(pose.views[0]);
-    
-    
+    // XXX three.js
+    /* const viewport = baseLayer.getViewport(pose.views[0]);
+
     var views = pose.views;
     var baseLayer = session.renderState.baseLayer;
 
@@ -502,6 +500,85 @@ core.animate = (timestamp, frame, referenceSpace) => {
       camera.projectionMatrix.fromArray( view.projectionMatrix );
       camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
     } */
+    
+    // XXX native
+    /* // hmd pose
+    const hmdMatrix = localMatrix.fromArray(localFloat32HmdPoseArray);
+
+    hmdMatrix.decompose(localVector, localQuaternion, localVector2);
+    localVector.toArray(xrState.position);
+    localQuaternion.toArray(xrState.orientation);
+
+    hmdMatrix.getInverse(hmdMatrix);
+
+    // eye pose
+    const _loadHmd = (i, viewMatrix, projectionMatrix, eyeOffset, fov) => {
+      topVrPresentState.vrSystem.GetEyeToHeadTransform(i, localFloat32MatrixArray);
+      localMatrix2
+        .fromArray(localFloat32MatrixArray)
+        .decompose(localVector, localQuaternion, localVector2);
+      localVector.toArray(eyeOffset);
+      localMatrix2
+        .getInverse(localMatrix2)
+        .multiply(hmdMatrix)
+        .toArray(viewMatrix);
+
+      topVrPresentState.vrSystem.GetProjectionMatrix(i, xrState.depthNear[0], xrState.depthFar[0], localFloat32MatrixArray);
+      projectionMatrix.set(localFloat32MatrixArray);
+
+      topVrPresentState.vrSystem.GetProjectionRaw(i, localFovArray);
+      for (let i = 0; i < localFovArray.length; i++) {
+        fov[i] = Math.atan(localFovArray[i]) / Math.PI * 180;
+      }
+    };
+    _loadHmd(0, xrState.leftViewMatrix, xrState.leftProjectionMatrix, xrState.leftOffset, xrState.leftFov);
+    _loadHmd(1, xrState.rightViewMatrix, xrState.rightProjectionMatrix, xrState.rightOffset, xrState.rightFov);
+
+    // build stage parameters
+    // topVrPresentState.vrSystem.GetSeatedZeroPoseToStandingAbsoluteTrackingPose(localFloat32MatrixArray);
+    // stageParameters.sittingToStandingTransform.set(localFloat32MatrixArray);
+
+    // build gamepads data
+    const _loadGamepad = i => {
+      const gamepad = xrState.gamepads[i];
+      if (topVrPresentState.vrSystem.GetControllerState(i, localGamepadArray)) {
+        gamepad.connected[0] = 1;
+
+        localMatrix.fromArray(localFloat32GamepadPoseArrays[i]);
+        localMatrix.decompose(localVector, localQuaternion, localVector2);
+        localVector.toArray(gamepad.position);
+        localQuaternion.toArray(gamepad.orientation);
+
+        gamepad.buttons[0].pressed[0] = localGamepadArray[4]; // pad
+        gamepad.buttons[1].pressed[0] = localGamepadArray[5]; // trigger
+        gamepad.buttons[2].pressed[0] = localGamepadArray[3]; // grip
+        gamepad.buttons[3].pressed[0] = localGamepadArray[2]; // menu
+        gamepad.buttons[4].pressed[0] = localGamepadArray[1]; // system
+
+        gamepad.buttons[0].touched[0] = localGamepadArray[9]; // pad
+        gamepad.buttons[1].touched[0] = localGamepadArray[10]; // trigger
+        gamepad.buttons[2].touched[0] = localGamepadArray[8]; // grip
+        gamepad.buttons[3].touched[0] = localGamepadArray[7]; // menu
+        gamepad.buttons[4].touched[0] = localGamepadArray[6]; // system
+
+        gamepad.axes.set(localGamepadArray.slice(11, 21));
+        gamepad.buttons[1].value[0] = gamepad.axes[2]; // trigger
+
+        for (let i = 0; i < 5; i++) {
+          const button = gamepad.buttons[5 + i];
+          const value = localGamepadArray[21 + i];
+          button.value[0] = value;
+          button.touched[0] = value >= 0.5 ? 1 : 0;
+          button.pressed[0] = value >= 0.9 ? 1 : 0;
+        }
+
+        gamepad.bones.set(localGamepadArray.slice(26, 26 + 31*(3+4)));
+      } else {
+        gamepad.connected[0] = 0;
+      }
+    };
+    _loadGamepad(0);
+    _loadGamepad(1); */
   }
   
   _computeDerivedGamepadsData();

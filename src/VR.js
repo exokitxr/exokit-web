@@ -609,8 +609,10 @@ class FakeXRDisplay {
     }
   }
   pushUpdate() {
-    this.pushHmdUpdate();
-    this.pushGamepadsUpdate();
+    if (!GlobalContext.xrState.isPresentingReal[0]) {
+      this.pushHmdUpdate();
+      this.pushGamepadsUpdate();
+    }
   }
 
   enable() {
