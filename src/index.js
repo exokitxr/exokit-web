@@ -1,5 +1,5 @@
 import core from './core.js';
-import minimist from '../modules/minimist.js';
+// import minimist from '../modules/minimist.js';
 
 import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
 import symbols from './symbols.js';
