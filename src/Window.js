@@ -686,9 +686,25 @@ self.onrunasync = req => {
   const {method} = req;
 
   switch (method) {
-    case 'tickAnimationFrame':
+    case 'tickAnimationFrame': {
       self.tickAnimationFrame(req);
       return Promise.resolve();
+    }
+    case 'enterXr': {
+      console.log('handle enter xr', GlobalContext.id);
+      self.vrdisplaypresentchange();
+      return Promise.all(windows.map(win => win.runAsync({
+        method: 'enterXr',
+      }))).then(() => {});
+      break;
+    }
+    case 'exitXr': {
+      self.vrdisplaypresentchange();
+      return Promise.all(windows.map(win => win.runAsync({
+        method: 'exitXr',
+      }))).then(() => {});
+      break;
+    }
     case 'response': {
       const {keypath} = req;
 
@@ -734,7 +750,7 @@ self.onrunasync = req => {
         }
       }
       break;
-    } */
+    }
     case 'meshes': {
       for (let i = 0; i < windows.length; i++) {
         windows[i].runAsync(req);
@@ -790,7 +806,7 @@ self.onrunasync = req => {
         }
       }
       break;
-    }
+    } */
     case 'eval': // used in tests
       return Promise.resolve([(0, eval)(req.scriptString), []]);
     default:

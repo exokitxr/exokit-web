@@ -130,10 +130,10 @@ class XRIFrame extends HTMLElement {
           
           session.updateRenderState({baseLayer});
 
-          session.requestAnimationFrame((timestamp, frame) => {
+          session.requestAnimationFrame(async (timestamp, frame) => {
             const pose = frame.getViewerPose(referenceSpace);
             const viewport = baseLayer.getViewport(pose.views[0]);
-            // const width = viewport.width;
+            const width = viewport.width;
             const height = viewport.height;
             const fullWidth = (() => {
               let result = 0;
@@ -144,11 +144,15 @@ class XRIFrame extends HTMLElement {
             })();
             
             GlobalContext.xrState.isPresentingReal[0] = 1;
-            GlobalContext.xrState.renderWidth[0] = fullWidth;
+            GlobalContext.xrState.renderWidth[0] = width;
             GlobalContext.xrState.renderHeight[0] = height;
             
             win.canvas.width = fullWidth;
             win.canvas.height = height;
+
+            await win.runAsync({
+              method: 'enterXr',
+            });
 
             console.log('XR setup complete');
           });
