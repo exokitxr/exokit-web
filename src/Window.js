@@ -575,11 +575,7 @@ const _fetchText = src => fetch(src)
     vrDisplay.onrequestanimationframe = _makeRequestAnimationFrame(window);
     vrDisplay.oncancelanimationframe = window.cancelAnimationFrame;
     vrDisplay.onvrdisplaypresentchange = () => {
-      window.dispatchEvent(new CustomEvent('vrdisplaypresentchange', {
-        detail: {
-          display: vrDisplay,
-        },
-      }));
+      window.vrdisplaypresentchange();
     };
     vrDisplay.onrequestpresent = _onrequestpresent;
     vrDisplay.onmakeswapchain = _onmakeswapchain;
@@ -630,6 +626,15 @@ const _fetchText = src => fetch(src)
         once: true,
       });
     }
+  };
+  window.vrdisplaypresentchange = () => {
+    const {vrDisplay} = window[symbols.mrDisplaysSymbol];
+    const {isPresenting} = vrDisplay;
+    window.dispatchEvent(new CustomEvent('vrdisplaypresentchange', {
+      detail: {
+        display: isPresenting ? vrDisplay : null,
+      },
+    }));
   };
 
   // window.document = _parseDocument(htmlString, window);
