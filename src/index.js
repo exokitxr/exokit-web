@@ -1,7 +1,7 @@
 import core from './core.js';
 // import minimist from '../modules/minimist.js';
 
-import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
+import {defaultEyeSeparation/*, maxNumTrackers*/} from './constants.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 
@@ -115,13 +115,13 @@ const xrState = (() => {
     bones: _makeTypedArray(Float32Array, 31*16),
   });
   result.gamepads = (() => {
-    const result = Array(2 + maxNumTrackers);
+    const result = Array(2);
     for (let i = 0; i < result.length; i++) {
       result[i] = _makeGamepad();
     }
     return result;
   })();
-  result.hands = (() => {
+  /* result.hands = (() => {
     const result = Array(2);
     for (let i = 0; i < result.length; i++) {
       const hand = _makeGamepad();
@@ -149,7 +149,7 @@ const xrState = (() => {
     }
     return result;
   })();
-  result.eye = _makeGamepad();
+  result.eye = _makeGamepad(); */
   result.id = _makeTypedArray(Uint32Array, 1);
   result.hmdType = _makeTypedArray(Uint32Array, 1);
   result.tex = _makeTypedArray(Uint32Array, 1);
