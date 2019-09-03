@@ -320,11 +320,12 @@ class XRWebGLLayer {
     window[symbols.makeXrCompatible](context, {
       reset: true,
     });
-    const {fbo} = this.session.onmakeswapchain(context);
+    this.session.onmakeswapchain(context);
+    /* const {fbo} = this.session.onmakeswapchain(context);
     
     this.framebuffer = {
       id: fbo,
-    };
+    }; */
   }
   getViewport(view) {
     return view._viewport;
@@ -334,7 +335,7 @@ class XRWebGLLayer {
   }
   
   get framebuffer() {
-    return this.session._framebuffer;
+    return this.context._proxyContext.xrFramebuffer;
   }
   set framebuffer(framebuffer) {}
   

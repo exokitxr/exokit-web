@@ -309,9 +309,9 @@ window.addEventListener('contextmenu', e => {
 });
 
 const topVrPresentState = {
-  hmdType: null,
+  /* hmdType: null,
   windowHandle: null,
-  fbo: 0,
+  fbo: null,
   msFbo: 0,
   vrContext: null,
   vrSystem: null,
@@ -320,7 +320,7 @@ const topVrPresentState = {
   mesher: null,
   planeTracker: null,
   handTracker: null,
-  eyeTracker: null,
+  eyeTracker: null, */
 };
 
 const requests = [];
@@ -362,7 +362,7 @@ const _handleRequestImmediate = req => {
       break;
     }
     case 'exitPresent': {
-      topVrPresentState.fbo = null;
+      // topVrPresentState.fbo = null;
       xrState.isPresenting[0] = 0;
       _respond(null, null);
       break;
@@ -370,7 +370,7 @@ const _handleRequestImmediate = req => {
     case 'requestHitTest': {
       const {origin, direction, coordinateSystem} = req;
 
-      if (topVrPresentState.hmdType === 'fake') {
+      /* if (topVrPresentState.hmdType === 'fake') {
         if (!topVrPresentState.mesher) {
           _startFakeMesher();
         }
@@ -381,9 +381,9 @@ const _handleRequestImmediate = req => {
           .catch(err => {
             _respond(err);
           });
-      } else {
+      } else { */
         _respond(null, []);
-      }
+      // }
 
       return true;
     }

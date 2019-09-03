@@ -495,16 +495,16 @@ const _fetchText = src => fetch(src)
         } */
 
         vrPresentState.glContext = context;
-        vrPresentState.fbo = context.createFramebuffer().id;
-        vrPresentState.msFbo = context.createFramebuffer().id;
+        // vrPresentState.fbo = context.createFramebuffer().id;
+        // vrPresentState.msFbo = context.createFramebuffer().id;
         // vrPresentState.glContext.setClearEnabled(false);
 
         // window.document.dispatchEvent(new CustomEvent('domchange')); // open mirror window
       }
 
-      return {
+      /* return {
         fbo: vrPresentState.fbo,
-      };
+      }; */
     };
     const _onexitpresent = async () => {
       // if (GlobalContext.xrState.isPresenting[0]) {

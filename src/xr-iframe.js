@@ -59,6 +59,13 @@ class XRIFrame extends HTMLElement {
             win.ctx = win.canvas.getContext('webgl2', {
               xrCompatible: true,
             });
+            win.ctx.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) { // XXX return the correct undone binding in gl.getParameter
+              if (!fbo) {
+                fbo = win.ctx.xrFramebuffer;
+              }
+              return _bindFramebuffer.call(this, target, fbo);
+            })(win.ctx.bindFramebuffer);
+            win.ctx.xrFramebuffer = null;
             const extensions = win.ctx.getSupportedExtensions();
             for (let i = 0; i < extensions.length; i++) {
               win.ctx.getExtension(extensions[i]);
