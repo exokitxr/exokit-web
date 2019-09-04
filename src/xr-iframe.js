@@ -131,6 +131,7 @@ class XRIFrame extends HTMLElement {
           try {
             referenceSpace = await session.requestReferenceSpace('local-floor');
           } catch (err) {
+            console.warn(err);
             referenceSpace = await session.requestReferenceSpace('local');
           }
           const baseLayer = new XRWebGLLayer(session, win.ctx);
