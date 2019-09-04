@@ -152,7 +152,9 @@ class WorkerVm extends EventTarget {
     };
     this.iframe = iframe;
 
-    iframe.style.display = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-10000px';
+    iframe.style.left = '-10000px';
     document.body.appendChild(iframe);
 
     this.requestKeys = 0;
