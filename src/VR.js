@@ -359,7 +359,7 @@ class VRDisplay extends EventTarget {
   }
 }
 
-class FakeMesher extends EventTarget {
+/* class FakeMesher extends EventTarget {
   constructor() {
     super();
 
@@ -557,7 +557,7 @@ class FakePlaneTracker extends EventTarget {
   destroy() {
     clearInterval(this.interval);
   }
-}
+} */
 
 class FakeXRDisplay {
   constructor() {
@@ -733,8 +733,8 @@ export {
   Gamepad,
   GamepadButton,
   FakeXRDisplay,
-  FakeMesher,
-  FakePlaneTracker,
+  // FakeMesher,
+  // FakePlaneTracker,
   lookupHMDTypeString,
   lookupHMDTypeIndex,
   createFakeXRDisplay,
