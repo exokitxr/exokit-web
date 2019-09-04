@@ -19,8 +19,7 @@ console.log('app 1');
 
 
 let xrIframe = null;
-const fakeXrDisplay = new FakeXRDisplay();
-
+let fakeXrDisplay;
 // main
 
 const scene = new THREE.Scene();
@@ -129,7 +128,6 @@ renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
-console.log("renderer.domElement rec = " + JSON.stringify(renderer.domElement.getBoundingClientRect()));
 
 const layers = [renderer.domElement];
 
@@ -158,6 +156,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 const _startFakeVrDisplay = async (width, height) => {
+  const fakeXrDisplay = new FakeXRDisplay();
   if (isFinite(width)) {
     fakeXrDisplay.width = width;
   }
