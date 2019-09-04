@@ -3,29 +3,99 @@
   <head>
     <!-- exokit.org -->
     <meta http-equiv="origin-trial" content="AspvaSU7F1Gbpa8q9JRNRNXFF+0+77C1xkxf1hkzJCrBI7Mmt/eG25QXLBn7lfzPsgrN5next8ZtIiCeGs6R4w8AAABleyJvcmlnaW4iOiJodHRwczovL2V4b2tpdC5vcmc6NDQzIiwiZmVhdHVyZSI6IldlYlhSRGV2aWNlTTc2IiwiZXhwaXJ5IjoxNTcxMTEyNjU0LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta charset="utf-8">
+    <meta name="description" content="The Exokit Engine">
+    <meta name="author" content="Exokit">
+    <title>Exokit Engine</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  overflow: hidden;
-}
-body.entered {
-  background-color: #000;
-}
-body:not(.loaded) #form, body.entered #form, body:not(.entered) canvas {
-  display: none;
-}
-iframe {
-  display: none;
-}
-/* canvas {
-  width: 100vw;
-  height: 100vh;
-} */
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        background-color: black;
+        color: #F5F5F5;
+      }
+      body:not(.loaded) #form, body.entered #form, body:not(.entered) canvas {
+        display: none;
+      }
+      iframe {
+        display: none;
+      }
+      .examples {
+        width: 50%;
+        margin: 0 auto;
+      }
+      .btn {
+        width: 211px;
+        height: 50px
+        margin: 0 auto;
+      }
+      li {
+        /* font-size: 1.3vw;
+        font-size: 2.3vh; */
+        font-size: 1.2rem;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      .cut {
+        background-color: white;
+      }
+      .description {
+        /* font-size: 2.3vw;
+        font-size: 3.3vh; */
+        font-size: 2.5rem;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      canvas {
+        width: 100vw;
+        height: 100vh;
+      }
+      .btn-outline {
+        color: white;
+        border: 1px solid;
+        border-color: white;
+      }
+
+      .btn-outline:hover, .btn-outline:focus, .btn-outline:active, .btn-outline.active {
+        color: white;
+        border-color: #e1a6ff;
+        background-color: #dd9cff;
+      }
+
+      .btn {
+        border-radius: 300px;
+        font-family: 'Lato', 'Helvetica', 'Arial', 'sans-serif';
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: linear-gradient(to top, #a23cd6, #8e3db8);
+      }
+
+      .btn-xl {
+        font-size: 11px;
+        padding: 15px 45px;
+      }
     </style>
   </head>
   <body>
+    <script>
+    function clicker(url){
+      console.log("click url = " + url);
+
+      const xrIframe = document.getElementById('xr-iframe');
+      xrIframe.postMessage({
+        method: 'load',
+        url: url,
+      });
+
+      return false;
+    }
+    </script>
     <script type=module>
 navigator.serviceWorker.register(`sw.js`)
   .then(() => {
@@ -38,9 +108,53 @@ navigator.serviceWorker.register(`sw.js`)
   .then(() => import('./src/index.js'))
   .then(() => {
     const xrIframe = document.createElement('xr-iframe');
+    xrIframe.setAttribute("id", "xr-iframe");
     xrIframe.src = 'app.html';
-    document.body.appendChild(xrIframe);
+    document.getElementById("mid-div").appendChild(xrIframe);
   });
     </script>
+      <div class="row h-100">
+
+        <div class="col-sm-2">
+          <div class="examples">
+            <br><br>
+            <h1><b>Exokit</b></h1><br>
+            <h4>
+              Examples
+            </h4>
+            <h5>
+              <a href="./examples/example1xr.html" id="red-cube" onclick="return clicker(this.href)">Red Cube</a><br>
+              <a href="./examples/example2xr.html" id="red-cube" onclick="return clicker(this.href)">Green Cube</a><br>
+
+            <h5>
+          </div>
+        </div>
+
+        <div class="col-lg-7 cut" id="mid-div" style="padding-left: 0px; padding-right: 0px;">
+
+        </div>
+
+        <div class="col-md-3">
+          <br><br>
+          <h1 class="description">
+            A web engine for running highly performant virtual reality experiences.
+          </h1><br>
+            <ul>
+            <li>Reality tabs: blend multiple WebXR sites in a WebXR site</li>
+            <li>App enclosures: isolate user-generated content in 3d</li>
+            <li>Make-your-own-browser: reinvent what a 3D browser means</li>
+            <li>Conquer CORS: securely move apps across origins</li>
+            <li>Script your own WebXR bots</li>
+            <li>Hotswap code live by using Service Workers</li>
+          </ul>
+        <br><br>
+        <div style="width: 50%;margin: 0 auto;">
+          <a href="https://docs.exokit.org/" class="btn btn-outline btn-xl js-scroll-trigger"> Documentation</a><br><br>
+          <a href="https://github.com/exokitxr/exokit" class="btn btn-outline btn-xl js-scroll-trigger">GitHub</a><br><br>
+          <a href="https://mailchi.mp/ee614096d73a/exokitweb" class="btn btn-outline btn-xl js-scroll-trigger">  Early Access</a><br><br>
+        </div>
+        </div>
+
+      </div>
   </body>
 </html>
