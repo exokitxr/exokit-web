@@ -642,12 +642,6 @@ class FakeXRDisplay {
     return GlobalContext.xrState.leftViewMatrix;
   }
   set viewMatrix(viewMatrix) {}
-  get texture() {
-    return {
-      id: GlobalContext.xrState.tex[0],
-    };
-  }
-  set texture(texture) {}
 }
 
 const hmdTypes = [
