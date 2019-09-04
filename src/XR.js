@@ -418,7 +418,11 @@ class XRViewport {
     this.eye = eye;
   }
   get x() {
-    return this.eye === 'left' ? 0 : GlobalContext.xrState.renderWidth[0];
+    if (GlobalContext.xrState.stereo[0]) {
+      return this.eye === 'left' ? 0 : GlobalContext.xrState.renderWidth[0];
+    } else {
+      return this.eye === 'left' ? 0 : GlobalContext.xrState.renderWidth[0] * 2;
+    }
   }
   set x(x) {}
   get y() {
@@ -426,7 +430,15 @@ class XRViewport {
   }
   set y(y) {}
   get width() {
-    return GlobalContext.xrState.renderWidth[0];
+    if (GlobalContext.xrState.stereo[0]) {
+      return GlobalContext.xrState.renderWidth[0];
+    } else {
+      if (this.eye === 'left') {
+        return GlobalContext.xrState.renderWidth[0] * 2;
+      } else {
+        return 0;
+      }
+    }
   }
   set width(width) {}
   get height() {

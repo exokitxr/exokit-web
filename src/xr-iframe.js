@@ -145,6 +145,7 @@ class XRIFrame extends HTMLElement {
             })();
             
             GlobalContext.xrState.isPresentingReal[0] = 1;
+            GlobalContext.xrState.stereo[0] = 1;
             GlobalContext.xrState.renderWidth[0] = width;
             GlobalContext.xrState.renderHeight[0] = height;
             
