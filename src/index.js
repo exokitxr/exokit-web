@@ -66,7 +66,7 @@ const xrState = (() => {
   result.depthNear = _makeTypedArray(Float32Array, 1);
   result.depthNear[0] = 0.1;
   result.depthFar = _makeTypedArray(Float32Array, 1);
-  result.depthFar[0] = 10000.0;
+  result.depthFar[0] = 2000.0;
   result.position = _makeTypedArray(Float32Array, 3);
   result.orientation = _makeTypedArray(Float32Array, 4);
   result.orientation[3] = 1;
