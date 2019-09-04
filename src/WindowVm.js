@@ -155,6 +155,7 @@ class WorkerVm extends EventTarget {
     iframe.style.position = 'absolute';
     iframe.style.top = '-10000px';
     iframe.style.left = '-10000px';
+    iframe.style.visibility = 'hidden';
     document.body.appendChild(iframe);
 
     this.requestKeys = 0;
