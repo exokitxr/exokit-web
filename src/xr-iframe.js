@@ -127,13 +127,11 @@ class XRIFrame extends HTMLElement {
           const session = await navigator.xr.requestSession('immersive-vr', {
             optionalFeatures: ['local-floor', 'bounded-floor'],
           });
-          let referenceSpace = null;
+          let referenceSpace;
           try {
             referenceSpace = await session.requestReferenceSpace('local-floor');
-          } catch (err) {}
-          if (!referenceSpace) {
+          } catch (err) {
             referenceSpace = await session.requestReferenceSpace('local');
-            referenceSpace = referenceSpace.getOffsetReferenceSpace(new XRRigidTransform(new DOMPoint(0, -1.6, 0)));
           }
           const baseLayer = new XRWebGLLayer(session, win.ctx);
           
