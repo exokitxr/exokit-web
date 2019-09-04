@@ -74,8 +74,9 @@ const xrState = (() => {
   result.leftViewMatrix.set(Float32Array.from([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
   result.rightViewMatrix = _makeTypedArray(Float32Array, 16);
   result.rightViewMatrix.set(result.leftViewMatrix);
+  // new THREE.PerspectiveCamera(110, 2, 0.1, 2000).projectionMatrix.toArray()
   result.leftProjectionMatrix = _makeTypedArray(Float32Array, 16);
-  result.leftProjectionMatrix.set(Float32Array.from([0.5625000000000001, 0, 0, 0, 0, 1.0000000000000002, 0, 0, 0, 0, -1.0002000200020003, -1, 0, 0, -0.20002000200020004, 0]));
+  result.leftProjectionMatrix.set(Float32Array.from([0.3501037691048549, 0, 0, 0, 0, 0.7002075382097098, 0, 0, 0, 0, -1.00010000500025, -1, 0, 0, -0.200010000500025, 0]));
   result.rightProjectionMatrix = _makeTypedArray(Float32Array, 16);
   result.rightProjectionMatrix.set(result.leftProjectionMatrix);
   result.leftOffset = _makeTypedArray(Float32Array, 3);
