@@ -151,6 +151,8 @@ class WorkerVm extends EventTarget {
       iframe.contentWindow.removeEventListener('postmessage', _postmessage);
     };
     this.iframe = iframe;
+
+    iframe.style.display = 'none';
     document.body.appendChild(iframe);
 
     this.requestKeys = 0;
