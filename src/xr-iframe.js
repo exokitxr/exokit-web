@@ -56,6 +56,13 @@ class XRIFrame extends HTMLElement {
             win.canvas.height = GlobalContext.xrState.renderHeight[0];
             win.canvas.style.width = '100%';
             win.canvas.style.height = '100%';
+            win.canvas.addEventListener('mouseenter', e => {
+              const {x, y, width, height} = win.canvas.getBoundingClientRect();
+              GlobalContext.xrState.canvasViewport[0] = x;
+              GlobalContext.xrState.canvasViewport[1] = y;
+              GlobalContext.xrState.canvasViewport[2] = width;
+              GlobalContext.xrState.canvasViewport[3] = height;
+            });
             win.ctx = win.canvas.getContext('webgl2', {
               xrCompatible: true,
             });

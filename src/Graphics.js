@@ -187,6 +187,10 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'clientHeight', {
     return this.height;
   },
 });
+HTMLCanvasElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+  const {canvasViewport} = GlobalContext.xrState;
+  return new DOMRect(canvasViewport[0], canvasViewport[1], canvasViewport[2], canvasViewport[3]);
+};
 
 [WebGLRenderingContext, WebGL2RenderingContext].forEach(WebGLRenderingContext => {
 

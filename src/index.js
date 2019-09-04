@@ -61,6 +61,8 @@ const xrState = (() => {
   result.devicePixelRatio[0] = window.devicePixelRatio;
   result.stereo = _makeTypedArray(Uint32Array, 1);
   // result.stereo[0] = 1;
+  result.canvasViewport = _makeTypedArray(Float32Array, 4);
+  result.canvasViewport.set(Float32Array.from([0, 0, window.innerWidth, window.innerHeight]));
   result.depthNear = _makeTypedArray(Float32Array, 1);
   result.depthNear[0] = 0.1;
   result.depthFar = _makeTypedArray(Float32Array, 1);
