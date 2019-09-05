@@ -51,9 +51,9 @@ const xrState = (() => {
   result.isPresenting = _makeTypedArray(Uint32Array, 1);
   result.isPresentingReal = _makeTypedArray(Uint32Array, 1);
   result.renderWidth = _makeTypedArray(Float32Array, 1);
-  result.renderWidth[0] = 1920/2;
+  result.renderWidth[0] = window.innerWidth / 2 * window.devicePixelRatio;
   result.renderHeight = _makeTypedArray(Float32Array, 1);
-  result.renderHeight[0] = 1080;
+  result.renderHeight[0] = window.innerHeight * window.devicePixelRatio;
   result.metrics = _makeTypedArray(Uint32Array, 2);
   result.metrics[0] = window.innerWidth;
   result.metrics[1] = window.innerHeight;
