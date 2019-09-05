@@ -438,7 +438,7 @@ class FakeXRDisplay {
     GlobalContext.xrState.fakeVrDisplayEnabled[0] = 0;
   }
 
-  get width() {
+  /* get width() {
     return GlobalContext.xrState.renderWidth[0]*2;
   }
   set width(width) {
@@ -449,7 +449,7 @@ class FakeXRDisplay {
   }
   set height(height) {
     GlobalContext.xrState.renderHeight[0] = height;
-  }
+  } */
   get projectionMatrix() {
     return GlobalContext.xrState.leftProjectionMatrix;
   }
