@@ -131,21 +131,18 @@ const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
 directionalLight.position.set(1, 1, 1);
 scene.add(directionalLight);
 
-// bootstrap
-var angle = 5;
-var radius = 5;
-
+let cameraAngle = 5;
 function animate() {
-  camera.position.x = radius * Math.cos( angle );
-  camera.position.z = radius * Math.sin( angle );
+  const cameraRadius = 5;
+  camera.position.x = cameraRadius * Math.cos(cameraAngle);
+  camera.position.z = cameraRadius * Math.sin(cameraAngle);
   camera.lookAt(scene.position);
   if (fakeXrDisplay !== null) {
     fakeXrDisplay.position.copy(camera.position);
     fakeXrDisplay.quaternion.copy(camera.quaternion);
     fakeXrDisplay.pushUpdate();
   }
-  angle += 0.005;
-  // console.log('animate', angle);
+  cameraAngle += 0.005;
 
   renderer.render(scene, camera);
 }
