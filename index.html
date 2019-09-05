@@ -133,7 +133,7 @@ session.layers.push(xri);</code></pre>
 
       </div>
     <script type=module>
-let xrIframe = null;
+let xrScene = null;
 
 navigator.serviceWorker.register(`sw.js`)
   .then(() => {
@@ -145,11 +145,10 @@ navigator.serviceWorker.register(`sw.js`)
   })
   .then(() => import('./src/index.js'))
   .then(() => {
-    xrIframe = document.createElement('xr-iframe');
-    xrIframe.setAttribute("id", "xr-iframe");
-    xrIframe.src = 'app.html';
-    // document.getElementById('iframe-wrapper').appendChild(xrIframe);
-    xrIframe.addEventListener('canvas', e => {
+    xrScene = document.createElement('xr-scene');
+    xrScene.src = 'app.html';
+    // document.getElementById('iframe-wrapper').appendChild(xrScene);
+    xrScene.addEventListener('canvas', e => {
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
     });
@@ -164,7 +163,7 @@ for (let i = 0; i < aCubes.length; i++) {
     const url = aCube.href;
     console.log('click url = ' + url);
 
-    xrIframe.postMessage({
+    xrScene.postMessage({
       method: 'load',
       url,
     });

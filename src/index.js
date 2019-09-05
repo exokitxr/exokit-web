@@ -9,7 +9,7 @@ import THREE from '../lib/three-min.js';
 
 import GlobalContext from './GlobalContext.js';
 
-import './xr-iframe.js';
+import './xr-scene.js';
 
 let bootstrapped = false;
 const _bootstrap = () => {
