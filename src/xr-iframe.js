@@ -64,6 +64,8 @@ class XRIFrame extends HTMLElement {
               GlobalContext.xrState.canvasViewport[3] = height;
             });
             win.ctx = win.canvas.getContext('webgl2', {
+              antialias: true,
+              alpha: true,
               xrCompatible: true,
             });
             win.ctx.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) { // XXX return the correct undone binding in gl.getParameter
