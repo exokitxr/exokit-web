@@ -230,17 +230,30 @@ _startFakeVrDisplay()
           ];
           layers.push(xrIframe);
 
-          // const control = new THREE.TransformControls( camera, renderer.domElement );
-          // control.addEventListener( 'change', animate );
-          // control.addEventListener( 'dragging-changed', function ( event ) {
-          // } );
+          const object = new THREE.Object3D();
+          object.position.fromArray(xrIframe.position);
+          scene.add(object);
+
+          const control = new THREE.TransformControls( camera, renderer.domElement );
+          control.attach(object);
+          control.size = 3;
+          control.addEventListener('change', e => {
+            // console.log('got change', e);
+            xrIframe.position = object.position.toArray();
+            xrIframe.quaternion = object.quaternion.toArray();
+            xrIframe.scale = object.scale.toArray();
+          });
+          control.addEventListener('dragging-changed', e => {
+            // console.log('got dragging-changed', e);
+          });
+          window.control = control;
           //
           // const geometry = new THREE.BoxBufferGeometry(.25, .25, .25);
           // const material = new THREE.MeshPhongMaterial({color: 0x00FF00});
           // var mesh = new THREE.Mesh( geometry, material );
           // control.attach(mesh);
           // // control.attach(xrIframe);
-          // scene.add(control);
+          scene.add(control);
 
           break;
         }
