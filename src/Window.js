@@ -54,7 +54,7 @@ import * as XR from './XR.js';
 import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 
-import './xr-iframe-window.js';
+import './xr-iframe.js';
 
 // const isMac = os.platform() === 'darwin';
 
