@@ -48,6 +48,14 @@ li {
   /* padding-left: 20px;
   padding-right: 20px; */
 }
+pre {
+  margin: 40px 20px;
+  padding: 15px;
+  background-color: #333;
+  border-radius: 8px;
+  color: #CCC;
+  line-height: 1.4;
+}
 canvas {
   width: 100% !important;
   height: 100vh !important;
@@ -99,6 +107,11 @@ a:active {
           <h3 class=description>
             A web engine for running highly performant virtual reality experiences.
           </h3>
+          <pre><code>// add a reality tab to your scene
+xri = document.createElement('xr-iframe');
+xri.src = 'https://aframe.io/a-painter';
+xri.position = [0, 1.6, 0];
+session.layers.push(xri);</code></pre>
           <ul>
             <li>Reality tabs: blend multiple WebXR sites in a WebXR site</li>
             <li>App enclosures: isolate user-generated content in 3d</li>
