@@ -458,6 +458,14 @@ class FakeXRDisplay {
     return GlobalContext.xrState.leftViewMatrix;
   }
   set viewMatrix(viewMatrix) {}
+  get depthNear() {
+    return GlobalContext.xrState.depthNear[0];
+  }
+  set depthNear(depthNear) {}
+  get depthFar() {
+    return GlobalContext.xrState.depthFar[0];
+  }
+  set depthFar(depthFar) {}
   get stereo() {
     return GlobalContext.xrState.stereo[0];
   }
