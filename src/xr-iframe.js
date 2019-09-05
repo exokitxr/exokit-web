@@ -125,7 +125,7 @@ class XRIFrame extends HTMLElement {
       if (!win.session) {
         if (win.canvas) {
           const session = await navigator.xr.requestSession('immersive-vr', {
-            optionalFeatures: ['local-floor', 'bounded-floor'],
+            requiredFeatures: ['local-floor'],
           });
           let referenceSpace;
           try {
