@@ -72,7 +72,16 @@ const _rewriteRes = res => {
   return _rewriteResExt(res.url, res.originalUrl, res.headers, res);
 };
 const _rewriteResExt = (url, originalUrl, headers, res) => {
-  if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
+  if (originalUrl === 'https://https-aframe-io.proxy.exokit.org/a-painter/vendor/aframe-master.min.js') {
+    return _rewriteResText(res, jsString => {
+      const result = jsString
+        .replace(
+          'var e=i.getEyeParameters("left"),n=e.renderWidth,a=e.renderHeight;m=t.getPixelRatio(),f=t.getSize(),t.setDrawingBufferSize(2*n,a,1)',
+          'var le=i.getEyeParameters("left"),re=i.getEyeParameters("right"),n=le.renderWidth+re.renderWidth,a=le.renderHeight;m=t.getPixelRatio(),f=t.getSize(),t.setDrawingBufferSize(n,a,1)'
+        )
+      return result;
+    });
+  } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace('window.top', 'window.self'));
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/engine-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace(`powerPreference:"default"}`, 'powerPreference:"default",xrCompatible:!0}'));
