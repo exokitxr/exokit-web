@@ -3,11 +3,6 @@
   <head>
     <script src="three.js"></script>
     <script src="TransformControls.js"></script>
-    <!-- <script src="OrbitControls.js"></script>
-    <script src="TransformControls.js"></script> -->
-    <!-- <script src="BufferGeometryUtils.js"></script>
-    <script src="GLTFLoader.js"></script>
-    <script src="LegacyGLTFLoader.js"></script> -->
   </head>
   <body>
     <script type=module>
@@ -15,8 +10,6 @@
 try {
 
 console.log('app 1');
-
-
 
 let xrIframe = null;
 let fakeXrDisplay;
@@ -145,31 +138,26 @@ var radius = 5;
 function animate() {
   camera.position.x = radius * Math.cos( angle );
   camera.position.z = radius * Math.sin( angle );
-  camera.lookAt( scene.position );
-  if(fakeXrDisplay != null){
+  camera.lookAt(scene.position);
+  if (fakeXrDisplay !== null) {
     fakeXrDisplay.position.copy(camera.position);
     fakeXrDisplay.quaternion.copy(camera.quaternion);
     fakeXrDisplay.pushUpdate();
   }
   angle += 0.005;
+  // console.log('animate', angle);
 
   renderer.render(scene, camera);
 }
-const _startFakeVrDisplay = async (width, height) => {
-  const fakeXrDisplay = new FakeXRDisplay();
-  if (isFinite(width)) {
-    fakeXrDisplay.width = width;
-  }
-  if (isFinite(height)) {
-    fakeXrDisplay.height = height;
-  }
+const _startFakeVrDisplay = async () => {
+  fakeXrDisplay = new FakeXRDisplay();
   fakeXrDisplay.position.copy(camera.position);
   fakeXrDisplay.quaternion.copy(camera.quaternion);
   fakeXrDisplay.pushUpdate();
   fakeXrDisplay.enable();
   await _enterXr();
 
-  renderer.setAnimationLoop(animate);
+  // renderer.setAnimationLoop(animate);
 };
 const _enterXr = async () => {
   const session = await navigator.xr.requestSession({
@@ -226,10 +214,11 @@ _startFakeVrDisplay()
         case 'load': {
           xrIframe = document.createElement('xr-iframe');
           xrIframe.src = data.url;
-          const rate = 100;
-          const f = (Date.now() % rate) / 20;
-          console.log("f = " + f);
-          xrIframe.position = [f, Math.abs(f), f];
+          xrIframe.position = [
+            (-1 + Math.random() * 2) * 3,
+            (-1 + Math.random() * 2) * 3,
+            (-1 + Math.random() * 2) * 3,
+          ];
           layers.push(xrIframe);
 
           // const control = new THREE.TransformControls( camera, renderer.domElement );
