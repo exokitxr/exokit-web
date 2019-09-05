@@ -3,30 +3,121 @@
   <head>
     <!-- exokit.org -->
     <meta http-equiv="origin-trial" content="AspvaSU7F1Gbpa8q9JRNRNXFF+0+77C1xkxf1hkzJCrBI7Mmt/eG25QXLBn7lfzPsgrN5next8ZtIiCeGs6R4w8AAABleyJvcmlnaW4iOiJodHRwczovL2V4b2tpdC5vcmc6NDQzIiwiZmVhdHVyZSI6IldlYlhSRGV2aWNlTTc2IiwiZXhwaXJ5IjoxNTcxMTEyNjU0LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
+    <meta charset="utf-8">
+    <meta name="description" content="Exokit Engine">
+    <meta name="author" content="Exokit">
+    <title>Exokit Engine</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap" rel="stylesheet">
     <style>
+* {
+  box-sizing: border-box;
+}
 body {
+  margin: 0;
+  background-color: #000;
+  color: #F5F5F5;
+  font-family: 'Open Sans';
+}
+.body {
+  display: flex;
   width: 100vw;
   height: 100vh;
-  margin: 0;
   overflow: hidden;
 }
-body.entered {
-  background-color: #000;
+.examples {
+  width: 300px;
 }
-body:not(.loaded) #form, body.entered #form, body:not(.entered) canvas {
-  display: none;
+h1, h2, h3, h4, h5, h6, p {
+  margin: 20px 0;
+  padding: 0 20px;
 }
-iframe {
-  display: none;
+li {
+  /* padding-left: 20px;
+  padding-right: 20px; */
 }
-/* canvas {
-  width: 100vw;
-  height: 100vh;
-} */
+.iframe-wrapper {
+  display: flex;
+  flex: 1;
+  background-color: #FFF;
+}
+.details {
+  width: 400px;
+  overflow-y: auto;
+}
+.description {
+  /* padding-left: 20px;
+  padding-right: 20px; */
+}
+canvas {
+  width: 100% !important;
+  height: 100vh !important;
+}
+a {
+  color: #5c6bc0;
+  text-decoration: none;
+}
+a:hover {
+  color: #ec407a;
+}
+a:active {
+  color: #c2185b;
+}
+.buttons {
+  display: inline-flex;
+  padding: 0 20px;
+  flex-direction: column;
+}
+.button {
+  margin: 5px 0;
+  padding: 8px 20px;
+  border: 2px solid;
+  border-radius: 100px;
+  color: #5c6bc0;
+}
+.button:hover {
+  background-color: #5c6bc0;
+  border-color: #5c6bc0;
+  color: #FFF;
+}
     </style>
   </head>
   <body>
+      <div class=body>
+
+        <div class=examples>
+          <h1>Exokit</h1>
+          <h3>Examples</h3>
+          <p>
+            <a href="./examples/example1xr.html" class="a-cube">Red Cube</a><br>
+            <a href="./examples/example2xr.html" class="a-cube">Green Cube</a><br>
+          </p>
+        </div>
+
+        <div class=iframe-wrapper id=iframe-wrapper></div>
+
+        <div class=details>
+          <h3 class=description>
+            A web engine for running highly performant virtual reality experiences.
+          </h3>
+          <ul>
+            <li>Reality tabs: blend multiple WebXR sites in a WebXR site</li>
+            <li>App enclosures: isolate user-generated content in 3d</li>
+            <li>Make-your-own-browser: reinvent what a 3D browser means</li>
+            <li>Conquer CORS: securely move apps across origins</li>
+            <li>Script your own WebXR bots</li>
+            <li>Hotswap code live by using Service Workers</li>
+          </ul>
+          <div class=buttons>
+            <a href="https://docs.exokit.org/" class=button>Documentation</a>
+            <a href="https://github.com/exokitxr/exokit" class=button>GitHub</a>
+            <a href="https://mailchi.mp/ee614096d73a/exokitweb" class=button>Early Access</a>
+          </div>
+        </div>
+
+      </div>
     <script type=module>
+let xrIframe = null;
+
 navigator.serviceWorker.register(`sw.js`)
   .then(() => {
     if (navigator.serviceWorker.controller) {
@@ -37,10 +128,33 @@ navigator.serviceWorker.register(`sw.js`)
   })
   .then(() => import('./src/index.js'))
   .then(() => {
-    const xrIframe = document.createElement('xr-iframe');
+    xrIframe = document.createElement('xr-iframe');
+    xrIframe.setAttribute("id", "xr-iframe");
     xrIframe.src = 'app.html';
-    document.body.appendChild(xrIframe);
+    // document.getElementById('iframe-wrapper').appendChild(xrIframe);
+    xrIframe.addEventListener('canvas', e => {
+      const canvas = e.data;
+      document.getElementById('iframe-wrapper').appendChild(canvas);
+    });
   });
+
+const aCubes = document.querySelectorAll('.a-cube');
+for (let i = 0; i < aCubes.length; i++) {
+  const aCube = aCubes[i];
+  aCube.addEventListener('click', e => {
+    e.preventDefault();
+
+    const url = aCube.href;
+    console.log('click url = ' + url);
+
+    xrIframe.postMessage({
+      method: 'load',
+      url,
+    });
+
+    return false;
+  });
+}
     </script>
   </body>
 </html>

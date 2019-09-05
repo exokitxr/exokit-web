@@ -2,11 +2,7 @@
 <html>
   <head>
     <script src="three.js"></script>
-    <!-- <script src="OrbitControls.js"></script>
-    <script src="TransformControls.js"></script> -->
-    <!-- <script src="BufferGeometryUtils.js"></script>
-    <script src="GLTFLoader.js"></script>
-    <script src="LegacyGLTFLoader.js"></script> -->
+    <script src="TransformControls.js"></script>
   </head>
   <body>
     <script type=module>
@@ -15,8 +11,9 @@ try {
 
 console.log('app 1');
 
-let xrIframe = null;
-
+let tutorialXrIframe = null;
+// let xrIframe = null;
+let fakeXrDisplay;
 // main
 
 const scene = new THREE.Scene();
@@ -24,18 +21,6 @@ const scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xFFFFFF);
 scene.matrixAutoUpdate = false;
 
-/* const cubeMesh = (() => {
-  const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
-  const material = new THREE.MeshPhongMaterial({
-    color: 0xab47bc,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.z = -5;
-  mesh.rotation.order = 'YXZ';
-  mesh.frustumCulled = false;
-  return mesh;
-})();
-scene.add(cubeMesh); */
 
 const floorMesh = (() => {
   const geometry = new THREE.PlaneBufferGeometry(300, 300, 300, 300)
@@ -133,7 +118,7 @@ const renderer = new THREE.WebGLRenderer({
   antialias: true,
 });
 console.log('set size', window.innerWidth, window.innerHeight);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
@@ -147,33 +132,37 @@ const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
 directionalLight.position.set(1, 1, 1);
 scene.add(directionalLight);
 
-// bootstrap
-
+let cameraAngle = 5;
 function animate() {
+  const cameraRadius = 2;
+  camera.position.x = cameraRadius * Math.cos(cameraAngle);
+  camera.position.z = cameraRadius * Math.sin(cameraAngle);
+  camera.lookAt(new THREE.Vector3(0, 0.5, 0));
+  if (fakeXrDisplay !== null) {
+    fakeXrDisplay.position.copy(camera.position);
+    fakeXrDisplay.quaternion.copy(camera.quaternion);
+    fakeXrDisplay.pushUpdate();
+  }
+  cameraAngle += 0.005;
+
   const rate = 5000;
   const f = (Date.now() % rate) / rate;
-  xrIframe.position = [0, Math.sin(f * Math.PI*2) / 2, 0];
-  xrIframe.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (-1 + Math.sin(f * Math.PI*4) * 2) * 0.1, 'YXZ')).toArray();
+  tutorialXrIframe.position = [0, Math.sin(f * Math.PI*2) / 2, 0];
+  tutorialXrIframe.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (-1 + Math.sin(f * Math.PI*4) * 2) * 0.1, 'YXZ')).toArray();
   const s = 0.3 + (1 + Math.sin(f * Math.PI*4)) / 2 * 0.7;
-  xrIframe.scale = [s, s, s];
+  tutorialXrIframe.scale = [s, s, s];
 
   renderer.render(scene, camera);
 }
-const _startFakeVrDisplay = async (width, height) => {
-  const fakeXrDisplay = new FakeXRDisplay();
-  if (isFinite(width)) {
-    fakeXrDisplay.width = width;
-  }
-  if (isFinite(height)) {
-    fakeXrDisplay.height = height;
-  }
+const _startFakeVrDisplay = async () => {
+  fakeXrDisplay = new FakeXRDisplay();
   fakeXrDisplay.position.copy(camera.position);
   fakeXrDisplay.quaternion.copy(camera.quaternion);
   fakeXrDisplay.pushUpdate();
   fakeXrDisplay.enable();
   await _enterXr();
-  
-  renderer.setAnimationLoop(animate);
+
+  // renderer.setAnimationLoop(animate);
 };
 const _enterXr = async () => {
   const session = await navigator.xr.requestSession({
@@ -211,9 +200,65 @@ const _enterXr = async () => {
 };
 _startFakeVrDisplay()
   .then(() => {
-    xrIframe = document.createElement('xr-iframe');
-    xrIframe.src = 'examples/tutorial.html';
+
+    tutorialXrIframe = document.createElement('xr-iframe');
+    tutorialXrIframe.src = 'examples/tutorial.html';
+    layers.push(tutorialXrIframe);
+
+    /* const xrIframe = document.createElement('xr-iframe');
+    xrIframe.src = 'examples/example1xr.html';
+    xrIframe.position = [0, 2, 0];
     layers.push(xrIframe);
+
+    const xrIframe = document.createElement('xr-iframe');
+    xrIframe.src = 'examples/example2xr.html';
+    xrIframe.position = [0, 2, 0];
+    layers.push(xrIframe); */
+
+    // Listen to messages from parent window
+    window.addEventListener('message', e => {
+      const {data} = e;
+      const {method} = data;
+      switch (method) {
+        case 'load': {
+          const xrIframe = document.createElement('xr-iframe');
+          xrIframe.src = data.url;
+          xrIframe.position = [
+            -1 + Math.random() * 2,
+            Math.random() * 2,
+            -1 + Math.random() * 2,
+          ];
+          layers.push(xrIframe);
+
+          const object = new THREE.Object3D();
+          object.position.fromArray(xrIframe.position);
+          scene.add(object);
+
+          const control = new THREE.TransformControls( camera, renderer.domElement );
+          control.attach(object);
+          control.size = 3;
+          control.addEventListener('change', e => {
+            // console.log('got change', e);
+            xrIframe.position = object.position.toArray();
+            xrIframe.quaternion = object.quaternion.toArray();
+            xrIframe.scale = object.scale.toArray();
+          });
+          control.addEventListener('dragging-changed', e => {
+            // console.log('got dragging-changed', e);
+          });
+          window.control = control;
+          //
+          // const geometry = new THREE.BoxBufferGeometry(.25, .25, .25);
+          // const material = new THREE.MeshPhongMaterial({color: 0x00FF00});
+          // var mesh = new THREE.Mesh( geometry, material );
+          // control.attach(mesh);
+          // // control.attach(xrIframe);
+          scene.add(control);
+
+          break;
+        }
+      }
+    });
 
     console.log('loaded fake display');
   })
