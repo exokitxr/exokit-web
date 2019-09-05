@@ -103,6 +103,7 @@ a:active {
             <a href="./examples/example1xr.html" class="a-cube">Red Cube</a><br>
             <a href="./examples/example2xr.html" class="a-cube">Green Cube</a><br>
           </p>
+          <h3><a class="button" id="enter-xr-button">Enter XR</a></h3>
         </div>
 
         <div class=iframe-wrapper id=iframe-wrapper></div>
@@ -171,6 +172,11 @@ for (let i = 0; i < aCubes.length; i++) {
     return false;
   });
 }
+
+const enterXrButton = document.getElementById('enter-xr-button');
+enterXrButton.addEventListener('click', () => {
+  xrScene.enterXr();
+});
     </script>
   </body>
 </html>
