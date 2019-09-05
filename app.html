@@ -109,7 +109,7 @@ const floorMesh = (() => {
 scene.add(floorMesh);
 
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1, 1.5);
+camera.position.set(0, 2, 3);
 camera.lookAt(new THREE.Vector3(0, 0.5, 0));
 
 scene.add(camera);
@@ -132,18 +132,12 @@ const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
 directionalLight.position.set(1, 1, 1);
 scene.add(directionalLight);
 
-let cameraAngle = 5;
 function animate() {
-  const cameraRadius = 2;
-  camera.position.x = cameraRadius * Math.cos(cameraAngle);
-  camera.position.z = cameraRadius * Math.sin(cameraAngle);
-  camera.lookAt(new THREE.Vector3(0, 0.5, 0));
   if (fakeXrDisplay !== null) {
     fakeXrDisplay.position.copy(camera.position);
     fakeXrDisplay.quaternion.copy(camera.quaternion);
     fakeXrDisplay.pushUpdate();
   }
-  cameraAngle += 0.005;
 
   const rate = 5000;
   const f = (Date.now() % rate) / rate;
@@ -224,9 +218,9 @@ _startFakeVrDisplay()
           const xrIframe = document.createElement('xr-iframe');
           xrIframe.src = data.url;
           xrIframe.position = [
-            -1 + Math.random() * 2,
-            Math.random() * 2,
-            -1 + Math.random() * 2,
+            0,
+            .25,
+            0,
           ];
           layers.push(xrIframe);
 
