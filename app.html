@@ -160,6 +160,10 @@ const _startFakeVrDisplay = async () => {
   fakeXrDisplay.quaternion.copy(camera.quaternion);
   fakeXrDisplay.pushUpdate();
   fakeXrDisplay.enable();
+
+  camera.near = fakeXrDisplay.depthNear;
+  camera.far = fakeXrDisplay.depthFar;
+
   await _enterXr();
 
   // renderer.setAnimationLoop(animate);
