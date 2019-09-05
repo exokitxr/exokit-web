@@ -84,6 +84,10 @@ class XRIFrame extends HTMLElement {
               this.shadow = this.attachShadow({mode: 'closed'});
             }
             this.shadow.appendChild(win.canvas);
+
+            this.dispatchEvent(new MessageEvent('canvas', {
+              data: win.canvas,
+            }));
           }
           return win.ctx;
         };
