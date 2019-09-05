@@ -5,7 +5,7 @@ const {_getBaseUrl, _getProxyUrl} = utils;
 
 import GlobalContext from './GlobalContext.js';
 
-class XRIFrame extends HTMLElement {
+class XRScene extends HTMLElement {
   constructor() {
     super();
 
@@ -192,4 +192,4 @@ class XRIFrame extends HTMLElement {
     }
   }
 }
-customElements.define('xr-iframe', XRIFrame);
+customElements.define('xr-scene', XRScene);
