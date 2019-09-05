@@ -11,7 +11,8 @@ try {
 
 console.log('app 1');
 
-let xrIframe = null;
+let tutorialXrIframe = null;
+// let xrIframe = null;
 let fakeXrDisplay;
 // main
 
@@ -133,16 +134,23 @@ scene.add(directionalLight);
 
 let cameraAngle = 5;
 function animate() {
-  const cameraRadius = 5;
+  const cameraRadius = 2;
   camera.position.x = cameraRadius * Math.cos(cameraAngle);
   camera.position.z = cameraRadius * Math.sin(cameraAngle);
-  camera.lookAt(scene.position);
+  camera.lookAt(new THREE.Vector3(0, 0.5, 0));
   if (fakeXrDisplay !== null) {
     fakeXrDisplay.position.copy(camera.position);
     fakeXrDisplay.quaternion.copy(camera.quaternion);
     fakeXrDisplay.pushUpdate();
   }
   cameraAngle += 0.005;
+
+  const rate = 5000;
+  const f = (Date.now() % rate) / rate;
+  tutorialXrIframe.position = [0, Math.sin(f * Math.PI*2) / 2, 0];
+  tutorialXrIframe.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (-1 + Math.sin(f * Math.PI*4) * 2) * 0.1, 'YXZ')).toArray();
+  const s = 0.3 + (1 + Math.sin(f * Math.PI*4)) / 2 * 0.7;
+  tutorialXrIframe.scale = [s, s, s];
 
   renderer.render(scene, camera);
 }
@@ -193,15 +201,19 @@ const _enterXr = async () => {
 _startFakeVrDisplay()
   .then(() => {
 
-    xrIframe = document.createElement('xr-iframe');
+    tutorialXrIframe = document.createElement('xr-iframe');
+    tutorialXrIframe.src = 'examples/tutorial.html';
+    layers.push(tutorialXrIframe);
+
+    /* const xrIframe = document.createElement('xr-iframe');
     xrIframe.src = 'examples/example1xr.html';
     xrIframe.position = [0, 2, 0];
     layers.push(xrIframe);
 
-    xrIframe = document.createElement('xr-iframe');
+    const xrIframe = document.createElement('xr-iframe');
     xrIframe.src = 'examples/example2xr.html';
     xrIframe.position = [0, 2, 0];
-    layers.push(xrIframe);
+    layers.push(xrIframe); */
 
     // Listen to messages from parent window
     window.addEventListener('message', e => {
@@ -209,12 +221,12 @@ _startFakeVrDisplay()
       const {method} = data;
       switch (method) {
         case 'load': {
-          xrIframe = document.createElement('xr-iframe');
+          const xrIframe = document.createElement('xr-iframe');
           xrIframe.src = data.url;
           xrIframe.position = [
-            (-1 + Math.random() * 2) * 3,
-            (-1 + Math.random() * 2) * 3,
-            (-1 + Math.random() * 2) * 3,
+            -1 + Math.random() * 2,
+            Math.random() * 2,
+            -1 + Math.random() * 2,
           ];
           layers.push(xrIframe);
 
