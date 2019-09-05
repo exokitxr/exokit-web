@@ -4,24 +4,11 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@rgrove/parse-xml": "^2.0.1",
-    "css": "^2.2.4",
-    "events": "^3.0.0",
-    "events-browserify": "0.0.1",
-    "he": "^1.2.0",
-    "history": "^4.9.0",
-    "minimist": "^1.2.0",
-    "parse-int": "^1.0.3",
-    "parse5": "^5.1.0",
-    "path": "^0.12.7",
-    "path-browserify": "^1.0.0",
-    "stream-browserify": "^2.0.2",
-    "util": "^0.12.1",
-    "window-lsm": "0.0.1",
-    "window-selector": "0.0.8"
+    "express": "^4.17.1"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "sudo $(which node) index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
