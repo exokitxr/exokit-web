@@ -141,7 +141,7 @@ const _oninitmessage = async e => {
     self._onbootstrap = undefined;
   };
   self._postMessageUp = function _postMessageUp(data, transfer) {
-    messagePort.postMessage(data, transfer);
+    messagePort.postMessageSync(data, transfer);
   };
   const _onmessageHandle = e => {
     const {data: m} = e;
@@ -163,26 +163,23 @@ const _oninitmessage = async e => {
         break;
       }
       case 'runAsync': {
-        let result, err;
+        let resultSpec, err;
         try {
-          result = self.onrunasync ? self.onrunasync(m.request) : null;
+          resultSpec = self.onrunasync ? self.onrunasync(m.request) : null;
         } catch(e) {
           err = e.stack;
         }
         if (!err) {
-          Promise.resolve(result)
-            .then(resultSpec => {
-              let result, transfers;
-              if (resultSpec) {
-                result = resultSpec[0];
-                transfers = resultSpec[1];
-              }
-              self._postMessageUp({
-                method: 'response',
-                requestKey: m.requestKey,
-                result,
-              }, transfers);
-            });
+          let result, transfers;
+          if (resultSpec) {
+            result = resultSpec[0];
+            transfers = resultSpec[1];
+          }
+          self._postMessageUp({
+            method: 'response',
+            requestKey: m.requestKey,
+            result,
+          }, transfers);
         } else {
           self._postMessageUp({
             method: 'response',
