@@ -596,7 +596,7 @@ class XRRigidTransform {
     }
   }
   
-  initialize(_buffer = new SharedArrayBuffer((3 + 4 + 3 + 16) * 2 * Float32Array.BYTES_PER_ELEMENT), inverse = null) {
+  initialize(_buffer = new ArrayBuffer((3 + 4 + 3 + 16) * 2 * Float32Array.BYTES_PER_ELEMENT), inverse = null) {
     this._buffer = _buffer;
     this._inverse = inverse;
 
