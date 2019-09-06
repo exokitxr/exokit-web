@@ -13,9 +13,6 @@ self.addEventListener('message', e => {
   e.ports[0].postMessage({});
 });
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
 const _rewriteUrlToProxy = u => {
   if (/^[a-z]+:\/\//.test(u) && !u.startsWith(self.location.origin) && !/^[a-z]+:\/\/[a-z0-9\-]+\.proxy\.exokit\.org(?:\/|$)/.test(u)) {
     const parsedUrl = new URL(u);
