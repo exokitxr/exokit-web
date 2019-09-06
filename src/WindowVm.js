@@ -87,6 +87,12 @@ class WorkerVm extends EventTarget {
       });
 
     const messageChannel = new MessageChannel2();
+    messageChannel.port2.postMessageSync = (data, transfers) => {
+      messageChannel.port1.dispatchEvent(new MessageEvent('message', {data}));
+    };
+    messageChannel.port1.postMessageSync = (data, transfers) => {
+      messageChannel.port2.dispatchEvent(new MessageEvent('message', {data}));
+    };
     messageChannel.port1.addEventListener('message', e => {
       const {data: m} = e;
       switch (m.method) {
@@ -145,7 +151,7 @@ class WorkerVm extends EventTarget {
     messageChannel.port1.start();
 
     iframe._postMessageDown = function _postMessageDown(data, transfer) {
-      messageChannel.port1.postMessage(data, transfer);
+      messageChannel.port1.postMessageSync(data, transfer);
     };
     iframe.cleanup = () => {
       iframe.contentWindow.removeEventListener('postmessage', _postmessage);
@@ -185,20 +191,21 @@ class WorkerVm extends EventTarget {
     });
   }
   runAsync(request, transferList) {
-    return new Promise((accept, reject) => {
-      const requestKey = this.queueRequest((err, result) => {
-        if (!err) {
-          accept(result);
-        } else {
-          reject(err);
-        }
-      });
-      this.iframe._postMessageDown({
-        method: 'runAsync',
-        request,
-        requestKey,
-      }, transferList);
+    let result, error;
+    const requestKey = this.queueRequest((err, res) => {
+      error = err;
+      result = res;
     });
+    this.iframe._postMessageDown({
+      method: 'runAsync',
+      request,
+      requestKey,
+    }, transferList);
+    if (!error) {
+      return result;
+    } else {
+      throw error;
+    }
   }
   postMessage(message, transferList) {
     this.iframe._postMessageDown({

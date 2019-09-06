@@ -453,12 +453,7 @@ const _tickAnimationFrame = win => {
   return win.runAsync({
     method: 'tickAnimationFrame',
     layered: true,
-  })
-    .catch(err => {
-      if (err.code !== 'ECANCEL') {
-        console.warn(err);
-      }
-    });
+  });
 };
 const _tickAnimationFrames = () => {
   for (let i = 0; i < windows.length; i++) {

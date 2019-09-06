@@ -687,21 +687,25 @@ self.onrunasync = req => {
   switch (method) {
     case 'tickAnimationFrame': {
       self.tickAnimationFrame(req);
-      return Promise.resolve();
+      break;
     }
     case 'enterXr': {
       console.log('handle enter xr', GlobalContext.id);
       self.vrdisplaypresentchange();
-      return Promise.all(windows.map(win => win.runAsync({
-        method: 'enterXr',
-      }))).then(() => {});
+      for (let i = 0; i < windows.length; i++) {
+        windows[i].runAsync({
+          method: 'enterXr',
+        });
+      }
       break;
     }
     case 'exitXr': {
       self.vrdisplaypresentchange();
-      return Promise.all(windows.map(win => win.runAsync({
-        method: 'exitXr',
-      }))).then(() => {});
+      for (let i = 0; i < windows.length; i++) {
+        windows[i].runAsync({
+          method: 'exitXr',
+        });
+      }
       break;
     }
     case 'response': {
@@ -710,10 +714,8 @@ self.onrunasync = req => {
       if (keypath.length === 0) {
         if (vrPresentState.responseAccepts.length > 0) {
           vrPresentState.responseAccepts.shift()(req);
-
-          return Promise.resolve();
         } else {
-          return Promise.reject(new Error(`unexpected response at window ${method}`));
+          throw new Error(`unexpected response at window ${method}`);
         }
       } else {
         const windowId = keypath.pop();
@@ -729,8 +731,8 @@ self.onrunasync = req => {
         } else {
           console.warn('ignoring unknown response', req, {windowId});
         }
-        return Promise.resolve();
       }
+      break;
     }
     /* case 'keyEvent': {
       const {event} = request;
@@ -806,9 +808,11 @@ self.onrunasync = req => {
       }
       break;
     } */
-    case 'eval': // used in tests
-      return Promise.resolve([(0, eval)(req.scriptString), []]);
+    case 'eval': {// used in tests
+      (0, eval)(req.scriptString);
+      break;
+    }
     default:
-      return Promise.reject(new Error(`invalid window async request: ${JSON.stringify(req)}`));
+      throw new Error(`invalid window async request: ${JSON.stringify(req)}`);
   }
 };
