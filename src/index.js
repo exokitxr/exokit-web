@@ -1,4 +1,4 @@
-import './webxr-polyfill.module.js';
+// import './webxr-polyfill.module.js';
 
 import core from './core.js';
 // import minimist from '../modules/minimist.js';
@@ -356,7 +356,7 @@ const _handleRequestImmediate = req => {
   };
 
   switch (type) {
-    case 'makeXrCompatible': {
+    case 'makeProxyContext': {
       const ctx = win.install();
       _respond(null, ctx);
       break;
@@ -449,7 +449,7 @@ const _computeDerivedGamepadsData = () => {
   }
 };
 const _tickAnimationFrame = win => {
-  win.clear();
+  // win.clear();
   return win.runAsync({
     method: 'tickAnimationFrame',
     layered: true,

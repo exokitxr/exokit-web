@@ -74,6 +74,7 @@ class XRScene extends HTMLElement {
               }
               return _bindFramebuffer.call(this, target, fbo);
             })(win.ctx.bindFramebuffer);
+            win.ctx.binding = null;
             win.ctx.xrFramebuffer = null;
             const extensions = win.ctx.getSupportedExtensions();
             for (let i = 0; i < extensions.length; i++) {
@@ -91,11 +92,11 @@ class XRScene extends HTMLElement {
           }
           return win.ctx;
         };
-        win.clear = () => {
+        /* win.clear = () => {
           if (win.ctx) {
             win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
           }
-        };
+        }; */
         win.destroy = (destroy => function() {
           if (win.canvas) {
             this.shadow.removeChild(win.canvas);
