@@ -71,6 +71,10 @@ class WorkerVm extends EventTarget {
                 messagePort: messageChannel.port2,
               },
             }));
+            
+            if (!messageChannel.port2.handleMessage || !messageChannel.port2.handleMessage.lol) {
+              console.warn('message handler not added!!!!!!!!!!!!!!!!!', messageChannel.port2.handleMessage, messageChannel.port2.handleMessage && messageChannel.port2.handleMessage.lol);
+            }
 
             accept();
           }, {
@@ -88,15 +92,16 @@ class WorkerVm extends EventTarget {
 
     const messageChannel = new MessageChannel2();
     messageChannel.port2.postMessageSync = (data, transfers) => {
-      messageChannel.port1.dispatchEvent(new MessageEvent('message', {data}));
+      messageChannel.port1.handleMessage(new MessageEvent('message', {data}));
     };
     messageChannel.port1.postMessageSync = (data, transfers) => {
-      messageChannel.port2.dispatchEvent(new MessageEvent('message', {data}));
+      messageChannel.port2.handleMessage(new MessageEvent('message', {data}));
     };
-    messageChannel.port1.addEventListener('message', e => {
+    messageChannel.port1.handleMessage = e => {
       const {data: m} = e;
       switch (m.method) {
         case 'request': {
+          console.log('handle request up', m);
           this.dispatchEvent(new CustomEvent('request', {
             detail: m,
           }));
@@ -147,9 +152,16 @@ class WorkerVm extends EventTarget {
           break;
         }
       }
-    });
+    };
+    messageChannel.port1.addEventListener('message', messageChannel.port1.handleMessage);
     messageChannel.port1.start();
 
+    const queue = [];
+    messageChannel.port2.handleMessage = e => {
+      queue.push(e);
+    };
+    messageChannel.port2.handleMessage.queue = queue;
+    
     iframe._postMessageDown = function _postMessageDown(data, transfer) {
       messageChannel.port1.postMessageSync(data, transfer);
     };

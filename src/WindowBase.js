@@ -124,8 +124,6 @@ const _oninitmessage = async e => {
         method: 'load',
       });
 
-      messagePort.addEventListener('message', _onmessageHandle);
-      messagePort.start();
       /* console.log('flush messages', messageQueue.length);
       for (let i = 0; i < messageQueue.length; i++) {
         self.dispatchEvent(messageQueue[i]);
@@ -143,7 +141,9 @@ const _oninitmessage = async e => {
   self._postMessageUp = function _postMessageUp(data, transfer) {
     messagePort.postMessageSync(data, transfer);
   };
-  const _onmessageHandle = e => {
+  console.log('top passed handle message', messagePort.handleMessage);
+  const {queue} = messagePort.handleMessage;
+  messagePort.handleMessage = e => {
     const {data: m} = e;
 
     switch (m.method) {
@@ -263,6 +263,15 @@ const _oninitmessage = async e => {
       default: throw new Error(`invalid method: ${JSON.stringify(m.method)}`);
     }
   };
+  messagePort.handleMessage.lol = 'zol';
+  messagePort.addEventListener('message', messagePort.handleMessage);
+  messagePort.start();
+
+  console.log('child window flush queue', queue.length);
+  for (let i = 0; i < queue.length; i++) {
+    messagePort.handleMessage(queue[i]);
+  }
+  queue.length = 0;
 
   // run init module
 

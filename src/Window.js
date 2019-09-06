@@ -442,10 +442,14 @@ const _fetchText = src => fetch(src)
     }
     _tickLocalRafs();
   };
-  const _renderChild = (window, layered) => window.runAsync({
-    method: 'tickAnimationFrame',
-    layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
-  });
+  const _renderChild = (window, layered) => {
+    if (window.loaded) {
+      window.runAsync({
+        method: 'tickAnimationFrame',
+        layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+      });
+    }
+  };
   const _render = layered => {
     for (let i = 0; i < windows.length; i++) {
       _renderChild(windows[i], layered);
@@ -458,17 +462,26 @@ const _fetchText = src => fetch(src)
   };
 
   const _ensureProxyContext = () => {
+    console.log('ensure proxy context 1', !!GlobalContext.proxyContext);
     if (!GlobalContext.proxyContext) {
+      console.log('ensure proxy context 2');
       vrPresentState.responseAccepts.push(({result}) => {
+        console.log('ensure proxy context 3', !!result);
         GlobalContext.proxyContext = result;
+        console.log('ensure proxy context 4');
       });
 
+      console.log('ensure proxy context 5');
+      
       self._postMessageUp({
         method: 'request',
         type: 'makeProxyContext',
         keypath: [],
       });
+      
+      console.log('ensure proxy context 6');
     }
+    console.log('ensure proxy context 7');
   };
   const _makeMrDisplays = () => {
     const _onrequestpresent = async () => {

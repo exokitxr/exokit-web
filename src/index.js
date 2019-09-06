@@ -357,8 +357,11 @@ const _handleRequestImmediate = req => {
 
   switch (type) {
     case 'makeProxyContext': {
+      console.log('make proxy context 1');
       const ctx = win.install();
+      console.log('make proxy context 2', !!ctx);
       _respond(null, ctx);
+      console.log('make proxy context 3', !!ctx);
       break;
     }
     case 'requestPresent': {
