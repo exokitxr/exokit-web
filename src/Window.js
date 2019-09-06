@@ -2,7 +2,6 @@ import path from '../modules/path-browserify.js';
 import util from '../modules/util.js';
 
 // import {EventTarget, KeyboardEvent, SpatialEvent} from './Event.js';
-// import {MutationObserver} from './MutationObserver.js';
 import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext} from './Graphics.js';
 
 // import LocalStorage from '../modules/window-lsm.js';
