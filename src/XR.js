@@ -316,9 +316,6 @@ class XRWebGLLayer {
     this.stencil = stencil;
     this.alpha = alpha;
 
-    window[symbols.makeXrCompatible](context, {
-      reset: true,
-    });
     this.session.onmakeswapchain(context);
     /* const {fbo} = this.session.onmakeswapchain(context);
     
@@ -334,7 +331,7 @@ class XRWebGLLayer {
   }
   
   get framebuffer() {
-    return this.context._proxyContext.xrFramebuffer;
+    return GlobalContext.proxyContext.xrFramebuffer;
   }
   set framebuffer(framebuffer) {}
   

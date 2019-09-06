@@ -34,6 +34,7 @@ GlobalContext.id = id;
 GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
+GlobalContext.proxyContext = null;
 
 // import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document.js';
 /* import {
@@ -456,15 +457,15 @@ const _fetchText = src => fetch(src)
     _render(layered);
   };
 
-  const _makeXrCompatible = (context, opts) => {
-    if (!context.hasProxyContext()) {
+  const _ensureProxyContext = () => {
+    if (!GlobalContext.proxyContext) {
       vrPresentState.responseAccepts.push(({result}) => {
-        context.setProxyContext(result, opts);
+        GlobalContext.proxyContext = result;
       });
 
       self._postMessageUp({
         method: 'request',
-        type: 'makeXrCompatible',
+        type: 'makeProxyContext',
         keypath: [],
       });
     }
@@ -606,7 +607,7 @@ const _fetchText = src => fetch(src)
       xrSession,
     };
   };
-  window[symbols.makeXrCompatible] = _makeXrCompatible;
+  window[symbols.ensureProxyContext] = _ensureProxyContext;
   window[symbols.mrDisplaysSymbol] = _makeMrDisplays();
   window.vrdisplayactivate = () => {
     const _emit = () => {

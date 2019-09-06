@@ -299,9 +299,6 @@ class VRDisplay extends EventTarget {
 
     const [{source: canvas}] = layers;
     const context = canvas.getContext('webgl');
-    window[symbols.makeXrCompatible](context, {
-      reset: true,
-    });
     this.onmakeswapchain(context);
 
     if (this.onvrdisplaypresentchange && !this.isPresenting) {

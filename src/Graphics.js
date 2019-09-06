@@ -8,7 +8,7 @@ self.OffscreenCanvasRenderingContext2D = undefined;
 self.WebGLRenderingContext = undefined;
 self.WebGL2RenderingContext = undefined; */
 
-const {WebGLRenderingContext, WebGL2RenderingContext, CanvasRenderingContext2D} = self;
+const {/*WebGLRenderingContext, WebGL2RenderingContext,*/ CanvasRenderingContext2D} = self;
 
 /* const _inherit = (a, b) => {
   for (const k in b) {
@@ -37,136 +37,107 @@ const {WebGLRenderingContext, WebGL2RenderingContext, CanvasRenderingContext2D} 
   }
 }; */
 
-const _makeState = gl => ({
-  vao: null,
+const _makeState = () => {
+  const gl = GlobalContext.proxyContext;
 
-  arrayBuffer: null,
-  renderbuffer: {},
-  framebuffer: {},
+  return {
+    vao: null,
 
-  blend: false,
-  cullFace: false,
-  depthTest: false,
-  dither: false,
-  polygonOffsetFill: false,
-  sampleAlphaToCoverage: false,
-  sampleCoverage: false,
-  scissorTest: false,
-  stencilTest: false,
+    arrayBuffer: null,
+    renderbuffer: {},
+    framebuffer: {},
 
-  activeTexture: gl.TEXTURE0,
+    blend: false,
+    cullFace: false,
+    depthTest: false,
+    dither: false,
+    polygonOffsetFill: false,
+    sampleAlphaToCoverage: false,
+    sampleCoverage: false,
+    scissorTest: false,
+    stencilTest: false,
 
-  packAlignment: 4,
-  unpackAlignment: 4,
-  unpackColorspaceConversion: gl.BROWSER_DEFAULT_WEBGL,
-  unpackFlipY: 0,
-  unpackPremultiplyAlpha: 0,
+    activeTexture: gl.TEXTURE0,
 
-  currentProgram: null,
-  viewport: [0, 0, gl.canvas.width, gl.canvas.height],
-  scissor: [0, 0, 0, 0],
-  blendSrcRgb: gl.ONE,
-  blendDstRgb: gl.ZERO,
-  blendSrcAlpha: gl.ONE,
-  blendDstAlpha: gl.ZERO,
-  blendEquationRgb: gl.FUNC_ADD,
-  blendEquationAlpha: gl.FUNC_ADD,
-  blendColor: [0, 0, 0, 0],
-  colorClearValue: [0, 0, 0, 0],
-  colorMask: [true, true, true, true],
-  cullFaceMode: gl.BACK,
-  depthClearValue: 1,
-  depthFunc: gl.LESS,
-  depthRange: [0, 1],
-  depthMask: true,
-  frontFace: gl.CCW,
-  generateMipmapHint: gl.DONT_CARE,
-  lineWidth: 1,
-  polygonOffsetFactor: 0,
-  polygonOffsetUnits: 0,
-  sampleCoverageValue: 1,
-  sampleCoverageUnits: false,
-  stencilBackFail: gl.KEEP,
-  stencilBackFunc: gl.ALWAYS,
-  stencilBackPassDepthFail: gl.KEEP,
-  stencilBackPassDepthPass: gl.KEEP,
-  stencilBackRef: 0,
-  stencilBackValueMask: 0xFFFFFFFF,
-  stencilBackWriteMask: 0xFFFFFFFF,
-  stencilClearValue: 0,
-  stencilFail: gl.KEEP,
-  stencilFunc: gl.ALWAYS,
-  stencilPassDepthFail: gl.KEEP,
-  stencilPassDpethPass: gl.KEEP,
-  stencilRef: 0,
-  stencilValueMask: 0xFFFFFFFF,
-  stencilWriteMask: 0xFFFFFFFF,
+    packAlignment: 4,
+    unpackAlignment: 4,
+    unpackColorspaceConversion: gl.BROWSER_DEFAULT_WEBGL,
+    unpackFlipY: 0,
+    unpackPremultiplyAlpha: 0,
 
-  textureUnits: (() => {
-    const numTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-    const result = Array(numTextureUnits);
-    for (let i = 0; i < numTextureUnits; i++) {
-      result[i] = {
-        texture2D: null,
-        textureCubemap: null,
-      };
-    }
-    return result;
-  })(),
-});
+    currentProgram: null,
+    viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+    scissor: [0, 0, 0, 0],
+    blendSrcRgb: gl.ONE,
+    blendDstRgb: gl.ZERO,
+    blendSrcAlpha: gl.ONE,
+    blendDstAlpha: gl.ZERO,
+    blendEquationRgb: gl.FUNC_ADD,
+    blendEquationAlpha: gl.FUNC_ADD,
+    blendColor: [0, 0, 0, 0],
+    colorClearValue: [0, 0, 0, 0],
+    colorMask: [true, true, true, true],
+    cullFaceMode: gl.BACK,
+    depthClearValue: 1,
+    depthFunc: gl.LESS,
+    depthRange: [0, 1],
+    depthMask: true,
+    frontFace: gl.CCW,
+    generateMipmapHint: gl.DONT_CARE,
+    lineWidth: 1,
+    polygonOffsetFactor: 0,
+    polygonOffsetUnits: 0,
+    sampleCoverageValue: 1,
+    sampleCoverageUnits: false,
+    stencilBackFail: gl.KEEP,
+    stencilBackFunc: gl.ALWAYS,
+    stencilBackPassDepthFail: gl.KEEP,
+    stencilBackPassDepthPass: gl.KEEP,
+    stencilBackRef: 0,
+    stencilBackValueMask: 0xFFFFFFFF,
+    stencilBackWriteMask: 0xFFFFFFFF,
+    stencilClearValue: 0,
+    stencilFail: gl.KEEP,
+    stencilFunc: gl.ALWAYS,
+    stencilPassDepthFail: gl.KEEP,
+    stencilPassDpethPass: gl.KEEP,
+    stencilRef: 0,
+    stencilValueMask: 0xFFFFFFFF,
+    stencilWriteMask: 0xFFFFFFFF,
+
+    textureUnits: (() => {
+      const numTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+      const result = Array(numTextureUnits);
+      for (let i = 0; i < numTextureUnits; i++) {
+        result[i] = {
+          texture2D: null,
+          textureCubemap: null,
+        };
+      }
+      return result;
+    })(),
+  };
+};
 HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
   const match = type.match(/^(?:experimental-)?(webgl2?)$/);
   if (match) {
+    window[symbols.ensureProxyContext]();
+
     const canvas = this;
-    const gl = oldGetContext.call(canvas, type, init);
-    // gl.version = match[1] === 'webgl2' ? 2 : 1;
-    gl.id = ++GlobalContext.xrState.id[0];
-    gl._proxyContext = null;
-    Object.defineProperty(gl, 'canvas', { // Object.defineProperty to avoid proxying
-      get() {
-        return canvas;
-      },
-    });
+    const gl = match[1] === 'webgl2' ? new WebGL2RenderingContext(canvas) : new WebGLRenderingContext(canvas);
+    // const gl = oldGetContext.call(canvas, type, init);
+
     canvas.getContext = function getContext() {
       return gl;
     };
 
-    GlobalContext.contexts.push(gl);
-
-    gl.state = null;
-    const enabled = {
-      clear: true,
-    };
-    gl._enabled = enabled;
-    const extensions = {
-      WEBGL_lose_context: gl._exokitGetExtension('WEBGL_lose_context'),
-    };
-    gl._extensions = extensions;
-
     /* new MutationObserver(() => {
-      if (this._proxyContext) {
-        this._proxyContext.canvas.width = canvas.width;
-        this._proxyContext.canvas.height = canvas.height;
-      }
+      GlobalContext.proxyContext.canvas.width = canvas.width;
+      GlobalContext.proxyContext.canvas.height = canvas.height;
     }).observe(canvas, {
       attributes: true,
       attributeFilter: ['width', 'height'],
     }); */
-
-    if (init.xrCompatible) {
-      window[symbols.makeXrCompatible](gl, {
-        reset: false,
-      });
-    }
-
-    if (gl.createVertexArray) {
-      const vao = gl.createVertexArray();
-      gl.bindVertexArray(vao);
-    } else {
-      const extension = gl.getExtension('OES_vertex_array_object');
-      const vao = extension.createVertexArrayOES();
-      extension.bindVertexArrayOES(vao);
-    }
 
     setTimeout(() => {
       window.vrdisplayactivate();
@@ -192,143 +163,111 @@ HTMLCanvasElement.prototype.getBoundingClientRect = function getBoundingClientRe
   return new DOMRect(canvasViewport[0], canvasViewport[1], canvasViewport[2], canvasViewport[3]);
 };
 
-[WebGLRenderingContext, WebGL2RenderingContext].forEach(WebGLRenderingContext => {
+const [WebGLRenderingContext, WebGL2RenderingContext] = [self.WebGLRenderingContext, self.WebGL2RenderingContext].map(WebGLRenderingContext => {
 
-const {getExtension} = WebGLRenderingContext.prototype;
+function ProxiedWebGLRenderingContext(canvas) {
+  Object.defineProperty(this, 'canvas', { // Object.defineProperty to avoid proxying
+    get() {
+      return canvas;
+    },
+  });
+
+  this.id = ++GlobalContext.xrState.id[0];
+  this.state = _makeState();
+  this._enabled = {
+    clear: true,
+  };
+
+  if (this.createVertexArray) {
+    const vao = this.createVertexArray();
+    this.bindVertexArray(vao);
+  } else {
+    const extension = this.getExtension('OES_vertex_array_object');
+    const vao = extension.createVertexArrayOES();
+    extension.bindVertexArrayOES(vao);
+  }
+
+  GlobalContext.contexts.push(this);
+}
+ProxiedWebGLRenderingContext.prototype = Object.create(WebGLRenderingContext.prototype);
+
 for (const k in WebGLRenderingContext.prototype) {
   const o = Object.getOwnPropertyDescriptor(WebGLRenderingContext.prototype, k);
   if (o.get) {
     o.get = (get => function() {
-      return get.apply(this._proxyContext || this, arguments);
+      return GlobalContext.proxyContext[k];
     })(o.get);
-    o.set = (set => function() {
-      return set.apply(this._proxyContext || this, arguments);
+    o.set = (set => function(v) {
+      GlobalContext.proxyContext[k] = v;
     })(o.set);
-    Object.defineProperty(WebGLRenderingContext.prototype, k, o);
+    Object.defineProperty(ProxiedWebGLRenderingContext.prototype, k, o);
   } else {
     const {value} = o;
     if (typeof value === 'function') {
       // const {getError} = WebGLRenderingContext.prototype;
-      WebGLRenderingContext.prototype[k] = function() {
-        let result;
-        if (this._proxyContext) {
-          result = this._proxyContext[k].apply(this._proxyContext, arguments)
-        } else {
-          result = value.apply(this, arguments)
-        }
+      ProxiedWebGLRenderingContext.prototype[k] = function() {
         /* const error = getError.call(this);
         if (error) {
           Error.stackTraceLimit = 300;
-          console.log('fn', error, !!this._proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
+          console.log('fn', error, !!GlobalContext.proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
         } */
-        return result;
+        this.setProxyState();
+        if (k === 'getParameter' && !arguments[0]) {
+          console.log('getParameter', Array.from(arguments), new Error().stack);
+        }
+        return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
       };
     }
   }
 }
-WebGLRenderingContext.prototype._exokitGetExtension = getExtension;
-WebGLRenderingContext.prototype._exokitClear = (oldClear => function _exokitClear() {
-  oldClear.call(this, this.COLOR_BUFFER_BIT|this.DEPTH_BUFFER_BIT|this.STENCIL_BUFFER_BIT);
-})(WebGLRenderingContext.prototype.clear);
-WebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
+ProxiedWebGLRenderingContext.prototype._exokitClear = function _exokitClear() {
+  const gl = GlobalContext.proxyContext;
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);
+};
+ProxiedWebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
   this._enabled.clear = enabled;
 };
 class OES_vertex_array_object {
   constructor(gl) {
     this.gl = gl;
-    this.extension = this.gl._exokitGetExtension('OES_vertex_array_object');
+    this.extension = GlobalContext.proxyContext.getExtension('OES_vertex_array_object');
 
     this.VERTEX_ARRAY_BINDING_OES = OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES;
   }
   createVertexArrayOES() {
-    if (this.gl._proxyContext) {
-      return this.gl._proxyContext.createVertexArray();
-    } else if (this.extension) {
-      return this.extension.createVertexArrayOES();
-    } else {
-      return this.gl.createVertexArray();
-    }
+    return GlobalContext.proxyContext.createVertexArray();
   }
   bindVertexArrayOES(vao) {
     if (this.gl.state) {
       this.gl.state.vao = vao;
     }
-    if (this.gl._proxyContext) {
-      return this.gl._proxyContext.bindVertexArray(vao);
-    } else if (this.extension) {
-      return this.extension.bindVertexArrayOES(vao);
-    } else {
-      return this.gl.bindVertexArray(vao);
-    }
+    return GlobalContext.proxyContext.bindVertexArray(vao);
   }
   deleteVertexArrayOES(vao) {
-    if (this.gl._proxyContext) {
-      return this.gl._proxyContext.deleteVertexArray(vao);
-    } else if (this.extension) {
-      return this.extension.deleteVertexArrayOES(vao);
-    } else {
-      return this.gl.deleteVertexArray(vao);
-    }
+    return GlobalContext.proxyContext.deleteVertexArray(vao);
   }
   isVertexArrayOES(vao) {
-    if (this.gl._proxyContext) {
-      return this.gl._proxyContext.isVertexArray(vao);
-    } else if (this.extension) {
-      return this.extension.isVertexArrayOES(vao);
-    } else {
-      return this.gl.isVertexArray(vao);
-    }
+    return GlobalContext.proxyContext.isVertexArray(vao);
   }
   static get VERTEX_ARRAY_BINDING_OES() {
     return WebGL2RenderingContext.VERTEX_ARRAY_BINDING;
   }
 }
-WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
+ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   if (name === 'OES_vertex_array_object') {
     return new OES_vertex_array_object(this);
+  } else if (name === 'EXT_texture_filter_anisotropic') {
+    return GlobalContext.proxyContext.getExtension(name);
   } else {
-    return _getExtension.call(this, name);
+    return {};
   }
-})(getExtension);
-WebGLRenderingContext.prototype.hasProxyContext = function hasProxyContext() {
-  return !!this._proxyContext;
-};
-WebGLRenderingContext.prototype.setProxyContext = function setProxyContext(proxyContext, {reset}) {
-  const ctx = this;
-  const {canvas} = ctx;
-  this._proxyContext = proxyContext;
-
-  if (reset) {
-    canvas.addEventListener('webglcontextlost', e => {
-      e.preventDefault();
-      setTimeout(() => {
-        this.state = _makeState(this);
-        this._extensions.WEBGL_lose_context.restoreContext();
-      });
-    }, {once: true});
-    this._extensions.WEBGL_lose_context.loseContext();
-  } else {
-    this.state = _makeState(this);
-  }
-
-  /* new MutationObserver(() => {
-    proxyContext.canvas.width = canvas.width;
-    proxyContext.canvas.height = canvas.height;
-  }).observe(canvas, {
-    attributes: true,
-    attributeFilter: ['width', 'height'],
-  }); */
-};
-WebGLRenderingContext.prototype.clear = (oldClear => function clear() {
+})(ProxiedWebGLRenderingContext.prototype.getExtension);
+ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
     oldClear.apply(this, arguments);
   }
-})(WebGLRenderingContext.prototype.clear);
-WebGLRenderingContext.prototype.makeXrCompatible = function makeXrCompatible() {
-  window[symbols.makeXrCompatible](this, {
-    reset: true,
-  });
-};
+})(ProxiedWebGLRenderingContext.prototype.clear);
+ProxiedWebGLRenderingContext.prototype.makeXrCompatible = function makeXrCompatible() {};
 function enableDisable(gl, feature, enable) {
   if (enable) {
     gl.enable(feature);
@@ -336,10 +275,11 @@ function enableDisable(gl, feature, enable) {
     gl.disable(feature);
   }
 }
-WebGLRenderingContext.prototype.setProxyState = function setProxyState() {
-  const {_proxyContext: gl, state} = this;
+ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() {
+  if (GlobalContext.proxyContext.binding !== this) {
+    const {state} = this;
+    const gl = GlobalContext.proxyContext;
 
-  if (state) {
     gl.bindVertexArray(state.vao);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
@@ -399,26 +339,26 @@ WebGLRenderingContext.prototype.setProxyState = function setProxyState() {
       gl.bindTexture(gl.TEXTURE_CUBE_MAP, state.textureUnits[i].textureCubemap);
     }
     gl.activeTexture(state.activeTexture);
+
+    GlobalContext.proxyContext.binding = this;
   }
 };
-WebGLRenderingContext.prototype.destroy = function destroy() {
+ProxiedWebGLRenderingContext.prototype.destroy = function destroy() {
   GlobalContext.contexts.splice(GlobalContext.contexts.indexOf(this), 1);
 };
 
 // state memoization
 
 if (WebGLRenderingContext.prototype.bindVertexArray) {
-  WebGLRenderingContext.prototype.bindVertexArray = (_bindVertexArray => function bindVertexArray(vao) {
-    if (this.state) {
-      this.state.vao = vao;
-    }
+  ProxiedWebGLRenderingContext.prototype.bindVertexArray = (_bindVertexArray => function bindVertexArray(vao) {
+    this.state.vao = vao;
     return _bindVertexArray.apply(this, arguments);
-  })(WebGLRenderingContext.prototype.bindVertexArray);
+  })(ProxiedWebGLRenderingContext.prototype.bindVertexArray);
 }
-/* WebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
+/* ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;
   const extension = _getExtension.apply(this, arguments);
-  if (this.state && name === 'OES_vertex_array_object' && !extension.bindVertexArrayOES._bound) {
+  if (name === 'OES_vertex_array_object' && !extension.bindVertexArrayOES._bound) {
     extension.bindVertexArrayOES = (_bindVertexArrayOES => function bindVertexArrayOES(vao) {
       gl.state.vao = vao;
       return _bindVertexArrayOES.apply(this, arguments);
@@ -427,24 +367,20 @@ if (WebGLRenderingContext.prototype.bindVertexArray) {
   }
   return extension;
 })(WebGLRenderingContext.prototype.getExtension); */
-WebGLRenderingContext.prototype.bindBuffer = (_bindBuffer => function bindBuffer(target, b) {
-  if (this.state && target === this.ARRAY_BUFFER) {
+ProxiedWebGLRenderingContext.prototype.bindBuffer = (_bindBuffer => function bindBuffer(target, b) {
+  if (target === this.ARRAY_BUFFER) {
     this.state.arrayBuffer = b;
   }
   return _bindBuffer.apply(this, arguments);
-})(WebGLRenderingContext.prototype.bindBuffer);
-WebGLRenderingContext.prototype.bindRenderbuffer = (_bindRenderbuffer => function bindRenderbuffer(target, rbo) {
-  if (this.state) {
-    this.state.renderbuffer[target] = rbo;
-  }
+})(ProxiedWebGLRenderingContext.prototype.bindBuffer);
+ProxiedWebGLRenderingContext.prototype.bindRenderbuffer = (_bindRenderbuffer => function bindRenderbuffer(target, rbo) {
+  this.state.renderbuffer[target] = rbo;
   return _bindRenderbuffer.apply(this, arguments);
-})(WebGLRenderingContext.prototype.bindRenderbuffer);
-WebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
-  if (this.state) {
-    this.state.framebuffer[target] = fbo;
-  }
+})(ProxiedWebGLRenderingContext.prototype.bindRenderbuffer);
+ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
+  this.state.framebuffer[target] = fbo;
   return _bindFramebuffer.apply(this, arguments);
-})(WebGLRenderingContext.prototype.bindFramebuffer);
+})(ProxiedWebGLRenderingContext.prototype.bindFramebuffer);
 const targetStateKeys = {
   [WebGLRenderingContext.BLEND]: 'blend',
   [WebGLRenderingContext.CULL_FACE]: 'cullFace',
@@ -462,243 +398,182 @@ const targetStateKeys = {
   [WebGLRenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL]: 'unpackPremultiplyAlpha',
   [WebGLRenderingContext.GENERATE_MIPMAP_HINT]: 'generateMipmapHint',
 };
-WebGLRenderingContext.prototype.enable = (_enable => function enable(target) {
-  if (this.state) {
-    const stateKey = targetStateKeys[target];
-    if (stateKey !== undefined) {
-      this.state[stateKey] = true;
-    }
+ProxiedWebGLRenderingContext.prototype.enable = (_enable => function enable(target) {
+  const stateKey = targetStateKeys[target];
+  if (stateKey !== undefined) {
+    this.state[stateKey] = true;
   }
   return _enable.apply(this, arguments);
-})(WebGLRenderingContext.prototype.enable);
-WebGLRenderingContext.prototype.disable = (_disable => function disable(target) {
-  if (this.state) {
-    const stateKey = targetStateKeys[target];
-    if (stateKey !== undefined) {
-      this.state[stateKey] = false;
-    }
+})(ProxiedWebGLRenderingContext.prototype.enable);
+ProxiedWebGLRenderingContext.prototype.disable = (_disable => function disable(target) {
+  const stateKey = targetStateKeys[target];
+  if (stateKey !== undefined) {
+    this.state[stateKey] = false;
   }
   return _disable.apply(this, arguments);
-})(WebGLRenderingContext.prototype.disable);
-WebGLRenderingContext.prototype.activeTexture = (_activeTexture => function activeTexture(slot) {
-  if (this.state) {
-    this.state.activeTexture = slot;
-  }
+})(ProxiedWebGLRenderingContext.prototype.disable);
+ProxiedWebGLRenderingContext.prototype.activeTexture = (_activeTexture => function activeTexture(slot) {
+  this.state.activeTexture = slot;
   return _activeTexture.apply(this, arguments);
-})(WebGLRenderingContext.prototype.activeTexture);
-WebGLRenderingContext.prototype.pixelStorei = (_pixelStorei => function pixelStorei(name, value) {
-  if (this.state) {
-    const stateKey = targetStateKeys[name];
-    if (stateKey !== undefined) {
-      this.state[stateKey] = value;
-    }
+})(ProxiedWebGLRenderingContext.prototype.activeTexture);
+ProxiedWebGLRenderingContext.prototype.pixelStorei = (_pixelStorei => function pixelStorei(name, value) {
+  const stateKey = targetStateKeys[name];
+  if (stateKey !== undefined) {
+    this.state[stateKey] = value;
   }
   return _pixelStorei.apply(this, arguments);
-})(WebGLRenderingContext.prototype.pixelStorei);
-WebGLRenderingContext.prototype.useProgram = (_useProgram => function useProgram(program) {
-  if (this.state) {
-    this.state.currentProgram = program;
-  }
+})(ProxiedWebGLRenderingContext.prototype.pixelStorei);
+ProxiedWebGLRenderingContext.prototype.useProgram = (_useProgram => function useProgram(program) {
+  this.state.currentProgram = program;
   return _useProgram.apply(this, arguments);
-})(WebGLRenderingContext.prototype.useProgram);
-WebGLRenderingContext.prototype.viewport = (_viewport => function viewport(x, y, w, h) {
-  if (this.state) {
-    this.state.viewport[0] = x;
-    this.state.viewport[1] = y;
-    this.state.viewport[2] = w;
-    this.state.viewport[3] = h;
-  }
+})(ProxiedWebGLRenderingContext.prototype.useProgram);
+ProxiedWebGLRenderingContext.prototype.viewport = (_viewport => function viewport(x, y, w, h) {
+  this.state.viewport[0] = x;
+  this.state.viewport[1] = y;
+  this.state.viewport[2] = w;
+  this.state.viewport[3] = h;
   return _viewport.apply(this, arguments);
-})(WebGLRenderingContext.prototype.viewport);
-WebGLRenderingContext.prototype.scissor = (_scissor => function scissor(x, y, w, h) {
-  if (this.state) {
-    this.state.scissor[0] = x;
-    this.state.scissor[1] = y;
-    this.state.scissor[2] = w;
-    this.state.scissor[3] = h;
-  }
+})(ProxiedWebGLRenderingContext.prototype.viewport);
+ProxiedWebGLRenderingContext.prototype.scissor = (_scissor => function scissor(x, y, w, h) {
+  this.state.scissor[0] = x;
+  this.state.scissor[1] = y;
+  this.state.scissor[2] = w;
+  this.state.scissor[3] = h;
   return _scissor.apply(this, arguments);
-})(WebGLRenderingContext.prototype.scissor);
-WebGLRenderingContext.prototype.blendFuncSeparate = (_blendFuncSeparate => function blendFuncSeparate(blendSrcRgb, blendDstRgb, blendSrcAlpha, blendDstAlpha) {
-  if (this.state) {
-    this.state.blendSrcRgb = blendSrcRgb;
-    this.state.blendDstRgb = blendDstRgb;
-    this.state.blendSrcAlpha = blendSrcAlpha;
-    this.state.blendDstAlpha = blendDstAlpha;
-  }
+})(ProxiedWebGLRenderingContext.prototype.scissor);
+ProxiedWebGLRenderingContext.prototype.blendFuncSeparate = (_blendFuncSeparate => function blendFuncSeparate(blendSrcRgb, blendDstRgb, blendSrcAlpha, blendDstAlpha) {
+  this.state.blendSrcRgb = blendSrcRgb;
+  this.state.blendDstRgb = blendDstRgb;
+  this.state.blendSrcAlpha = blendSrcAlpha;
+  this.state.blendDstAlpha = blendDstAlpha;
   return _blendFuncSeparate.apply(this, arguments);
-})(WebGLRenderingContext.prototype.blendFuncSeparate);
-WebGLRenderingContext.prototype.blendEquationSeparate = (_blendEquationSeparate => function blendEquationSeparate(blendEquationRgb, blendEquationAlpha) {
-  if (this.state) {
-    this.state.blendEquationRgb = blendEquationRgb;
-    this.state.blendEquationAlpha = blendEquationAlpha;
-  }
+})(ProxiedWebGLRenderingContext.prototype.blendFuncSeparate);
+ProxiedWebGLRenderingContext.prototype.blendEquationSeparate = (_blendEquationSeparate => function blendEquationSeparate(blendEquationRgb, blendEquationAlpha) {
+  this.state.blendEquationRgb = blendEquationRgb;
+  this.state.blendEquationAlpha = blendEquationAlpha;
   return _blendEquationSeparate.apply(this, arguments);
-})(WebGLRenderingContext.prototype.blendEquationSeparate);
-WebGLRenderingContext.prototype.blendColor = (_blendColor => function blendColor(r, g, b, a) {
-  if (this.state) {
-    this.state.blendColor[0] = r;
-    this.state.blendColor[1] = g;
-    this.state.blendColor[2] = b;
-    this.state.blendColor[3] = a;
-  }
+})(ProxiedWebGLRenderingContext.prototype.blendEquationSeparate);
+ProxiedWebGLRenderingContext.prototype.blendColor = (_blendColor => function blendColor(r, g, b, a) {
+  this.state.blendColor[0] = r;
+  this.state.blendColor[1] = g;
+  this.state.blendColor[2] = b;
+  this.state.blendColor[3] = a;
   return _blendColor.apply(this, arguments);
-})(WebGLRenderingContext.prototype.blendColor);
-WebGLRenderingContext.prototype.clearColor = (_clearColor => function clearColor(r, g, b, a) {
-  if (this.state) {
-    this.state.colorClearValue[0] = r;
-    this.state.colorClearValue[1] = g;
-    this.state.colorClearValue[2] = b;
-    this.state.colorClearValue[3] = a;
-  }
+})(ProxiedWebGLRenderingContext.prototype.blendColor);
+ProxiedWebGLRenderingContext.prototype.clearColor = (_clearColor => function clearColor(r, g, b, a) {
+  this.state.colorClearValue[0] = r;
+  this.state.colorClearValue[1] = g;
+  this.state.colorClearValue[2] = b;
+  this.state.colorClearValue[3] = a;
   return _clearColor.apply(this, arguments);
-})(WebGLRenderingContext.prototype.clearColor);
-WebGLRenderingContext.prototype.colorMask = (_colorMask => function colorMask(r, g, b, a) {
-  if (this.state) {
-    this.state.colorMask[0] = r;
-    this.state.colorMask[1] = g;
-    this.state.colorMask[2] = b;
-    this.state.colorMask[3] = a;
-  }
+})(ProxiedWebGLRenderingContext.prototype.clearColor);
+ProxiedWebGLRenderingContext.prototype.colorMask = (_colorMask => function colorMask(r, g, b, a) {
+  this.state.colorMask[0] = r;
+  this.state.colorMask[1] = g;
+  this.state.colorMask[2] = b;
+  this.state.colorMask[3] = a;
   return _colorMask.apply(this, arguments);
-})(WebGLRenderingContext.prototype.colorMask);
-WebGLRenderingContext.prototype.cullFace = (_cullFace => function cullFace(cullFaceMode) {
-  if (this.state) {
-    this.state.cullFaceMode = cullFaceMode;
-  }
+})(ProxiedWebGLRenderingContext.prototype.colorMask);
+ProxiedWebGLRenderingContext.prototype.cullFace = (_cullFace => function cullFace(cullFaceMode) {
+  this.state.cullFaceMode = cullFaceMode;
   return _cullFace.apply(this, arguments);
-})(WebGLRenderingContext.prototype.cullFace);
-WebGLRenderingContext.prototype.clearDepth = (_clearDepth => function clearDepth(depthClearValue) {
-  if (this.state) {
-    this.state.depthClearValue = depthClearValue;
-  }
+})(ProxiedWebGLRenderingContext.prototype.cullFace);
+ProxiedWebGLRenderingContext.prototype.clearDepth = (_clearDepth => function clearDepth(depthClearValue) {
+  this.state.depthClearValue = depthClearValue;
   return _clearDepth.apply(this, arguments);
-})(WebGLRenderingContext.prototype.clearDepth);
-WebGLRenderingContext.prototype.depthFunc = (_depthFunc => function depthFunc(df) {
-  if (this.state) {
-    this.state.depthFunc = df;
-  }
+})(ProxiedWebGLRenderingContext.prototype.clearDepth);
+ProxiedWebGLRenderingContext.prototype.depthFunc = (_depthFunc => function depthFunc(df) {
+  this.state.depthFunc = df;
   return _depthFunc.apply(this, arguments);
-})(WebGLRenderingContext.prototype.depthFunc);
-WebGLRenderingContext.prototype.depthRange = (_depthRange => function depthRange(near, far) {
-  if (this.state) {
-    this.state.depthRange[0] = near;
-    this.state.depthRange[1] = far;
-  }
+})(ProxiedWebGLRenderingContext.prototype.depthFunc);
+ProxiedWebGLRenderingContext.prototype.depthRange = (_depthRange => function depthRange(near, far) {
+  this.state.depthRange[0] = near;
+  this.state.depthRange[1] = far;
   return _depthRange.apply(this, arguments);
-})(WebGLRenderingContext.prototype.depthRange);
-WebGLRenderingContext.prototype.depthMask = (_depthMask => function depthMask(dm) {
-  if (this.state) {
-    this.state.depthMask = dm;
-  }
+})(ProxiedWebGLRenderingContext.prototype.depthRange);
+ProxiedWebGLRenderingContext.prototype.depthMask = (_depthMask => function depthMask(dm) {
+  this.state.depthMask = dm;
   return _depthMask.apply(this, arguments);
-})(WebGLRenderingContext.prototype.depthMask);
-WebGLRenderingContext.prototype.frontFace = (_frontFace => function frontFace(ff) {
-  if (this.state) {
-    this.state.frontFace = ff;
-  }
+})(ProxiedWebGLRenderingContext.prototype.depthMask);
+ProxiedWebGLRenderingContext.prototype.frontFace = (_frontFace => function frontFace(ff) {
+  this.state.frontFace = ff;
   return _frontFace.apply(this, arguments);
-})(WebGLRenderingContext.prototype.frontFace);
-WebGLRenderingContext.prototype.hint = (_hint => function hint(target, value) {
-  if (this.state) {
-    const stateKey = targetStateKeys[target];
-    if (stateKey !== undefined) {
-      this.state[stateKey] = value;
-    }
+})(ProxiedWebGLRenderingContext.prototype.frontFace);
+ProxiedWebGLRenderingContext.prototype.hint = (_hint => function hint(target, value) {
+  const stateKey = targetStateKeys[target];
+  if (stateKey !== undefined) {
+    this.state[stateKey] = value;
   }
   return _hint.apply(this, arguments);
-})(WebGLRenderingContext.prototype.hint);
-WebGLRenderingContext.prototype.lineWidth = (_lineWidth => function lineWidth(lw) {
-  if (this.state) {
-    this.state.lineWidth = lw;
-  }
+})(ProxiedWebGLRenderingContext.prototype.hint);
+ProxiedWebGLRenderingContext.prototype.lineWidth = (_lineWidth => function lineWidth(lw) {
+  this.state.lineWidth = lw;
   return _lineWidth.apply(this, arguments);
-})(WebGLRenderingContext.prototype.lineWidth);
-WebGLRenderingContext.prototype.polygonOffset = (_polygonOffset => function polygonOffset(polygonOffsetFactor, polygonOffsetUnits) {
-  if (this.state) {
-    this.state.polygonOffsetFactor = polygonOffsetFactor;
-    this.state.polygonOffsetUnits = polygonOffsetUnits;
-  }
+})(ProxiedWebGLRenderingContext.prototype.lineWidth);
+ProxiedWebGLRenderingContext.prototype.polygonOffset = (_polygonOffset => function polygonOffset(polygonOffsetFactor, polygonOffsetUnits) {
+  this.state.polygonOffsetFactor = polygonOffsetFactor;
+  this.state.polygonOffsetUnits = polygonOffsetUnits;
   return _polygonOffset.apply(this, arguments);
-})(WebGLRenderingContext.prototype.polygonOffset);
-WebGLRenderingContext.prototype.sampleCoverage = (_sampleCoverage => function sampleCoverage(sampleCoverageValue, sampleCoverageUnits) {
-  if (this.state) {
-    this.state.sampleCoverageValue = sampleCoverageValue;
-    this.state.sampleCoverageUnits = sampleCoverageUnits;
-  }
+})(ProxiedWebGLRenderingContext.prototype.polygonOffset);
+ProxiedWebGLRenderingContext.prototype.sampleCoverage = (_sampleCoverage => function sampleCoverage(sampleCoverageValue, sampleCoverageUnits) {
+  this.state.sampleCoverageValue = sampleCoverageValue;
+  this.state.sampleCoverageUnits = sampleCoverageUnits;
   return _sampleCoverage.apply(this, arguments);
-})(WebGLRenderingContext.prototype.sampleCoverage);
-WebGLRenderingContext.prototype.stencilFuncSeparate = (_stencilFuncSeparate => function stencilFuncSeparate(face, func, ref, mask) {
-  if (this.state) {
-    if (face === this.BACK) {
-      this.state.stencilBackFunc = func;
-      this.state.stencilBackRef = ref;
-      this.state.stencilBackValueMask = mask;
-    } else if (face === this.FRONT) {
-      this.state.stencilFunc = func;
-      this.state.stencilRef = ref;
-      this.state.stencilValueMask = mask;
-    }
+})(ProxiedWebGLRenderingContext.prototype.sampleCoverage);
+ProxiedWebGLRenderingContext.prototype.stencilFuncSeparate = (_stencilFuncSeparate => function stencilFuncSeparate(face, func, ref, mask) {
+  if (face === this.BACK) {
+    this.state.stencilBackFunc = func;
+    this.state.stencilBackRef = ref;
+    this.state.stencilBackValueMask = mask;
+  } else if (face === this.FRONT) {
+    this.state.stencilFunc = func;
+    this.state.stencilRef = ref;
+    this.state.stencilValueMask = mask;
   }
   return _stencilFuncSeparate.apply(this, arguments);
-})(WebGLRenderingContext.prototype.stencilFuncSeparate);
-WebGLRenderingContext.prototype.stencilOpSeparate = (_stencilOpSeparate => function stencilOpSeparate(face, fail, zfail, zpass) {
-  if (this.state) {
-    if (face === this.BACK) {
-      this.state.stencilBackFail = fail;
-      this.state.stencilBackPassDepthFail = zfail;
-      this.state.stencilBackPassDepthPass = zpass;
-    } else if (face === this.FRONT) {
-      this.state.stencilFail = fail;
-      this.state.stencilPassDepthFail = zfail;
-      this.state.stencilPassDepthPass = zpass;
-    }
+})(ProxiedWebGLRenderingContext.prototype.stencilFuncSeparate);
+ProxiedWebGLRenderingContext.prototype.stencilOpSeparate = (_stencilOpSeparate => function stencilOpSeparate(face, fail, zfail, zpass) {
+  if (face === this.BACK) {
+    this.state.stencilBackFail = fail;
+    this.state.stencilBackPassDepthFail = zfail;
+    this.state.stencilBackPassDepthPass = zpass;
+  } else if (face === this.FRONT) {
+    this.state.stencilFail = fail;
+    this.state.stencilPassDepthFail = zfail;
+    this.state.stencilPassDepthPass = zpass;
   }
   return _stencilOpSeparate.apply(this, arguments);
-})(WebGLRenderingContext.prototype.stencilOpSeparate);
-WebGLRenderingContext.prototype.stencilMaskSeparate = (_stencilMaskSeparate => function stencilMaskSeparate(face, mask) {
-  if (this.state) {
-    if (face === this.BACK) {
-      this.state.stencilBackWriteMask = mask;
-    } else if (face === this.FRONT) {
-      this.state.stencilWriteMask = mask;
-    }
+})(ProxiedWebGLRenderingContext.prototype.stencilOpSeparate);
+ProxiedWebGLRenderingContext.prototype.stencilMaskSeparate = (_stencilMaskSeparate => function stencilMaskSeparate(face, mask) {
+  if (face === this.BACK) {
+    this.state.stencilBackWriteMask = mask;
+  } else if (face === this.FRONT) {
+    this.state.stencilWriteMask = mask;
   }
   return _stencilMaskSeparate.apply(this, arguments);
-})(WebGLRenderingContext.prototype.stencilMaskSeparate);
-WebGLRenderingContext.prototype.clearStencil = (_clearStencil => function stencilClearValue(stencilClearValue) {
-  if (this.state) {
-    this.state.stencilClearValue = stencilClearValue;
-  }
+})(ProxiedWebGLRenderingContext.prototype.stencilMaskSeparate);
+ProxiedWebGLRenderingContext.prototype.clearStencil = (_clearStencil => function stencilClearValue(stencilClearValue) {
+  this.state.stencilClearValue = stencilClearValue;
   return _clearStencil.apply(this, arguments);
-})(WebGLRenderingContext.prototype.clearStencil);
-WebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindTexture(target, texture) {
-  if (this.state) {
-    if (target === this.TEXTURE_2D) {
-      this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].texture2D = texture;
-    } else if (target === this.TEXTURE_CUBE_MAP) {
-      this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].textureCubemap = texture;
-    }
+})(ProxiedWebGLRenderingContext.prototype.clearStencil);
+ProxiedWebGLRenderingContext.prototype.bindTexture = (_bindTexture => function bindTexture(target, texture) {
+  if (target === this.TEXTURE_2D) {
+    this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].texture2D = texture;
+  } else if (target === this.TEXTURE_CUBE_MAP) {
+    this.state.textureUnits[this.state.activeTexture - this.TEXTURE0].textureCubemap = texture;
   }
   return _bindTexture.apply(this, arguments);
-})(WebGLRenderingContext.prototype.bindTexture);
-
-});
-
-[WebGLRenderingContext].forEach(WebGLRenderingContext => {
+})(ProxiedWebGLRenderingContext.prototype.bindTexture);
 
 // WebGL1 -> WebGL2 translations
-
-const glslVersion = '300 es';
-WebGLRenderingContext.prototype.createShader = (_createShader => function createShader(type) {
-  const result = _createShader.call(this, type);
-  if (this._proxyContext) {
+if (WebGLRenderingContext.name === 'WebGLRenderingContext') {
+  const glslVersion = '300 es';
+  ProxiedWebGLRenderingContext.prototype.createShader = (_createShader => function createShader(type) {
+    const result = _createShader.call(this, type);
     result.type = type;
-  }
-  return result;
-})(WebGLRenderingContext.prototype.createShader);
-WebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shaderSource(shader, source) {
-  if (this._proxyContext) {
+    return result;
+  })(ProxiedWebGLRenderingContext.prototype.createShader);
+  ProxiedWebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shaderSource(shader, source) {
     if (shader.type === this.VERTEX_SHADER) {
       // const oldSource = source;
       source = webGlToOpenGl.vertex(source, glslVersion);
@@ -708,43 +583,41 @@ WebGLRenderingContext.prototype.shaderSource = (_shaderSource => function shader
       source = webGlToOpenGl.fragment(source, glslVersion);
       // console.log('change source 2', this, oldSource, source);
     }
-  }
-  return _shaderSource.call(this, shader, source);
-})(WebGLRenderingContext.prototype.shaderSource);
-WebGLRenderingContext.prototype.getActiveAttrib = (_getActiveAttrib => function getActiveAttrib(program, index) {
-  let result = _getActiveAttrib.call(this, program, index);
-  if (this._proxyContext && result) {
-    result = {
-      size: result.size,
-      type: result.type,
-      name: webGlToOpenGl.unmapName(result.name),
-    };
-  }
-  return result;
-})(WebGLRenderingContext.prototype.getActiveAttrib);
-WebGLRenderingContext.prototype.getActiveUniform = (_getActiveUniform => function getActiveUniform(program, index) {
-  let result = _getActiveUniform.call(this, program, index);
-  if (this._proxyContext && result) {
-    result = {
-      size: result.size,
-      type: result.type,
-      name: webGlToOpenGl.unmapName(result.name),
-    };
-  }
-  return result;
-})(WebGLRenderingContext.prototype.getActiveUniform);
-WebGLRenderingContext.prototype.getAttribLocation = (_getAttribLocation => function getAttribLocation(program, path) {
-  if (this._proxyContext) {
+    return _shaderSource.call(this, shader, source);
+  })(ProxiedWebGLRenderingContext.prototype.shaderSource);
+  ProxiedWebGLRenderingContext.prototype.getActiveAttrib = (_getActiveAttrib => function getActiveAttrib(program, index) {
+    let result = _getActiveAttrib.call(this, program, index);
+    if (result) {
+      result = {
+        size: result.size,
+        type: result.type,
+        name: webGlToOpenGl.unmapName(result.name),
+      };
+    }
+    return result;
+  })(ProxiedWebGLRenderingContext.prototype.getActiveAttrib);
+  ProxiedWebGLRenderingContext.prototype.getActiveUniform = (_getActiveUniform => function getActiveUniform(program, index) {
+    let result = _getActiveUniform.call(this, program, index);
+    if (result) {
+      result = {
+        size: result.size,
+        type: result.type,
+        name: webGlToOpenGl.unmapName(result.name),
+      };
+    }
+    return result;
+  })(ProxiedWebGLRenderingContext.prototype.getActiveUniform);
+  ProxiedWebGLRenderingContext.prototype.getAttribLocation = (_getAttribLocation => function getAttribLocation(program, path) {
     path = webGlToOpenGl.mapName(path);
-  }
-  return _getAttribLocation.call(this, program, path);
-})(WebGLRenderingContext.prototype.getAttribLocation);
-WebGLRenderingContext.prototype.getUniformLocation = (_getUniformLocation => function getUniformLocation(program, path) {
-  if (this._proxyContext) {
+    return _getAttribLocation.call(this, program, path);
+  })(ProxiedWebGLRenderingContext.prototype.getAttribLocation);
+  ProxiedWebGLRenderingContext.prototype.getUniformLocation = (_getUniformLocation => function getUniformLocation(program, path) {
     path = webGlToOpenGl.mapName(path);
-  }
-  return _getUniformLocation.call(this, program, path);
-})(WebGLRenderingContext.prototype.getUniformLocation);
+    return _getUniformLocation.call(this, program, path);
+  })(ProxiedWebGLRenderingContext.prototype.getUniformLocation);
+}
+
+return ProxiedWebGLRenderingContext;
 
 });
 
