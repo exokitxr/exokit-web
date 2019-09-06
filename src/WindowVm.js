@@ -232,7 +232,7 @@ const _clean = o => {
   return result;
 };
 const _makeWindow = (options = {}) => {
-  const id = Atomics.add(GlobalContext.xrState.id, 0, 1) + 1;
+  const id = ++GlobalContext.xrState.id[0];
   const window = new WorkerVm({
     initModule: './Window.js',
     args: {

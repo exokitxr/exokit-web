@@ -120,7 +120,7 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
     const canvas = this;
     const gl = oldGetContext.call(canvas, type, init);
     // gl.version = match[1] === 'webgl2' ? 2 : 1;
-    gl.id = Atomics.add(GlobalContext.xrState.id, 0) + 1;
+    gl.id = ++GlobalContext.xrState.id[0];
     gl._proxyContext = null;
     Object.defineProperty(gl, 'canvas', { // Object.defineProperty to avoid proxying
       get() {
