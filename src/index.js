@@ -39,7 +39,7 @@ GlobalContext.windows = windows;
 
 const xrState = (() => {
   const _makeSab = size => {
-    const sab = new SharedArrayBuffer(size);
+    const sab = new ArrayBuffer(size);
     let index = 0;
     return (c, n) => {
       const result = new c(sab, index, n);
