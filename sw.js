@@ -71,24 +71,19 @@ const _rewriteRes = res => {
   const {url, originalUrl} = res;
   return _rewriteResExt(res.url, res.originalUrl, res.headers, res);
 };
+const _flattenWebVrEyeJs = jsString => jsString.replace(
+  /\.getEyeParameters\("left"\).{0,100}\.set(?:DrawingBuffer)?Size\(2\*/g,
+  all => all + '(new FakeXRDisplay().stereo?1:0.5)*'
+);
 const _rewriteResExt = (url, originalUrl, headers, res) => {
-  if (originalUrl === 'https://https-aframe-io.proxy.exokit.org/a-painter/vendor/aframe-master.min.js') {
-    return _rewriteResText(res, jsString => {
-      const result = jsString
-        .replace(
-          'var e=i.getEyeParameters("left"),n=e.renderWidth,a=e.renderHeight;m=t.getPixelRatio(),f=t.getSize(),t.setDrawingBufferSize(2*n,a,1)',
-          'var le=i.getEyeParameters("left"),re=i.getEyeParameters("right"),n=le.renderWidth+re.renderWidth,a=le.renderHeight;m=t.getPixelRatio(),f=t.getSize(),t.setDrawingBufferSize(n,a,1)'
-        )
-      return result;
-    });
-  } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
+  if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace('window.top', 'window.self'));
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/engine-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace(`powerPreference:"default"}`, 'powerPreference:"default",xrCompatible:!0}'));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/build/build.js') {
     return _rewriteResText(res, jsString => jsString.replace('getDistance:function(){var e=this.axis;', 'getDistance:function(){if (!this.axis)this.axis=[0,0,0];var e=this.axis;'));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/vendor/aframe-master.min.js') {
-    return _rewriteResText(res, jsString => 'delete navigator.xr;' + jsString);
+    return _rewriteResText(res, jsString => 'delete navigator.xr;' + _flattenWebVrEyeJs(jsString));
   } else if (originalUrl === 'https://js.cryptovoxels.com/client.js') {
     return _rewriteResText(res, jsString => {
       const result = jsString
@@ -97,6 +92,8 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
         .replace(/getContext\("webgl2",i\)/g, `getContext("webgl2",Object.assign(i,{xrCompatible:true}))`);
       return result;
     });
+  } else if (/aframe(?:-master)?\.min\.js/.test(originalUrl)) {
+    return _rewriteResText(res, _flattenWebVrEyeJs);
   } else if (originalUrl && /^text\/html(?:;|$)/.test(headers.get('Content-Type'))) {
     return _rewriteResText(res, htmlString => {
       htmlString = _addHtmlBase(htmlString, _getBaseUrl(url));
