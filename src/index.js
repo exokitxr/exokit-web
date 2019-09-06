@@ -1,3 +1,5 @@
+import './webxr-polyfill.min.js';
+
 import core from './core.js';
 // import minimist from '../modules/minimist.js';
 
