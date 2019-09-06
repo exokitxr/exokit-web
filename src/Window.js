@@ -19,7 +19,6 @@ import {
   getGamepads,
 } from './VR.js';
 
-import {maxNumTrackers} from './constants.js';
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
 

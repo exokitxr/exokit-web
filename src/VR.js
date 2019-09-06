@@ -8,7 +8,6 @@ import THREE from '../lib/three-min.js';
   nativeOculusMobileVr,
   nativeMl,
 } = require('./native-bindings.js'); */
-import {defaultEyeSeparation, maxNumTrackers} from './constants.js';
 import GlobalContext from './GlobalContext.js';
 
 const localVector = new THREE.Vector3();

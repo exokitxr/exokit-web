@@ -1,7 +1,6 @@
 import GlobalContext from './GlobalContext.js';
 import THREE from '../lib/three-min.js';
 import symbols from './symbols.js';
-// import {maxNumTrackers} from './constants.js';
 import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 

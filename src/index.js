@@ -3,7 +3,6 @@ import './webxr-polyfill.module.js';
 import core from './core.js';
 // import minimist from '../modules/minimist.js';
 
-import {defaultEyeSeparation/*, maxNumTrackers*/} from './constants.js';
 import symbols from './symbols.js';
 import THREE from '../lib/three-min.js';
 
@@ -82,9 +81,9 @@ const xrState = (() => {
   result.rightProjectionMatrix = _makeTypedArray(Float32Array, 16);
   result.rightProjectionMatrix.set(result.leftProjectionMatrix);
   result.leftOffset = _makeTypedArray(Float32Array, 3);
-  result.leftOffset.set(Float32Array.from([-defaultEyeSeparation/2, 0, 0]));
+  result.leftOffset.set(Float32Array.from([-0.625/2, 0, 0]));
   result.rightOffset = _makeTypedArray(Float32Array, 3);
-  result.leftOffset.set(Float32Array.from([defaultEyeSeparation/2, 0, 0]));
+  result.leftOffset.set(Float32Array.from([0.625/2, 0, 0]));
   result.leftFov = _makeTypedArray(Float32Array, 4);
   result.leftFov.set(Float32Array.from([45, 45, 45, 45]));
   result.rightFov = _makeTypedArray(Float32Array, 4);
