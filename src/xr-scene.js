@@ -95,7 +95,7 @@ class XRScene extends HTMLElement {
         win.clear = () => {
           if (win.ctx) {
             win.ctx.binding = null;
-            win.ctx.clearColor(0, 0, 0, 1);
+            win.ctx.clearColor(0, 0, 0, 0);
             win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
           }
         };
