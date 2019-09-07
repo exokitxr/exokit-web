@@ -162,36 +162,45 @@ self.addEventListener('activate', event => {
   // console.log('sw activate');
   self.clients.claim();
 });
-self.addEventListener('fetch', event => {
+
+self.addEventListener('fetch', event => event.respondWith(
+
+(async () => {
   // console.log('got request', event.request.url);
 
-  const permanentRedirect = permanentRedirects[event.request.url];
-  if (permanentRedirect) {
-    event.respondWith(
-      fetch(permanentRedirect)
-    );
-    return;
-  }
+  let u = event.request.url;
+  const dst = redirects.get(u);
+  if (dst) {
+    redirects.delete(event.request.url);
 
-  if (event.request.method === 'HEAD' && event.request.url === event.request.referrer) {
-    event.respondWith(new Response('', {
+    const res = new Response(dst, {
+      headers: {
+        'Content-Type': 'text/html',
+      },
+    });
+    return _rewriteResExt(u, u, res.headers, res);
+  } else if (event.request.method === 'HEAD' && event.request.url === event.request.referrer) {
+    return new Response('', {
       headers: {
         'Content-Type': 'text/html',
         'Date': new Date().toUTCString(),
       },
-    }));
-  } else {
-    let u = event.request.url;
-    const dst = redirects.get(u);
-    if (dst) {
-      redirects.delete(event.request.url);
+    });
+  }
 
-      const res = new Response(dst, {
-        headers: {
-          'Content-Type': 'text/html',
-        },
-      });
-      event.respondWith(_rewriteResExt(u, u, res.headers, res));
+  if (!cache) {
+    cache = await caches.open(cacheName);
+  }
+
+  const cachedRes = await cache.match(event.request);
+  if (cachedRes) {
+    return cachedRes;
+  }
+
+  const res = await (() => {
+    const permanentRedirect = permanentRedirects[event.request.url];
+    if (permanentRedirect) {
+      return fetch(permanentRedirect);
     } else {
       let match = u.match(/^[a-z]+:\/\/[a-zA-Z0-9\-\.:]+(.+)$/);
       if (match) {
@@ -200,51 +209,49 @@ self.addEventListener('fetch', event => {
           const originalUrl = match2[1];
           const permanentRedirect = permanentRedirects[originalUrl];
           if (permanentRedirect) {
-            event.respondWith(
-              fetch(permanentRedirect)
-            );
+            return fetch(permanentRedirect);
           } else {
             const proxyUrl = _rewriteUrlToProxy(originalUrl);
-            event.respondWith(
-              fetch(proxyUrl).then(res => {
-                res.originalUrl = originalUrl;
-                return _rewriteRes(res);
-              })
-            );
+            return fetch(proxyUrl).then(res => {
+              res.originalUrl = originalUrl;
+              return _rewriteRes(res);
+            });
           }
         } else if (match2 = match[1].match(/^\/.d\/(.+)$/)) {
-          event.respondWith(fetch(match2[1]));
+          return fetch(match2[1]);
         } else if (match2 = match[1].match(/^\/.f\/(.+)$/)) {
-          event.respondWith(
-            _resolveFollowUrl(match2[1])
-              .then(u => new Response(u, {
-                headers: {
-                  'Content-Type': 'text/plain',
-                },
-              }))
-          );
+          return _resolveFollowUrl(match2[1])
+            .then(u => new Response(u, {
+              headers: {
+                'Content-Type': 'text/plain',
+              },
+            }));
         } else {
-          event.respondWith(
-            fetch(event.request)
-              .then(res => {
-                if (res.type === 'opaque') {
-                  const proxyUrl = _rewriteUrlToProxy(u);
-                  return fetch(proxyUrl).then(res => {
-                    res.originalUrl = u;
-                    return _rewriteRes(res);
-                  })
-                } else {
+          return fetch(event.request)
+            .then(res => {
+              if (res.type === 'opaque') {
+                const proxyUrl = _rewriteUrlToProxy(u);
+                return fetch(proxyUrl).then(res => {
                   res.originalUrl = u;
                   return _rewriteRes(res);
-                }
-              })
-          );
+                })
+              } else {
+                res.originalUrl = u;
+                return _rewriteRes(res);
+              }
+            });
         }
       } else {
-        event.respondWith(new Response('invalid url', {
+        return Promise.resolve(new Response('invalid url', {
           status: 500,
         }));
       }
     }
+  })();
+  if (event.request.method !== 'HEAD') {
+    cache.put(event.request, res.clone());
   }
-});
+  return res;
+})()
+
+));
