@@ -13,6 +13,8 @@ import GlobalContext from './GlobalContext.js';
 
 import './xr-scene.js';
 
+new WebXRPolyfill();
+
 let bootstrapped = false;
 const _bootstrap = () => {
 
