@@ -97,6 +97,8 @@
  * THE SOFTWARE.
  */
 
+if (!/(Helio)/g.test(navigator.userAgent)) {
+
 const _global = typeof global !== 'undefined' ? global :
                 typeof self !== 'undefined' ? self :
                 typeof window !== 'undefined' ? window : {};
@@ -6132,6 +6134,6 @@ class WebXRPolyfill {
   }
 }
 
-if (!/(Helio)/g.test(navigator.userAgent)) {
-  new WebXRPolyfill();
+new WebXRPolyfill();
+
 }
