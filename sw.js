@@ -115,16 +115,49 @@ const _resolveFollowUrl = u => fetch(_rewriteUrlToProxy(u), {
   method: 'HEAD',
 }).then(res => _rewriteUrlToRaw(res.url));
 
-self.addEventListener('install', event => {
+const cacheName = 'proxy';
+let cache = null;
+self.addEventListener('install', event => event.waitUntil(
+
+(async () => {
   // console.log('sw install');
-  self.skipWaiting();
+
+  await caches.delete(cacheName);
+  cache = await caches.open(cacheName);
+
+  await cache.addAll([
+    'core.js',
+    'Document.js',
+    'Event.js',
+    'GlobalContext.js',
+    'Graphics.js',
+    'HelioWebXRPolyfill.js',
+    'History.js',
+    'index.js',
+    'Location.js',
+    'Navigator.js',
+    'symbols.js',
+    'USKeyboardLayout.js',
+    'utils.js',
+    'VR.js',
+    'webxr-polyfill.module.js',
+    'WindowBase.js',
+    'Window.js',
+    'WindowVm.js',
+    'xr-iframe.js',
+    'XR.js',
+    'xr-scene.js',
+  ].map(n => `/src/${n}`));
 
   /* event.waitUntil(
     caches.open(PRECACHE)
       .then(cache => cache.addAll(PRECACHE_URLS))
       .then(self.skipWaiting())
   ); */
-});
+})()
+
+));
+
 self.addEventListener('activate', event => {
   // console.log('sw activate');
   self.clients.claim();
