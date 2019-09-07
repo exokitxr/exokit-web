@@ -453,7 +453,7 @@ const _computeDerivedGamepadsData = () => {
   }
 };
 const _tickAnimationFrame = win => {
-  // win.clear();
+  win.clear();
   return win.runAsync({
     method: 'tickAnimationFrame',
     layered: true,

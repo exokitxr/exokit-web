@@ -92,13 +92,13 @@ class XRScene extends HTMLElement {
           }
           return win.ctx;
         };
-        /* win.clear = () => {
+        win.clear = () => {
           if (win.ctx) {
             win.ctx.binding = null;
             win.ctx.clearColor(0, 0, 0, 1);
             win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
           }
-        }; */
+        };
         win.destroy = (destroy => function() {
           if (win.canvas) {
             this.shadow.removeChild(win.canvas);
