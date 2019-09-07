@@ -1,4 +1,5 @@
 import './webxr-polyfill.module.js';
+import './HelioWebXRPolyfill.js';
 
 import core from './core.js';
 // import minimist from '../modules/minimist.js';
