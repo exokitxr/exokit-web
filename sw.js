@@ -108,7 +108,7 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
         headers: res.headers,
       }));
   } else {
-    return res;
+    return Promise.resolve(res);
   }
 };
 const _resolveFollowUrl = u => fetch(_rewriteUrlToProxy(u), {
