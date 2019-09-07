@@ -6132,4 +6132,4 @@ class WebXRPolyfill {
   }
 }
 
-export default WebXRPolyfill;
+new WebXRPolyfill();
