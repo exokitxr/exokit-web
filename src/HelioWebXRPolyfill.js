@@ -131,7 +131,7 @@ if ( /(Helio)/g.test( navigator.userAgent ) && "xr" in navigator ) {
 
 						// WebXRManager - xrSession.getInputSources() Polyfill Line 132 - 136
 
-						session.inputSources = Object.defineProperty(
+						/* session.inputSources = */Object.defineProperty(
 							session,
 							"inputSources",
 							{
