@@ -6132,4 +6132,6 @@ class WebXRPolyfill {
   }
 }
 
-new WebXRPolyfill();
+if (!/(Helio)/g.test(navigator.userAgent)) {
+  new WebXRPolyfill();
+}
