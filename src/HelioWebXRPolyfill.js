@@ -115,13 +115,15 @@ if ( /(Helio)/g.test( navigator.userAgent ) && "xr" in navigator ) {
 
 							res.forEach( function (xrInputSource ) {
 
-								Object.defineProperty( xrInputSource, "targetRaySpace", {
-									get: function () {
+                if (!('targetRaySpace' in xrInputSource)) {
+                  Object.defineProperty( xrInputSource, "targetRaySpace", {
+                    get: function () {
 
-										return xrInputSource;
+                      return xrInputSource;
 
-									}
-								} );
+                    }
+                  } );
+                }
 
 							} );
 
