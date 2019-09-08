@@ -199,7 +199,7 @@ self.addEventListener('fetch', event => {
                   return fetch(proxyUrl).then(res => {
                     res.originalUrl = u;
                     return _rewriteRes(res);
-                  })
+                  });
                 } else {
                   res.originalUrl = u;
                   return _rewriteRes(res);
