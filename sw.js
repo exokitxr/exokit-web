@@ -79,7 +79,10 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
   if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace('window.top', 'window.self'));
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/engine-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
-    return _rewriteResText(res, jsString => jsString.replace(`powerPreference:"default"}`, 'powerPreference:"default",xrCompatible:!0}'));
+    return _rewriteResText(res, jsString => 'delete navigator.xr;' + jsString.replace(
+      /\.getEyeParameters\("left"\);[a-z]+=2\*/g,
+      all => all + '(new FakeXRDisplay().stereo?1:0.5)*'
+    ));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/build/build.js') {
     return _rewriteResText(res, jsString => jsString.replace('getDistance:function(){var e=this.axis;', 'getDistance:function(){if (!this.axis)this.axis=[0,0,0];var e=this.axis;'));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/vendor/aframe-master.min.js') {

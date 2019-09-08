@@ -407,6 +407,12 @@ ProxiedWebGLRenderingContext.prototype.useProgram = (_useProgram => function use
   this.state.currentProgram = program;
   return _useProgram.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.useProgram);
+ProxiedWebGLRenderingContext.prototype.deleteProgram = (_deleteProgram => function deleteProgram(program) {
+  if (this.state.currentProgram === program) {
+    this.state.currentProgram = null;
+  }
+  return _deleteProgram.apply(this, arguments);
+})(ProxiedWebGLRenderingContext.prototype.deleteProgram);
 ProxiedWebGLRenderingContext.prototype.viewport = (_viewport => function viewport(x, y, w, h) {
   this.state.viewport[0] = x;
   this.state.viewport[1] = y;
@@ -544,6 +550,19 @@ ProxiedWebGLRenderingContext.prototype.bindTexture = (_bindTexture => function b
   }
   return _bindTexture.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindTexture);
+
+ProxiedWebGLRenderingContext.prototype.deleteTexture = (_deleteTexture => function deleteTexture(texture) {
+  for (let i = 0; i < this.state.textureUnits.length; i++) {
+    const textureUnit = this.state.textureUnits[i];
+    if (textureUnit.texture2D === texture) {
+      textureUnit.texture2D = null;
+    }
+    if (textureUnit.textureCubemap === texture) {
+      textureUnit.textureCubemap = null;
+    }
+  }
+  return _deleteTexture.apply(this, arguments);
+})(ProxiedWebGLRenderingContext.prototype.deleteTexture);
 
 // WebGL1 -> WebGL2 translations
 if (WebGLRenderingContext.name === 'WebGLRenderingContext') {

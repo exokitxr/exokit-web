@@ -634,7 +634,7 @@ const _fetchText = src => fetch(src)
     const {isPresenting} = vrDisplay;
     window.dispatchEvent(new CustomEvent('vrdisplaypresentchange', {
       detail: {
-        display: isPresenting ? vrDisplay : null,
+        display: vrDisplay,
       },
     }));
   };
