@@ -217,6 +217,9 @@ class OES_vertex_array_object {
     return GlobalContext.proxyContext.bindVertexArray(vao);
   }
   deleteVertexArrayOES(vao) {
+    if (this.gl.state.vao === vao) {
+      this.gl.state.vao = null;
+    }
     return GlobalContext.proxyContext.deleteVertexArray(vao);
   }
   isVertexArrayOES(vao) {
@@ -327,6 +330,12 @@ if (WebGLRenderingContext.prototype.bindVertexArray) {
     this.state.vao = vao;
     return _bindVertexArray.apply(this, arguments);
   })(ProxiedWebGLRenderingContext.prototype.bindVertexArray);
+  ProxiedWebGLRenderingContext.prototype.deleteVertexArray = (_deleteVertexArray => function deleteVertexArray(vao) {
+    if (this.state.vao === vao) {
+      this.state.vao = null;
+    }
+    return _deleteVertexArray.apply(this, arguments);
+  })(ProxiedWebGLRenderingContext.prototype.deleteVertexArray);
 }
 /* ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;
