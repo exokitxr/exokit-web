@@ -51,7 +51,7 @@ const _addHtmlBase = (htmlString, u) => {
   } else if (match = htmlString.match(/<[\s]*body[\s>]/i)) {
     return _insertBefore(htmlString, match, `<head><base href="${encodeURI(u)}" target="_blank"></head>`);
   } else {
-    throw new Error(`no head or body tag: ${htmlString}`);
+    throw new Error(`no head or body tag: ${JSON.stringify(u)} ${JSON.stringify(htmlString)}`);
   }
 };
 const _proxyHtmlScripts = (htmlString, originalUrl) => htmlString.replace(/(src=["'])([^"']+)(["'])/g, (all, pre, src, post) => {
