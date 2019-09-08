@@ -10,33 +10,6 @@ self.WebGL2RenderingContext = undefined; */
 
 const {/*WebGLRenderingContext, WebGL2RenderingContext,*/ CanvasRenderingContext2D} = self;
 
-/* const _inherit = (a, b) => {
-  for (const k in b) {
-    if (!(k in a)) {
-      a[k] = b[k];
-    }
-  }
-  for (const k in b.prototype) {
-    if (!(k in a.prototype)) {
-      const o = Object.getOwnPropertyDescriptor(b.prototype, k);
-      if (o.get) {
-        o.get = (get => function() {
-          return get.apply(this.backingContext, arguments);
-        })(o.get);
-        o.set = (set => function() {
-          return set.apply(this.backingContext, arguments);
-        })(o.set);
-        Object.defineProperty(a.prototype, k, o);
-      } else {
-        const {value} = o;
-        a.prototype[k] = typeof value === 'function' ? function() {
-          return value.apply(this.backingContext, arguments);
-        } : value;
-      }
-    }
-  }
-}; */
-
 const _makeState = () => {
   const gl = GlobalContext.proxyContext;
 
@@ -121,9 +94,7 @@ const _makeState = () => {
 HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
   const match = type.match(/^(?:experimental-)?(webgl2?)$/);
   if (match) {
-    console.log('call ensure proxy context 1', !!GlobalContext.proxyContext);
     window[symbols.ensureProxyContext]();
-    console.log('call ensure proxy context 2', !!GlobalContext.proxyContext);
 
     const canvas = this;
     const gl = match[1] === 'webgl2' ? new WebGL2RenderingContext(canvas) : new WebGLRenderingContext(canvas);
@@ -240,12 +211,13 @@ class OES_vertex_array_object {
     return GlobalContext.proxyContext.createVertexArray();
   }
   bindVertexArrayOES(vao) {
-    if (this.gl.state) {
-      this.gl.state.vao = vao;
-    }
+    this.gl.state.vao = vao;
     return GlobalContext.proxyContext.bindVertexArray(vao);
   }
   deleteVertexArrayOES(vao) {
+    if (this.gl.state.vao === vao) {
+      this.gl.state.vao = null;
+    }
     return GlobalContext.proxyContext.deleteVertexArray(vao);
   }
   isVertexArrayOES(vao) {
@@ -356,6 +328,12 @@ if (WebGLRenderingContext.prototype.bindVertexArray) {
     this.state.vao = vao;
     return _bindVertexArray.apply(this, arguments);
   })(ProxiedWebGLRenderingContext.prototype.bindVertexArray);
+  ProxiedWebGLRenderingContext.prototype.deleteVertexArray = (_deleteVertexArray => function deleteVertexArray(vao) {
+    if (this.state.vao === vao) {
+      this.state.vao = null;
+    }
+    return _deleteVertexArray.apply(this, arguments);
+  })(ProxiedWebGLRenderingContext.prototype.deleteVertexArray);
 }
 /* ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   const gl = this;

@@ -239,7 +239,14 @@ self.addEventListener('fetch', event => event.respondWith(
                 res.originalUrl = u;
                 return _rewriteRes(res);
               }
-            });
+            })
+            .catch(err => {
+              const proxyUrl = _rewriteUrlToProxy(u);
+              return fetch(proxyUrl).then(res => {
+                res.originalUrl = u;
+                return _rewriteRes(res);
+              });
+            })
         }
       } else {
         return Promise.resolve(new Response('invalid url', {
