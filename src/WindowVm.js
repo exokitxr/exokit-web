@@ -72,7 +72,7 @@ class WorkerVm extends EventTarget {
               },
             }));
             
-            if (!messageChannel.port2.handleMessage || !messageChannel.port2.handleMessage.lol) {
+            if (!messageChannel.port2.handleMessage || !messageChannel.port2.handleMessage.lol) { // XXX
               console.warn('message handler not added!!!!!!!!!!!!!!!!!', messageChannel.port2.handleMessage, messageChannel.port2.handleMessage && messageChannel.port2.handleMessage.lol);
             }
 
@@ -101,7 +101,6 @@ class WorkerVm extends EventTarget {
       const {data: m} = e;
       switch (m.method) {
         case 'request': {
-          console.log('handle request up', m);
           this.dispatchEvent(new CustomEvent('request', {
             detail: m,
           }));

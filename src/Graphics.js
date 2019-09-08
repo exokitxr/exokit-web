@@ -94,9 +94,7 @@ const _makeState = () => {
 HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
   const match = type.match(/^(?:experimental-)?(webgl2?)$/);
   if (match) {
-    console.log('call ensure proxy context 1', !!GlobalContext.proxyContext);
     window[symbols.ensureProxyContext]();
-    console.log('call ensure proxy context 2', !!GlobalContext.proxyContext);
 
     const canvas = this;
     const gl = match[1] === 'webgl2' ? new WebGL2RenderingContext(canvas) : new WebGLRenderingContext(canvas);
