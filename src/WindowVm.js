@@ -164,9 +164,6 @@ class WorkerVm extends EventTarget {
     iframe._postMessageDown = function _postMessageDown(data, transfer) {
       messageChannel.port1.postMessageSync(data, transfer);
     };
-    iframe.cleanup = () => {
-      iframe.contentWindow.removeEventListener('postmessage', _postmessage);
-    };
     this.iframe = iframe;
 
     iframe.style.position = 'absolute';
@@ -234,7 +231,6 @@ class WorkerVm extends EventTarget {
   
   destroy() {
     document.body.removeChild(this.iframe);
-    this.iframe.cleanup();
     this.iframe = null;
   }
 }
