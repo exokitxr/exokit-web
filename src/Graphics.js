@@ -193,6 +193,9 @@ function ProxiedWebGLRenderingContext(canvas) {
 }
 ProxiedWebGLRenderingContext.prototype = Object.create(WebGLRenderingContext.prototype);
 
+for (const k in WebGLRenderingContext) {
+  ProxiedWebGLRenderingContext[k] = WebGLRenderingContext[k];
+}
 for (const k in WebGLRenderingContext.prototype) {
   const o = Object.getOwnPropertyDescriptor(WebGLRenderingContext.prototype, k);
   if (o.get) {
