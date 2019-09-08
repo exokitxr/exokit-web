@@ -551,6 +551,19 @@ ProxiedWebGLRenderingContext.prototype.bindTexture = (_bindTexture => function b
   return _bindTexture.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindTexture);
 
+ProxiedWebGLRenderingContext.prototype.deleteTexture = (_deleteTexture => function deleteTexture(texture) {
+  for (let i = 0; i < this.state.textureUnits.length; i++) {
+    const textureUnit = this.state.textureUnits[i];
+    if (textureUnit.texture2D === texture) {
+      textureUnit.texture2D = null;
+    }
+    if (textureUnit.textureCubemap === texture) {
+      textureUnit.textureCubemap = null;
+    }
+  }
+  return _deleteTexture.apply(this, arguments);
+})(ProxiedWebGLRenderingContext.prototype.deleteTexture);
+
 // WebGL1 -> WebGL2 translations
 if (WebGLRenderingContext.name === 'WebGLRenderingContext') {
   const glslVersion = '300 es';
