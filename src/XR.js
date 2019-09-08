@@ -172,24 +172,26 @@ class XRSession extends EventTarget {
       const inputSource = inputSources[i];
       const gamepad = gamepads[i];
 
-      const pressed = gamepad.buttons[1].pressed;
-      const lastPressed = this._lastPresseds[i];
-      if (pressed && !lastPressed) {
-        this.dispatchEvent(new XRInputSourceEvent('selectstart', {
-          frame: this._frame,
-          inputSource,
-        }));
-        this.dispatchEvent(new XRInputSourceEvent('select', {
-          frame: this._frame,
-          inputSource,
-        }));
-      } else if (lastPressed && !pressed) {
-        this.dispatchEvent(new XRInputSourceEvent('selectend', {
-          frame: this._frame,
-          inputSource,
-        }));
+      if (gamepad) {
+        const pressed = gamepad.buttons[1].pressed;
+        const lastPressed = this._lastPresseds[i];
+        if (pressed && !lastPressed) {
+          this.dispatchEvent(new XRInputSourceEvent('selectstart', {
+            frame: this._frame,
+            inputSource,
+          }));
+          this.dispatchEvent(new XRInputSourceEvent('select', {
+            frame: this._frame,
+            inputSource,
+          }));
+        } else if (lastPressed && !pressed) {
+          this.dispatchEvent(new XRInputSourceEvent('selectend', {
+            frame: this._frame,
+            inputSource,
+          }));
+        }
+        this._lastPresseds[i] = pressed;
       }
-      this._lastPresseds[i] = pressed;
     }
   }
 
