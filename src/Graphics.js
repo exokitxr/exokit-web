@@ -213,9 +213,7 @@ class OES_vertex_array_object {
     return GlobalContext.proxyContext.createVertexArray();
   }
   bindVertexArrayOES(vao) {
-    if (this.gl.state) {
-      this.gl.state.vao = vao;
-    }
+    this.gl.state.vao = vao;
     return GlobalContext.proxyContext.bindVertexArray(vao);
   }
   deleteVertexArrayOES(vao) {
