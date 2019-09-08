@@ -214,9 +214,6 @@ for (const k in WebGLRenderingContext.prototype) {
           console.log('fn', error, !!GlobalContext.proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
         } */
         this.setProxyState();
-        if (k === 'getParameter' && !arguments[0]) {
-          console.log('getParameter', Array.from(arguments), new Error().stack);
-        }
         return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
       };
     }
