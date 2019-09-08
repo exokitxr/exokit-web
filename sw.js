@@ -51,7 +51,7 @@ const _addHtmlBase = (htmlString, u) => {
   } else if (match = htmlString.match(/<[\s]*body[\s>]/i)) {
     return _insertBefore(htmlString, match, `<head><base href="${encodeURI(u)}" target="_blank"></head>`);
   } else {
-    console.warn('no head or body tag', u, htmlString, new Error().stack);
+    console.warn('no head or body tag', htmlString, u, new Error().stack);
     return htmlString;
   }
 };
