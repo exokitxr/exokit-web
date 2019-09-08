@@ -407,6 +407,12 @@ ProxiedWebGLRenderingContext.prototype.useProgram = (_useProgram => function use
   this.state.currentProgram = program;
   return _useProgram.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.useProgram);
+ProxiedWebGLRenderingContext.prototype.deleteProgram = (_deleteProgram => function deleteProgram(program) {
+  if (this.state.currentProgram === program) {
+    this.state.currentProgram = null;
+  }
+  return _deleteProgram.apply(this, arguments);
+})(ProxiedWebGLRenderingContext.prototype.deleteProgram);
 ProxiedWebGLRenderingContext.prototype.viewport = (_viewport => function viewport(x, y, w, h) {
   this.state.viewport[0] = x;
   this.state.viewport[1] = y;
