@@ -317,6 +317,13 @@ const _fetchText = src => fetch(src)
   // }
   window.FakeXRDisplay = FakeXRDisplay;
   window.PaymentRequest = PaymentRequest;
+
+  window.addEventListener = (_addEventListener => function addEventListener(type, fn, opts) {
+    if (type !== 'vrdisplayconnect') {
+      _addEventListener.apply(this, arguments);
+    }
+  })(window.addEventListener);
+
   window.requestAnimationFrame = _makeRequestAnimationFrame(window);
   window.cancelAnimationFrame = id => {
     const index = rafCbs.findIndex(r => r && r[symbols.idSymbol] === id);
