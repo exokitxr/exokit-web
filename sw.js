@@ -142,6 +142,10 @@ self.addEventListener('fetch', event => {
   if (permanentRedirect) {
     event.respondWith(
       fetch(permanentRedirect)
+        .then(res => {
+          res.originalUrl = event.request.url;
+          return _rewriteRes(res);
+        })
     );
     return;
   }
