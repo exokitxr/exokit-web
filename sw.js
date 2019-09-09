@@ -93,9 +93,18 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
       const result = jsString
         .replace(/https:\/\/www\.cryptovoxels\.com\//g, '/')
         .replace('n._attached&&n.getEngine().enableVR()', 'n.getEngine().enableVR()')
-        .replace(/this\._rigCameras\[0\]\.viewport=new U\.Viewport\(0\,0\,\.5\,1\)/g, 'this._rigCameras[0].viewport=new U.Viewport(0,0,new FakeXRDisplay().stereo?0.5:1,1)')
-        .replace(/this\._rigCameras\[1\]\.viewport=new U\.Viewport\(\.5\,0\,\.5\,1\)/g, 'this._rigCameras[1].viewport=new U.Viewport(new FakeXRDisplay().stereo?0.5:0,0,new FakeXRDisplay().stereo?0.5:0,1)')
-        // .replace(/getContext\("webgl2",i\)/g, `getContext("webgl2",Object.assign(i,{xrCompatible:true}))`);
+        .replace(/this\._rigCameras\[0\]\.viewport=new ([a-zA-Z0-9\.]+)\(0\,0\,\.5\,1\)/g, 'this._rigCameras[0].viewport=new $1(0,0,new FakeXRDisplay().stereo?0.5:1,1)')
+        .replace(/this\._rigCameras\[1\]\.viewport=new ([a-zA-Z0-9\.]+)\(\.5\,0\,\.5\,1\)/g, 'this._rigCameras[1].viewport=new $1(new FakeXRDisplay().stereo?0.5:0,0,new FakeXRDisplay().stereo?0.5:0,1)')
+      return result;
+    });
+ } else if (originalUrl === 'https://preview.babylonjs.com/babylon.js') {
+    return _rewriteResText(res, jsString => {
+      const result = jsString
+        .replace('s._attached&&s.getEngine().enableVR()', 's.getEngine().enableVR()')
+        .replace(/e\._rigCameras\[0\]\.viewport=new ([a-zA-Z0-9\.]+)\(0\,0\,\.5\,1\)/g, 'e._rigCameras[0].viewport=new $1(0,0,new FakeXRDisplay().stereo?0.5:1,1)')
+        .replace(/e\._rigCameras\[1\]\.viewport=new ([a-zA-Z0-9\.]+)\(\.5\,0\,\.5\,1\)/g, 'e._rigCameras[1].viewport=new $1(new FakeXRDisplay().stereo?0.5:0,0,new FakeXRDisplay().stereo?0.5:0,1)')
+        .replace('this._webVRpresenting=e.isPresenting', 'this._webVRpresenting=false')
+        .replace('this._btnVR.addEventListener("click",function(){i.isInVRMode?i.exitVR():i.enterVR()})', 'this._btnVR.addEventListener("click",function(){i.isInVRMode?i.exitVR():i.enterVR()});setTimeout(() => {i.enterVR()})');
       return result;
     });
   } else if (/aframe(?:-master)?\.min\.js/.test(originalUrl)) {
