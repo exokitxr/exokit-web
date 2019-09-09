@@ -95,7 +95,7 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
         .replace('n._attached&&n.getEngine().enableVR()', 'n.getEngine().enableVR()')
         .replace(/this\._rigCameras\[0\]\.viewport=new U\.Viewport\(0\,0\,\.5\,1\)/g, 'this._rigCameras[0].viewport=new U.Viewport(0,0,new FakeXRDisplay().stereo?0.5:1,1)')
         .replace(/this\._rigCameras\[1\]\.viewport=new U\.Viewport\(\.5\,0\,\.5\,1\)/g, 'this._rigCameras[1].viewport=new U.Viewport(new FakeXRDisplay().stereo?0.5:0,0,new FakeXRDisplay().stereo?0.5:0,1)')
-        .replace(/getContext\("webgl2",i\)/g, `getContext("webgl2",Object.assign(i,{xrCompatible:true}))`);
+        // .replace(/getContext\("webgl2",i\)/g, `getContext("webgl2",Object.assign(i,{xrCompatible:true}))`);
       return result;
     });
   } else if (/aframe(?:-master)?\.min\.js/.test(originalUrl)) {
