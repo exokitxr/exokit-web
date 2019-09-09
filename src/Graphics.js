@@ -230,7 +230,13 @@ class OES_vertex_array_object {
 ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   if (name === 'OES_vertex_array_object') {
     return new OES_vertex_array_object(this);
-  } else if (name === 'EXT_texture_filter_anisotropic') {
+  } else if ([
+    'EXT_texture_filter_anisotropic',
+    'WEBGL_debug_renderer_info',
+    'EXT_disjoint_timer_query',
+    'EXT_disjoint_timer_query_webgl2',
+    'KHR_parallel_shader_compile',
+  ].includes(name)) {
     return GlobalContext.proxyContext.getExtension(name);
   } else {
     return {};
