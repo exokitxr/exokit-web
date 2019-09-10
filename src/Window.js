@@ -408,6 +408,24 @@ const _fetchText = src => fetch(src)
       localCbs[i] = null;
     }
   };
+  const _updateXr = () => {
+    const gamepads = getGamepads();
+    for (let i = 0; i < gamepads.length; i++) {
+      const gamepad = gamepads[i];
+      const xrGamepad = GlobalContext.xrState.gamepads[i];
+
+      localMatrix
+        .fromArray(xrGamepad.transformMatrix)
+        .premultiply(
+          localMatrix2
+            .fromArray(window.document.xrOffset.matrixInverse)
+        )
+        .decompose(localVector, localQuaternion, localVector2);
+
+      localVector.toArray(gamepad.pose.position);
+      localQuaternion.toArray(gamepad.pose.orientation);
+    }
+  };
   const _emitXrEvents = () => {
     if (window[symbols.mrDisplaysSymbol].xrSession.isPresenting) {
       window[symbols.mrDisplaysSymbol].xrSession.update();
@@ -461,6 +479,7 @@ const _fetchText = src => fetch(src)
     _renderLocal(layered);
   };
   window.tickAnimationFrame = ({layered = false}) => {
+    _updateXr();
     _emitXrEvents();
     _render(layered);
   };

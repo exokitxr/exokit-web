@@ -79,13 +79,13 @@ class GamepadButton {
   } */
 }
 class GamepadPose {
-  constructor(position, orientation) {
+  constructor() {
     this.hasPosition = true;
     this.hasOrientation = true;
-    this.position = position;
+    this.position = new Float32Array(3);
     this.linearVelocity = new Float32Array(3);
     this.linearAcceleration = new Float32Array(3);
-    this.orientation = orientation;
+    this.orientation = Float32Array.from([0, 0, 0, 1]);
     this.angularVelocity = new Float32Array(3);
     this.angularAcceleration = new Float32Array(3);
   }
@@ -136,7 +136,7 @@ class Gamepad {
       }
       return result;
     })();
-    this.pose = new GamepadPose(xrGamepad.position, xrGamepad.orientation);
+    this.pose = new GamepadPose();
     this.axes = xrGamepad.axes;
     this.hapticActuators = hapticActuator ? [hapticActuator] : [];
     this.bones = xrGamepad.bones;
@@ -396,28 +396,28 @@ class FakeXRDisplay {
     }
 
     for (let i = 0; i < globalGamepads.main.length; i++) {
-      const gamepad = globalGamepads.main[i];
+      const xrGamepad = GlobalContext.xrState.gamepads[i];
       if (i === 1 && position && quaternion) {
-        position.toArray(gamepad.pose.position);
-        quaternion.toArray(gamepad.pose.orientation);
+        position.toArray(xrGamepad.position);
+        quaternion.toArray(xrGamepad.orientation);
       } else {
         localVector.copy(this.position)
           .add(
             localVector2.set(-0.3 + i*0.6, -0.3, -0.35)
               .applyQuaternion(this.quaternion)
-          ).toArray(gamepad.pose.position);
-        this.quaternion.toArray(gamepad.pose.orientation); // XXX updates xrState
+          ).toArray(xrGamepad.position);
+        this.quaternion.toArray(xrGamepad.orientation);
       }
 
-      localMatrix2
+      /* localMatrix2
         .compose(
           localVector.fromArray(gamepad.pose.position),
           localQuaternion.fromArray(gamepad.pose.orientation),
           localVector2.set(1, 1, 1)
         )
-        .toArray(gamepad.pose._localPointerMatrix);
+        .toArray(gamepad.pose._localPointerMatrix); */
 
-      gamepad.connected = true;
+      xrGamepad.connected[0] = 1;
     }
   }
   pushUpdate() {
