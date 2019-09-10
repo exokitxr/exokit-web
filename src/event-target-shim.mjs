@@ -1,3 +1,5 @@
+if (/safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent)) {
+
 /**
  * @author Toru Nagashima <https://github.com/mysticatea>
  * @copyright 2015 Toru Nagashima. All rights reserved.
@@ -857,6 +859,9 @@ if (
     Object.setPrototypeOf(EventTarget.prototype, window.EventTarget.prototype);
 }
 
-export default EventTarget;
-export { defineEventAttribute, EventTarget };
-//# sourceMappingURL=event-target-shim.mjs.map
+// export default EventTarget;
+// export { defineEventAttribute, EventTarget };
+
+window.EventTarget = EventTarget;
+
+}
