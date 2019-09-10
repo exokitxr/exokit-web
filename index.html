@@ -8,6 +8,7 @@
     <meta name="author" content="Exokit">
     <title>Exokit Engine</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0735724151.js"></script>
     <style>
 * {
   box-sizing: border-box;
@@ -36,9 +37,39 @@ li {
   padding-right: 20px; */
 }
 .iframe-wrapper {
+  position: relative;
   display: flex;
   flex: 1;
   background-color: #FFF;
+}
+.tabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #000;
+}
+.tabs:empty {
+  display: none;
+}
+.tabs .tab {
+  display: inline-flex;
+  padding: 5px 10px;
+  background-color: #333;
+  align-items: center;
+}
+.tabs .tab .text {
+  margin-right: 20px;
+  align-items: center;
+}
+.tabs .tab .close-x {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  background-color: #ef5350;
+  color: #FFF;
+  justify-content: center;
+  align-items: center;
 }
 .details {
   width: 400px;
@@ -100,6 +131,7 @@ a:active {
             <a href="https://aframe.io/a-painter/" class="a-cube">A-Painter</a><br>
             <a href="https://rawcdn.githack.com/exokitxr/webxr-samples/8a13dcbb22fa52feadfab7b7f41f85bdb3601a3f/xr-presentation.html" class="a-cube">Solar System</a><br>
             <a href="https://playground.babylonjs.com/frame.html#TAFSN0" class="a-cube">Babylon.js</a><br>
+            <a href="https://supermedium.com/supercraft" class="a-cube">Supercraft</a><br>
             <a href="https://moonrider.xyz/" class="a-cube">Moonrider</a><br>
             <a href="https://exokitxr.github.io/examples/exobot.html" class="a-cube">Exobot</a><br>
             <a href="https://aframe.io/a-blast/" class="a-cube">A-Blast</a><br>
@@ -111,7 +143,9 @@ a:active {
           <h3><a class=button id="enter-xr-button">Enter XR</a></h3>
         </div>
 
-        <div class=iframe-wrapper id=iframe-wrapper></div>
+        <div class=iframe-wrapper id=iframe-wrapper>
+          <div class=tabs id=tabs></div>
+        </div>
 
         <div class=details>
           <h3 class=description>
@@ -160,6 +194,7 @@ navigator.serviceWorker.register(`sw.js`)
     });
   });
 
+const tabs = document.getElementById('tabs');
 const aCubes = document.querySelectorAll('.a-cube');
 for (let i = 0; i < aCubes.length; i++) {
   const aCube = aCubes[i];
@@ -173,6 +208,22 @@ for (let i = 0; i < aCubes.length; i++) {
       method: 'load',
       url,
     });
+
+    const label = aCube.innerText;
+    const div = document.createElement('div');
+    div.innerHTML = `<div class=tab><span class=text>${label}</span><a href="#" class=close-x><i class="fal fa-times"></i></a></div>`;
+    const tab = div.childNodes[0];
+    const closeX = tab.querySelector('.close-x');
+    closeX.addEventListener('click', e => {
+      e.preventDefault();
+      const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
+      xrScene.postMessage({
+        method: 'unload',
+        index,
+      });
+      tabs.removeChild(tab);
+    });
+    tabs.appendChild(tab);
 
     return false;
   });

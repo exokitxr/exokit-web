@@ -240,7 +240,7 @@ _startFakeVrDisplay()
           control.addEventListener('dragging-changed', e => {
             // console.log('got dragging-changed', e);
           });
-          window.control = control;
+          xrIframe.control = control;
           //
           // const geometry = new THREE.BoxBufferGeometry(.25, .25, .25);
           // const material = new THREE.MeshPhongMaterial({color: 0x00FF00});
@@ -248,6 +248,14 @@ _startFakeVrDisplay()
           // control.attach(mesh);
           // // control.attach(xrIframe);
           scene.add(control);
+
+          break;
+        }
+        case 'unload': {
+          const {index} = data;
+          const xrIframe = layers.splice(2 + index, 1)[0];
+          scene.remove(xrIframe.control);
+          xrIframe.destroy();
 
           break;
         }
