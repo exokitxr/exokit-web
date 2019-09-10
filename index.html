@@ -189,7 +189,7 @@ navigator.serviceWorker.register(`sw.js`)
     }
   })
   .then(() => import('./src/index.js'))
-  .then(() => {
+  .then(async () => {
     xrScene = document.createElement('xr-scene');
     xrScene.src = 'app.html';
     // document.getElementById('iframe-wrapper').appendChild(xrScene);
@@ -197,6 +197,24 @@ navigator.serviceWorker.register(`sw.js`)
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
     });
+
+    let result;
+    if (navigator.xr) {
+      try {
+        result = await navigator.xr.supportsSession('immersive-vr');
+      } catch (err) {
+        result = false;
+      }
+    } else {
+      result = false;
+    }
+    if (result) {
+      console.log('xr available');
+      enterXrButton.style.display = null;
+    } else {
+      console.log('no xr');
+      noXrButton.style.display = null;
+    }
   });
 
 const tabs = document.getElementById('tabs');
@@ -236,25 +254,6 @@ for (let i = 0; i < aCubes.length; i++) {
 
 const enterXrButton = document.getElementById('enter-xr-button');
 const noXrButton = document.getElementById('no-xr-button');
-(async () => {
-  let result;
-  if (navigator.xr) {
-    try {
-      result = await navigator.xr.supportsSession('immersive-vr');
-    } catch (err) {
-      result = false;
-    }
-  } else {
-    result = false;
-  }
-  if (result) {
-    console.log('xr available');
-    enterXrButton.style.display = null;
-  } else {
-    console.log('no xr');
-    noXrButton.style.display = null;
-  }
-})();
 enterXrButton.addEventListener('click', () => {
   xrScene.enterXr();
 });
