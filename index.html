@@ -195,9 +195,6 @@ navigator.serviceWorker.register(`sw.js`)
     // document.getElementById('iframe-wrapper').appendChild(xrScene);
     xrScene.addEventListener('canvas', e => {
       const canvas = e.data;
-      canvas.addEventListener('mousedown', e => {
-        e.preventDefault();
-      });
       document.getElementById('iframe-wrapper').appendChild(canvas);
     });
 

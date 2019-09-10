@@ -56,6 +56,9 @@ class XRScene extends HTMLElement {
             win.canvas.height = GlobalContext.xrState.renderHeight[0];
             win.canvas.style.width = '100%';
             win.canvas.style.height = '100%';
+            win.canvas.addEventListener('mousedown', e => {
+              e.preventDefault();
+            });
             win.canvas.addEventListener('mouseenter', e => {
               const {x, y, width, height} = win.canvas.getBoundingClientRect();
               GlobalContext.xrState.canvasViewport[0] = x;
