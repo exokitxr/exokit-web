@@ -203,7 +203,6 @@ ProxiedWebGLRenderingContext.prototype._exokitClearEnabled = function _exokitCle
 class OES_vertex_array_object {
   constructor(gl) {
     this.gl = gl;
-    this.extension = GlobalContext.proxyContext.getExtension('OES_vertex_array_object');
 
     this.VERTEX_ARRAY_BINDING_OES = OES_vertex_array_object.VERTEX_ARRAY_BINDING_OES;
   }
