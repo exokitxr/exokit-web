@@ -1,7 +1,7 @@
 import USKeyboardLayout from './USKeyboardLayout.js';
 import GlobalContext from './GlobalContext.js';
 
-const EventTarget = (EventTargetOld => class EventTarget extends EventTargetOld {
+/* const EventTarget = (EventTargetOld => class EventTarget extends EventTargetOld {
   constructor() {
     super();
 
@@ -58,7 +58,7 @@ const EventTarget = (EventTargetOld => class EventTarget extends EventTargetOld 
 
     self.event = null;
   }
-})(self.EventTarget);
+})(self.EventTarget); */
 
 class KeyboardEvent extends Event {
   constructor(type, init = {}) {
