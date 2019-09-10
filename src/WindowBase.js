@@ -52,14 +52,15 @@ const _oninitmessage = async e => {
     },
   });
   ServiceWorkerContainer.prototype.register = async function register() {};
-  MediaDevices.prototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
+  const mediaDevicesPrototype = (typeof MediaDevices !== 'undefined') ? MediaDevices : navigator.mediaDevices.__proto__; // Safari
+  mediaDevicesPrototype.enumerateDevices = (_enumerateDevices => function enumerateDevices() {
     return _enumerateDevices.apply(this, arguments)
       .then(ds => ds.map((d, i) => {
         d = JSON.parse(JSON.stringify(d));
         d.label = `Fake device (${i})`;
         return d;
       }));
-  })(MediaDevices.prototype.enumerateDevices);
+  })(mediaDevicesPrototype.enumerateDevices);
   self.fetch = (_fetch => function fetch(u, opts) {
     const oldUrl = u;
     u = _getProxyUrl(u);
