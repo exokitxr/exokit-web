@@ -145,12 +145,7 @@ function animate() {
         fakeXrDisplay.position.copy(orbitControls.object.position);
         fakeXrDisplay.quaternion.copy(orbitControls.object.quaternion);
 
-        // if (window.document.pointerLockElement) {
-          fakeXrDisplay.pushUpdate();
-        /* } else {
-          fakeXrDisplay.pushHmdUpdate();
-          fakeXrDisplay.pushGamepadsUpdate(mouse.position, mouse.quaternion);
-        } */
+        fakeXrDisplay.pushUpdate();
       }
     }
   };
