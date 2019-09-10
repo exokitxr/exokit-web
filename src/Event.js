@@ -209,7 +209,7 @@ class SpatialEvent extends Event {
 }
 
 export {
-  EventTarget,
+  // EventTarget,
   KeyboardEvent,
   MouseEvent,
   WheelEvent,
