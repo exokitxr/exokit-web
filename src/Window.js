@@ -46,8 +46,7 @@ GlobalContext.proxyContext = null;
   DOMRect,
   DOMPoint,
   // createImageBitmap,
-} from './DOM.js';
-import History from './History.js'; */
+} from './DOM.js'; */
 import * as XR from './XR.js';
 // const DevTools = require('./DevTools');
 import utils from './utils.js';
