@@ -1,3 +1,5 @@
+import './event-target-shim.mjs';
+
 import util from '../modules/util.js';
 
 import {DragEvent, KeyboardEvent, MouseEvent, WheelEvent} from './Event.js';
