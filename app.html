@@ -11,8 +11,9 @@ try {
 
 console.log('app 1');
 
+const vrCamera = new THREE.PerspectiveCamera();
+vrCamera.updateMatrixWorld = () => {};
 let tutorialXrIframe = null;
-// let xrIframe = null;
 let fakeXrDisplay;
 // main
 
@@ -137,6 +138,11 @@ function animate() {
     fakeXrDisplay.position.copy(camera.position);
     fakeXrDisplay.quaternion.copy(camera.quaternion);
     fakeXrDisplay.pushUpdate();
+
+    vrCamera.matrixWorldInverse.fromArray(fakeXrDisplay.viewMatrix);
+    vrCamera.matrixWorld.getInverse(vrCamera.matrixWorldInverse);
+    vrCamera.projectionMatrix.fromArray(fakeXrDisplay.projectionMatrix);
+    vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
   }
 
   const rate = 5000;
@@ -228,7 +234,7 @@ _startFakeVrDisplay()
           object.position.fromArray(xrIframe.position);
           scene.add(object);
 
-          const control = new THREE.TransformControls( camera, renderer.domElement );
+          const control = new THREE.TransformControls(vrCamera, renderer.domElement);
           control.attach(object);
           control.size = 3;
           control.addEventListener('change', e => {
