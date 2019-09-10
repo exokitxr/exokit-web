@@ -10,6 +10,8 @@ self.WebGL2RenderingContext = undefined; */
 
 const {/*WebGLRenderingContext, WebGL2RenderingContext,*/ CanvasRenderingContext2D} = self;
 
+const hasWebGL2 = !!window.WebGL2RenderingContext;
+
 const _makeState = () => {
   const gl = GlobalContext.proxyContext;
 
@@ -93,7 +95,7 @@ const _makeState = () => {
 };
 HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(type, init = {}) {
   const match = type.match(/^(?:experimental-)?(webgl2?)$/);
-  if (match) {
+  if (match && (hasWebGL2 || match[1] !== 'webgl2')) {
     window[symbols.ensureProxyContext]();
 
     const canvas = this;
@@ -136,7 +138,11 @@ HTMLCanvasElement.prototype.getBoundingClientRect = function getBoundingClientRe
   return new DOMRect(canvasViewport[0], canvasViewport[1], canvasViewport[2], canvasViewport[3]);
 };
 
-const [WebGLRenderingContext, WebGL2RenderingContext] = [self.WebGLRenderingContext, self.WebGL2RenderingContext].map(WebGLRenderingContext => {
+const [WebGLRenderingContext, WebGL2RenderingContext] = [window.WebGLRenderingContext, window.WebGL2RenderingContext].map(WebGLRenderingContext => {
+
+if (!WebGLRenderingContext) {
+  return WebGLRenderingContext;
+}
 
 function ProxiedWebGLRenderingContext(canvas) {
   Object.defineProperty(this, 'canvas', { // Object.defineProperty to avoid proxying
@@ -151,13 +157,15 @@ function ProxiedWebGLRenderingContext(canvas) {
     clear: true,
   };
 
-  if (this.createVertexArray) {
-    const vao = this.createVertexArray();
-    this.bindVertexArray(vao);
-  } else {
-    const extension = this.getExtension('OES_vertex_array_object');
-    const vao = extension.createVertexArrayOES();
-    extension.bindVertexArrayOES(vao);
+  if (hasWebGL2) {
+    if (this.createVertexArray) {
+      const vao = this.createVertexArray();
+      this.bindVertexArray(vao);
+    } else {
+      const extension = this.getExtension('OES_vertex_array_object');
+      const vao = extension.createVertexArrayOES();
+      extension.bindVertexArrayOES(vao);
+    }
   }
 
   GlobalContext.contexts.push(this);
@@ -228,7 +236,11 @@ class OES_vertex_array_object {
 }
 ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   if (name === 'OES_vertex_array_object') {
-    return new OES_vertex_array_object(this);
+    if (hasWebGL2) {
+      return new OES_vertex_array_object(this);
+    } else {
+      return GlobalContext.proxyContext.getExtension(name);
+    }
   } else if ([
     'EXT_texture_filter_anisotropic',
     'WEBGL_debug_renderer_info',
@@ -259,7 +271,9 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
     const {state} = this;
     const gl = GlobalContext.proxyContext;
 
-    gl.bindVertexArray(state.vao);
+    if (hasWebGL2) {
+      gl.bindVertexArray(state.vao);
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
     for (const k in state.renderbuffer) {
@@ -570,7 +584,7 @@ ProxiedWebGLRenderingContext.prototype.deleteTexture = (_deleteTexture => functi
 })(ProxiedWebGLRenderingContext.prototype.deleteTexture);
 
 // WebGL1 -> WebGL2 translations
-if (WebGLRenderingContext.name === 'WebGLRenderingContext') {
+if (hasWebGL2 && WebGLRenderingContext.name === 'WebGLRenderingContext') {
   const glslVersion = '300 es';
   ProxiedWebGLRenderingContext.prototype.createShader = (_createShader => function createShader(type) {
     const result = _createShader.call(this, type);

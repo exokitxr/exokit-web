@@ -66,7 +66,7 @@ class XRScene extends HTMLElement {
               GlobalContext.xrState.canvasViewport[2] = width;
               GlobalContext.xrState.canvasViewport[3] = height;
             });
-            win.ctx = win.canvas.getContext('webgl2', {
+            win.ctx = win.canvas.getContext(window.WebGL2RenderingContext ? 'webgl2' : 'webgl', {
               antialias: true,
               alpha: true,
               xrCompatible: true,
