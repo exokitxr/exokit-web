@@ -201,7 +201,8 @@ navigator.serviceWorker.register(`sw.js`)
     let result;
     if (navigator.xr) {
       try {
-        result = await navigator.xr.supportsSession('immersive-vr');
+        await navigator.xr.supportsSession('immersive-vr');
+        result = true;
       } catch (err) {
         result = false;
       }
