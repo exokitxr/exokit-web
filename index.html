@@ -132,15 +132,16 @@ a:active {
           <h1>Exokit</h1>
           <h3>Examples</h3>
           <p>
+            <a href="./examples/tutorial.html" class="a-cube">Introduction</a><br>
             <a href="https://aframe.io/a-painter/" class="a-cube">A-Painter</a><br>
             <a href="https://rawcdn.githack.com/exokitxr/webxr-samples/8a13dcbb22fa52feadfab7b7f41f85bdb3601a3f/xr-presentation.html" class="a-cube">Solar System</a><br>
             <a href="https://playground.babylonjs.com/frame.html#TAFSN0" class="a-cube">Babylon.js</a><br>
             <a href="https://supermedium.com/supercraft" class="a-cube">Supercraft</a><br>
             <a href="https://moonrider.xyz/" class="a-cube">Moonrider</a><br>
-            <a href="https://exokitxr.github.io/examples/exobot.html" class="a-cube">Exobot</a><br>
             <a href="https://aframe.io/a-blast/" class="a-cube">A-Blast</a><br>
             <a href="https://hubs.mozilla.com/VxGmqjU/fuchsia-winding-room?vr_entry_type=vr_now" class="a-cube">Mozilla Hubs</a><br>
             <a href="https://www.cryptovoxels.com/play?vr=enabled" class="a-cube">CryptoVoxels</a><br>
+            <a href="https://exokitxr.github.io/examples/exobot.html" class="a-cube">Exobot</a><br>
             <a href="./examples/example1xr.html" class="a-cube">Red Cube</a><br>
             <a href="./examples/example2xr.html" class="a-cube">Green Cube</a><br>
           </p>
@@ -196,6 +197,10 @@ navigator.serviceWorker.register(`sw.js`)
     xrScene.addEventListener('canvas', e => {
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
+
+      setTimeout(() => {
+        _loadLink(aCubes[0], true);
+      });
     });
 
     let result;
@@ -220,34 +225,35 @@ navigator.serviceWorker.register(`sw.js`)
 
 const tabs = document.getElementById('tabs');
 const aCubes = document.querySelectorAll('.a-cube');
+const _loadLink = (aCube, origin = false) => {
+  xrScene.postMessage({
+    method: 'load',
+    url: aCube.href,
+    origin,
+  });
+
+  const label = aCube.innerText;
+  const div = document.createElement('div');
+  div.innerHTML = `<div class=tab><span class=text>${label}</span><a href="#" class=close-x><i class="fal fa-times"></i></a></div>`;
+  const tab = div.childNodes[0];
+  const closeX = tab.querySelector('.close-x');
+  closeX.addEventListener('click', e => {
+    e.preventDefault();
+    const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
+    xrScene.postMessage({
+      method: 'unload',
+      index,
+    });
+    tabs.removeChild(tab);
+  });
+  tabs.appendChild(tab);
+};
 for (let i = 0; i < aCubes.length; i++) {
   const aCube = aCubes[i];
   aCube.addEventListener('click', e => {
     e.preventDefault();
 
-    const url = aCube.href;
-    console.log('click url = ' + url);
-
-    xrScene.postMessage({
-      method: 'load',
-      url,
-    });
-
-    const label = aCube.innerText;
-    const div = document.createElement('div');
-    div.innerHTML = `<div class=tab><span class=text>${label}</span><a href="#" class=close-x><i class="fal fa-times"></i></a></div>`;
-    const tab = div.childNodes[0];
-    const closeX = tab.querySelector('.close-x');
-    closeX.addEventListener('click', e => {
-      e.preventDefault();
-      const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
-      xrScene.postMessage({
-        method: 'unload',
-        index,
-      });
-      tabs.removeChild(tab);
-    });
-    tabs.appendChild(tab);
+    _loadLink(aCube);
 
     return false;
   });

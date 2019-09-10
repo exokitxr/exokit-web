@@ -242,10 +242,14 @@ _startFakeVrDisplay()
         case 'load': {
           const xrIframe = document.createElement('xr-iframe');
           xrIframe.src = data.url;
-          xrIframe.position = [
+          xrIframe.position = data.origin ? [
             0,
-            .25,
             0,
+            0,
+          ] : [
+            -1 + Math.random() * 2,
+            0.25,
+            -1 + Math.random() * 2,
           ];
           layers.push(xrIframe);
 
