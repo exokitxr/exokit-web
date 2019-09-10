@@ -8,7 +8,6 @@
     <meta name="author" content="Exokit">
     <title>Exokit Web</title>
     <link rel=icon type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/0735724151.js"></script>
     <style>
 * {
@@ -17,8 +16,9 @@
 body {
   margin: 0;
   background-color: #000;
-  color: #F5F5F5;
-  font-family: 'Open Sans';
+  /* color: #F5F5F5; */
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+  // font-weight: 300;
 }
 .body {
   display: flex;
@@ -26,12 +26,59 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+header {
+  position: absolute;
+  display: flex;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 50px;
+  background-color: #FFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  align-items: center;
+  user-select: none;
+  z-index: 1;
+}
+header img {
+  width: 50px;
+  height: 50px;
+  margin: 0 20px;
+}
+header nav {
+  display: flex;
+  height: 100%;
+  padding: 0 10px;
+  letter-spacing: 0.9px;
+  align-items: center;
+  text-transform: uppercase;
+}
+header nav span {
+  display: flex;
+  height: 30px;
+  padding: 10px;
+  border-radius: 4px;
+  align-items: center;
+}
+header nav.selected span {
+  background-color: #5c6bc0;
+  color: #FFF;
+  cursor: default;
+}
+header nav:not(.selected):hover {
+  cursor: pointer;
+}
+header nav:not(.selected):hover span {
+  background-color: #EEE;
+}
 .examples {
-  width: 300px;
+  width: 200px;
+  padding-top: 50px;
+  background-color: #FFF;
 }
 h1, h2, h3, h4, h5, h6, p {
   margin: 20px 0;
   padding: 0 20px;
+  font-weight: inherit;
 }
 li {
   /* padding-left: 20px;
@@ -40,6 +87,7 @@ li {
 .iframe-wrapper {
   position: relative;
   display: flex;
+  margin-top: 50px;
   flex: 1;
   background-color: #FFF;
 }
@@ -48,19 +96,18 @@ li {
   top: 0;
   left: 0;
   right: 0;
-  background-color: #000;
-}
-.tabs:empty {
-  display: none;
 }
 .tabs .tab {
   display: inline-flex;
+  margin: 5px 5px;
   padding: 5px 10px;
-  background-color: #333;
+  background-color: #D8D8D8;
+  border-radius: 4px;
+  color: #000;
   align-items: center;
 }
 .tabs .tab .text {
-  margin-right: 20px;
+  margin-right: 10px;
   align-items: center;
 }
 .tabs .tab .close-x {
@@ -91,24 +138,24 @@ pre {
 canvas {
   width: 100% !important;
   height: 100vh !important;
+  background-color: #f8f8f8;
 }
 a {
-  color: #5c6bc0;
+  color: #AAA;
   text-decoration: none;
 }
 a:hover {
-  color: #ec407a;
+  color: #42a5f5;
 }
 a:active {
-  color: #c2185b;
-}
-.buttons {
-  display: inline-flex;
-  padding: 0 20px;
-  flex-direction: column;
+  color: #1976d2;
 }
 .button {
-  margin: 5px 0;
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  display: inline-flex;
+  margin: 5px 20px;
   padding: 8px 20px;
   border: 2px solid;
   border-radius: 100px;
@@ -128,9 +175,15 @@ a:active {
   </head>
   <body>
       <div class=body>
+        <header>
+          <img src="logo.svg">
+          <nav class=selected><span>Web</span></nav>
+          <nav><span>Browser</span></nav>
+          <nav><span>Metaverse</span></nav>
+        </header>
 
         <div class=examples>
-          <h1>Exokit</h1>
+          <!-- <h1>Exokit</h1> -->
           <h3>Examples</h3>
           <p>
             <a href="./examples/tutorial.html" class="a-cube">Introduction</a><br>
@@ -146,15 +199,16 @@ a:active {
             <a href="./examples/example1xr.html" class="a-cube">Red Cube</a><br>
             <a href="./examples/example2xr.html" class="a-cube">Green Cube</a><br>
           </p>
-          <h3><a class=button id="enter-xr-button" style="display: none;">Enter XR</a></h3>
-          <h3><a class=button id="no-xr-button" disabled style="display: none;">No XR</a></h3>
         </div>
 
         <div class=iframe-wrapper id=iframe-wrapper>
           <div class=tabs id=tabs></div>
         </div>
 
-        <div class=details>
+        <a class=button id="enter-xr-button" style="display: none;">Enter XR</a>
+        <a class=button id="no-xr-button" disabled style="display: none;">No XR</a>
+
+        <!-- <div class=details>
           <h3 class=description>
             A web engine for running highly performant virtual reality experiences.
           </h3>
@@ -176,7 +230,7 @@ session.layers.push(xri);</code></pre>
             <a href="https://github.com/exokitxr/exokit" class=button>GitHub</a>
             <a href="https://mailchi.mp/ee614096d73a/exokitweb" class=button>Early Access</a>
           </div>
-        </div>
+        </div> -->
 
       </div>
     <script type=module>

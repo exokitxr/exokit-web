@@ -55,7 +55,7 @@ const floorMesh = (() => {
     void main() {
       vec3 c;
       float a;
-      c = vec3(0.8 + vDepth);
+      c = vec3(min(0.8 + vDepth, 0.9725490196078431)); // 0xf8/0xff
       /* vec2 uv = floor(vPosition + 150).xz / 300.0;
       c = texture2D(uTex, uv).rgb; */
       vec3 f = fract(vPosition);
