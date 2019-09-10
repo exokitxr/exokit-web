@@ -2,6 +2,7 @@
 <html>
   <head>
     <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
     <script src="TransformControls.js"></script>
   </head>
   <body>
@@ -13,8 +14,10 @@ console.log('app 1');
 
 const vrCamera = new THREE.PerspectiveCamera();
 vrCamera.updateMatrixWorld = () => {};
+let orbitControls = null;
 let tutorialXrIframe = null;
 let fakeXrDisplay;
+
 // main
 
 const scene = new THREE.Scene();
@@ -134,16 +137,32 @@ directionalLight.position.set(1, 1, 1);
 scene.add(directionalLight);
 
 function animate() {
-  if (fakeXrDisplay !== null) {
-    fakeXrDisplay.position.copy(camera.position);
-    fakeXrDisplay.quaternion.copy(camera.quaternion);
-    fakeXrDisplay.pushUpdate();
+  const _updateOrbitControls = () => {
+    if (orbitControls) {
+      orbitControls.update();
 
+      if (fakeXrDisplay) {
+        fakeXrDisplay.position.copy(orbitControls.object.position);
+        fakeXrDisplay.quaternion.copy(orbitControls.object.quaternion);
+
+        // if (window.document.pointerLockElement) {
+          fakeXrDisplay.pushUpdate();
+        /* } else {
+          fakeXrDisplay.pushHmdUpdate();
+          fakeXrDisplay.pushGamepadsUpdate(mouse.position, mouse.quaternion);
+        } */
+      }
+    }
+  };
+  _updateOrbitControls();
+
+  const _updateVrCamera = () => {
     vrCamera.matrixWorldInverse.fromArray(fakeXrDisplay.viewMatrix);
     vrCamera.matrixWorld.getInverse(vrCamera.matrixWorldInverse);
     vrCamera.projectionMatrix.fromArray(fakeXrDisplay.projectionMatrix);
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
-  }
+  };
+  _updateVrCamera();
 
   const rate = 5000;
   const f = (Date.now() % rate) / rate;
@@ -195,6 +214,16 @@ const _enterXr = async () => {
     renderer.vr.setSession(session);
     renderer.vr.setAnimationLoop(animate);
 
+    const orbitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+    orbitControls = new THREE.OrbitControls(orbitCamera, renderer.domElement);
+    orbitCamera.position.copy(fakeXrDisplay.position);
+    orbitCamera.quaternion.copy(fakeXrDisplay.quaternion);
+    /* scene.add(orbitCamera);
+    orbitCamera.updateMatrixWorld();
+    orbitControls.target.copy(orbitCamera.position).add(new THREE.Vector3(0, 0, -1).applyQuaternion(orbitCamera.quaternion)); */
+    orbitControls.screenSpacePanning = true;
+    orbitControls.update();
+
     console.log('loaded root in XR');
   });
 };
@@ -238,21 +267,14 @@ _startFakeVrDisplay()
           control.attach(object);
           control.size = 3;
           control.addEventListener('change', e => {
-            // console.log('got change', e);
             xrIframe.position = object.position.toArray();
             xrIframe.quaternion = object.quaternion.toArray();
             xrIframe.scale = object.scale.toArray();
           });
           control.addEventListener('dragging-changed', e => {
-            // console.log('got dragging-changed', e);
+            orbitControls.enabled = !e.value;
           });
           xrIframe.control = control;
-          //
-          // const geometry = new THREE.BoxBufferGeometry(.25, .25, .25);
-          // const material = new THREE.MeshPhongMaterial({color: 0x00FF00});
-          // var mesh = new THREE.Mesh( geometry, material );
-          // control.attach(mesh);
-          // // control.attach(xrIframe);
           scene.add(control);
 
           break;
