@@ -36,7 +36,6 @@ GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 GlobalContext.proxyContext = null;
 
-// import {_parseDocument, _parseDocumentAst, getBoundDocumentElements, DocumentType, DOMImplementation, initDocument} from './Document.js';
 /* import {
   HTMLElement,
   getBoundDOMElements,
