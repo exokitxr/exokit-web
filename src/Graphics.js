@@ -189,15 +189,24 @@ for (const k in WebGLRenderingContext.prototype) {
     const {value} = o;
     if (typeof value === 'function') {
       // const {getError} = WebGLRenderingContext.prototype;
-      ProxiedWebGLRenderingContext.prototype[k] = function() {
-        /* const error = getError.call(this);
-        if (error) {
-          Error.stackTraceLimit = 300;
-          console.log('fn', error, !!GlobalContext.proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
-        } */
-        this.setProxyState();
-        return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
-      };
+      if (k === 'drawElements' || k === 'drawArrays' || k === 'clear') {
+        ProxiedWebGLRenderingContext.prototype[k] = function() {
+          if (window[symbols.mrDisplaysSymbol].vrDisplay.isPresenting) {
+            this.setProxyState();
+            return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
+          }
+        };
+      } else {
+        ProxiedWebGLRenderingContext.prototype[k] = function() {
+          /* const error = getError.call(this);
+          if (error) {
+            Error.stackTraceLimit = 300;
+            console.log('fn', error, !!GlobalContext.proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
+          } */
+          this.setProxyState();
+          return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
+        };
+      }
     }
   }
 }
