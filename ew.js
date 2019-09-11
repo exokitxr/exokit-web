@@ -16,7 +16,6 @@ import './src/xr-scene.js';
 
 GlobalContext.args = {};
 GlobalContext.version = '';
-GlobalContext.onbeforeload = null;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -559,10 +558,3 @@ core.animate = (timestamp, frame, referenceSpace) => {
   _tickAnimationFrames();
 };
 core.setSession(null);
-
-export function setOptions(opts) {
-  opts = opts || {};
-  if (opts.onbeforeload) {
-    GlobalContext.onbeforeload = opts.onbeforeload;
-  }
-}

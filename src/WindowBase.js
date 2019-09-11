@@ -287,11 +287,6 @@ const _oninitmessage = async e => {
     console.warn('unhandled rejection:', (err && err.stack) || err);
   }); */
 
-  if (args.onbeforeload) {
-    GlobalContext.onbeforeload = args.onbeforeload;
-    await import(args.onbeforeload);
-  }
-
   await import(initModule);
 };
 self.addEventListener('message', _oninitmessage, {once: true});
