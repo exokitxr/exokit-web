@@ -196,6 +196,7 @@ self.addEventListener('fetch', event => {
             event.respondWith(
               fetch(proxyUrl, {
                 method: event.request.method,
+                headers: event.request.headers,
               }).then(res => {
                 res.originalUrl = originalUrl;
                 return _rewriteRes(res);
@@ -221,6 +222,7 @@ self.addEventListener('fetch', event => {
                   const proxyUrl = _rewriteUrlToProxy(u);
                   return fetch(proxyUrl, {
                     method: event.request.method,
+                    headers: event.request.headers,
                   }).then(res => {
                     res.originalUrl = u;
                     return _rewriteRes(res);
@@ -234,6 +236,7 @@ self.addEventListener('fetch', event => {
                 const proxyUrl = _rewriteUrlToProxy(u);
                 return fetch(proxyUrl, {
                   method: event.request.method,
+                  headers: event.request.headers,
                 }).then(res => {
                   res.originalUrl = u;
                   return _rewriteRes(res);
