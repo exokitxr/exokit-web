@@ -58,6 +58,13 @@ Exokit web is a Javascript library that gives you the powers of a 3D browser in 
 - Cross-app messaging
 - Automatic multiplayer with WebRTC
 
+## Run examples
+
+```
+npm install
+npm start
+```
+
 ## How to use
 
 Import `ew.js` into your app.
