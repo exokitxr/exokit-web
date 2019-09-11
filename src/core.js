@@ -27,9 +27,11 @@ exokit.make = (htmlString, options) => {
 };
 exokit.load = (src, options = {}) => {
   if (!/^[a-z]+:/.test(src)) {
-    let {href} = window.location;
-    href = href.replace(/#.*$/, '');
-    src = href + (!/\/$/.test(href) ? '/' : '') + src;
+    const u = new URL(window.location.href);
+    u.hash = '';
+    u.search = '';
+    u.pathname += src;
+    src = u.href;
   }
   options.args = options.args || {};
   options.replacements = options.replacements || {};
