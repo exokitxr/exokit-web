@@ -60,35 +60,31 @@ Exokit web is a Javascript library that gives you the powers of a 3D browser in 
 
 ## How to use
 
-Import `ew.js` into your app anywhere.
+Import `ew.js` into your app.
 
 ```html
 <script type=module src="https://web.exokit.org/ew.js"></script>
 ```
 
-If your app is limited to your own site (same origin), you're done! Read the [API Documentation](https://docs.exokit.org/).
-
-If your app acceses other sites (i.e. [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)), you'll need to set up a service worker and an API key.
-
-## Cross-origin setup
-
-Exokit Web suports accessing the full web with a Service Worker and proxy API, which requires a few more steps.
-
-### 1. Get an API key
-
-API keys are free. Get one in our Discord.
-
-Note that API keys are tied to your origin.
-
-### 2. Add Service worker
-
-In the top-level directory of your app, serve a service worker file, `sw.js`:
+In the _top-level directory of your app_, add `sw.js` with these contents:
 
 ```js
 importScripts('https://web.exokit.org/sw.js');
 ```
 
-### 3. Add API key
+If your app is limited to your own site (same origin), you're done! Read the [API Documentation](https://docs.exokit.org/).
+
+If your app acceses other sites (i.e. [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)), the above will not work.
+
+## Cross-origin setup
+
+To access web origins Exokit Web can use a proxy. This requires setting an API key.
+
+### 1. Get an API key
+
+API keys are used to whitelist your domain on the proxy, and are free. Get one in our Discord.
+
+### 2. Add API key
 
 Add your API key to your Exokit Web import:
 
