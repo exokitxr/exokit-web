@@ -74,13 +74,13 @@ If your app acceses other sites (i.e. [CORS](https://developer.mozilla.org/en-US
 
 Exokit Web suports accessing the full web with a Service Worker and proxy API, which requires a few more steps.
 
-1. Get an API key
+### 1. Get an API key
 
 API keys are free. Get one in our Discord.
 
 Note that API keys are tied to your origin.
 
-1. Add Service worker
+### 2. Add Service worker
 
 In the top-level directory of your app, serve a service worker file, `sw.js`:
 
@@ -88,7 +88,7 @@ In the top-level directory of your app, serve a service worker file, `sw.js`:
 importScripts('https://web.exokit.org/sw.js');
 ```
 
-1. Add API key
+### 3. Add API key
 
 Add your API key to your Exokit Web import:
 
