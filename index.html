@@ -221,17 +221,8 @@ function parseQuery(queryString) {
   return query;
 }
 
-const q = parseQuery(window.location.search);
-const {key} = q;
-navigator.serviceWorker.register('sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''))
-  .then(() => {
-    if (navigator.serviceWorker.controller) {
-      // nothing
-    } else {
-      window.location.reload();
-    }
-  })
-  .then(() => import('./ew.js'))
+const {key} = parseQuery(window.location.search);
+import('./ew.js' + (key ? `?key=${encodeURIComponent(key)}` : ''))
   .then(async () => {
     xrScene = document.createElement('xr-scene');
     xrScene.src = 'app.html';

@@ -17,18 +17,47 @@ import './src/xr-scene.js';
 GlobalContext.args = {};
 GlobalContext.version = '';
 
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localQuaternion = new THREE.Quaternion();
-const localMatrix = new THREE.Matrix4();
-
 const args = {};
 core.setArgs(args);
 core.setVersion('0.0.1');
 
 const windows = [];
 GlobalContext.windows = windows;
-// const contexts = [];
+GlobalContext.loadPromise = (() => {
+  let accept, reject;
+  const result = new Promise((a, r) => {
+    accept = a;
+    reject = r;
+  });
+  result.accept = accept;
+  result.reject = reject;
+  return result;
+})();
+
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
+const localMatrix = new THREE.Matrix4();
+
+(async () => {
+
+function parseQuery(queryString) {
+  var query = {};
+  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i].split('=');
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
+
+const {key} = parseQuery(new URL(import.meta.url).search);
+await navigator.serviceWorker.register('sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''));
+if (navigator.serviceWorker.controller) {
+  GlobalContext.loadPromise.accept();
+} else {
+  window.location.reload();
+}
 
 const xrState = (() => {
   const _makeSab = size => {
@@ -558,3 +587,5 @@ core.animate = (timestamp, frame, referenceSpace) => {
   _tickAnimationFrames();
 };
 core.setSession(null);
+
+})();

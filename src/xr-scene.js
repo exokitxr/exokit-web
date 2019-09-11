@@ -119,7 +119,8 @@ class XRScene extends HTMLElement {
         });
         this.contentWindow = win;
       };
-      _onnavigate(src);
+      GlobalContext.loadPromise
+        .then(() => _onnavigate(src));
     }
   }
   static get observedAttributes() {
