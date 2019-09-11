@@ -231,7 +231,7 @@ navigator.serviceWorker.register('sw.js' + (key ? `?key=${encodeURIComponent(key
       window.location.reload();
     }
   })
-  .then(() => import('./src/index.js'))
+  .then(() => import('./ew.js'))
   .then(async () => {
     xrScene = document.createElement('xr-scene');
     xrScene.src = 'app.html';

@@ -1,18 +1,18 @@
-import './webxr-polyfill.module.js';
-import './HelioWebXRPolyfill.js';
-import './event-target-shim.mjs';
+import './src/webxr-polyfill.module.js';
+import './src/HelioWebXRPolyfill.js';
+import './src/event-target-shim.mjs';
 
-import core from './core.js';
+import core from './src/core.js';
 // import minimist from '../modules/minimist.js';
 
-import symbols from './symbols.js';
-import THREE from '../lib/three-min.js';
+import symbols from './src/symbols.js';
+import THREE from './lib/three-min.js';
 
 // import {lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
 
-import GlobalContext from './GlobalContext.js';
+import GlobalContext from './src/GlobalContext.js';
 
-import './xr-scene.js';
+import './src/xr-scene.js';
 
 let bootstrapped = false;
 const _bootstrap = () => {
