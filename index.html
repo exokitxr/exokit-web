@@ -155,6 +155,16 @@ a:active {
   color: #b71c1c;
   cursor: auto;
 }
+.coming-soon {
+  color: #AAA;
+}
+.coming-soon-sub {
+  font-size: 10px;
+  display: block;
+}
+.header-link {
+  color: #767;
+}
     </style>
   </head>
   <body>
@@ -162,9 +172,13 @@ a:active {
         <header>
           <img src="logo.svg">
           <nav class=selected><span>Viewer</span></nav>
-          <nav><span>Browser</span></nav>
-          <nav><span>Metaverse</span></nav>
-          <nav><span><a href="http://docs.exokit.org/">Documentation</a></span></nav>
+          <a href="http://docs.exokit.org/"><nav><span class="header-link">Documentation</span></nav></a>
+          <nav><span class="coming-soon">Browser
+            <p class="coming-soon-sub">Coming soon!</p>
+          </span></nav>
+          <nav><span class="coming-soon">Metaverse
+            <p class="coming-soon-sub">Coming soon!</p>
+          </span></nav>
         </header>
 
         <div class=examples>
