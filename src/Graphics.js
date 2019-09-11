@@ -381,6 +381,12 @@ ProxiedWebGLRenderingContext.prototype.bindBuffer = (_bindBuffer => function bin
   }
   return _bindBuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindBuffer);
+ProxiedWebGLRenderingContext.prototype.deleteBuffer = (_deleteBuffer => function deleteBuffer(b) {
+  if (this.state.arrayBuffer === b) {
+    this.state.arrayBuffer = null;
+  }
+  return _deleteBuffer.apply(this, arguments);
+})(ProxiedWebGLRenderingContext.prototype.deleteBuffer);
 ProxiedWebGLRenderingContext.prototype.bindRenderbuffer = (_bindRenderbuffer => function bindRenderbuffer(target, rbo) {
   this.state.renderbuffer[target] = rbo;
   return _bindRenderbuffer.apply(this, arguments);
