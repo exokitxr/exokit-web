@@ -32,13 +32,13 @@
 ## Overview
 
 ### index.html
-```
+```js
 xrScene = document.createElement('xr-scene');
 xrIframe.src = 'app.html';
 ```
 
 ### app.html
-```
+```js
 // put A-Painter into a Hub
 
 fooFrame = document.createElement('xr-iframe');
@@ -62,7 +62,7 @@ Exokit web is a Javascript library that gives you the powers of a 3D browser in 
 
 Import `ew.js` into your app anywhere.
 
-```
+```html
 <script type=module src="https://web.exokit.org/ew.js"></script>
 ```
 
@@ -84,7 +84,7 @@ Note that API keys are tied to your origin.
 
 In the top-level directory of your app, serve a service worker file, `sw.js`:
 
-```
+```js
 importScripts('https://web.exokit.org/sw.js');
 ```
 
@@ -92,7 +92,7 @@ importScripts('https://web.exokit.org/sw.js');
 
 Add your API key to your Exokit Web import:
 
-```
+```html
 <script type=module src="https://web.exokit.org/ew.js?key=YOUR_API_KEY_HERE"></script>
 ```
 
