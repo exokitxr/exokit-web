@@ -64,7 +64,7 @@ const _proxyHtmlScripts = (htmlString, originalUrl) => htmlString.replace(/(src=
 });
 const _removeHtmlManifest = htmlString => htmlString.replace(/<link\s+rel="?manifest"?[^>]*>/, '');
 const _rewriteResText = (res, rewriteFn) => res.text()
-  .then(text => new Response(rewriteFn(text), {
+  .then(text => new Response(rewriteFn(text) || null, {
     status: res.status,
     headers: res.headers,
   }));
