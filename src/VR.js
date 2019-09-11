@@ -10,6 +10,19 @@ import THREE from '../lib/three-min.js';
 } = require('./native-bindings.js'); */
 import GlobalContext from './GlobalContext.js';
 
+const xrToVrButtonMappings = [
+  1, // trigger
+  2, // grip
+  0, // pad
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+];
+
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
@@ -132,7 +145,8 @@ class Gamepad {
     this.buttons = (() => {
       const result = Array(xrGamepad.buttons.length);
       for (let i = 0; i < result.length; i++) {
-        result[i] = new GamepadButton(xrGamepad.buttons[i].value, xrGamepad.buttons[i].pressed, xrGamepad.buttons[i].touched);
+        const vrButtonIndex = xrToVrButtonMappings[i];
+        result[vrButtonIndex] = new GamepadButton(xrGamepad.buttons[i].value, xrGamepad.buttons[i].pressed, xrGamepad.buttons[i].touched);
       }
       return result;
     })();
