@@ -14,13 +14,6 @@ import GlobalContext from './src/GlobalContext.js';
 
 import './src/xr-scene.js';
 
-let bootstrapped = false;
-const _bootstrap = () => {
-
-if (bootstrapped) {
-  return;
-}
-
 GlobalContext.args = {};
 GlobalContext.version = '';
 GlobalContext.onbeforeload = null;
@@ -566,11 +559,6 @@ core.animate = (timestamp, frame, referenceSpace) => {
   _tickAnimationFrames();
 };
 core.setSession(null);
-
-bootstrapped = true;
-
-};
-_bootstrap();
 
 export function setOptions(opts) {
   opts = opts || {};
