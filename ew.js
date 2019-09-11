@@ -52,6 +52,9 @@ function parseQuery(queryString) {
 }
 
 const {key} = parseQuery(new URL(import.meta.url).search);
+if (!key) {
+  console.warn('exokit-web API key not set! Web origins will not work. See https://github.com/exokitxr/exokit-web/');
+}
 await navigator.serviceWorker.register('sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''));
 if (navigator.serviceWorker.controller) {
   GlobalContext.loadPromise.accept();
