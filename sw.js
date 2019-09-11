@@ -77,7 +77,9 @@ const _flattenWebVrEyeJs = jsString => jsString.replace(
   all => all + '(new FakeXRDisplay().stereo?1:0.5)*'
 );
 const _rewriteResExt = (url, originalUrl, headers, res) => {
-  if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
+  if (originalUrl === 'https://aframe.io/releases/0.9.2/aframe.min.js') {
+    return _rewriteResText(res, jsString => 'delete navigator.xr;' + _flattenWebVrEyeJs(jsString));
+  } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => jsString.replace('window.top', 'window.self'));
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/engine-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => 'delete navigator.xr;' + jsString.replace(
