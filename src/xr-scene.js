@@ -123,9 +123,7 @@ class XRScene extends HTMLElement {
     }
   }
   static get observedAttributes() {
-    return [
-      'src',
-    ];
+    return ['src'];
   }
   get src() {
     return this.getAttribute('src');
