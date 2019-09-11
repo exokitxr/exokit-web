@@ -211,18 +211,7 @@ a:active {
     <script type=module>
 let xrScene = null;
 
-function parseQuery(queryString) {
-  var query = {};
-  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-  for (var i = 0; i < pairs.length; i++) {
-    var pair = pairs[i].split('=');
-    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
-  }
-  return query;
-}
-
-const {key} = parseQuery(window.location.search);
-import('./ew.js' + (key ? `?key=${encodeURIComponent(key)}` : ''))
+import(`./ew.js${window.location.search}`)
   .then(async () => {
     xrScene = document.createElement('xr-scene');
     xrScene.src = 'app.html';
