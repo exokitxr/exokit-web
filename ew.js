@@ -487,16 +487,30 @@ core.animate = (timestamp, frame, referenceSpace) => {
       let pose, gamepad;
       if (inputSource && (pose = frame.getPose(inputSource.targetRaySpace, referenceSpace)) && (gamepad = inputSource.gamepad || gamepads[i])) {
         const {transform} = pose;
-        const {position, orientation} = transform;
+        const {position, orientation, matrix} = transform;
+        if (position) { // new WebXR api
+          xrGamepad.position[0] = position.x;
+          xrGamepad.position[1] = position.y;
+          xrGamepad.position[2] = position.z;
 
-        xrGamepad.position[0] = position.x;
-        xrGamepad.position[1] = position.y;
-        xrGamepad.position[2] = position.z;
+          xrGamepad.orientation[0] = orientation.x;
+          xrGamepad.orientation[1] = orientation.y;
+          xrGamepad.orientation[2] = orientation.z;
+          xrGamepad.orientation[3] = orientation.w;
+        } else if (matrix) { // old WebXR api
+          localMatrix
+            .fromArray(transform.matrix)
+            .decompose(localVector, localQuaternion, localVector2);
 
-        xrGamepad.orientation[0] = orientation.x;
-        xrGamepad.orientation[1] = orientation.y;
-        xrGamepad.orientation[2] = orientation.z;
-        xrGamepad.orientation[3] = orientation.w;
+          xrGamepad.position[0] = localVector.x;
+          xrGamepad.position[1] = localVector.y;
+          xrGamepad.position[2] = localVector.z;
+
+          xrGamepad.orientation[0] = localQuaternion.x;
+          xrGamepad.orientation[1] = localQuaternion.y;
+          xrGamepad.orientation[2] = localQuaternion.z;
+          xrGamepad.orientation[3] = localQuaternion.w;
+        }
         
         for (let j = 0; j < gamepad.buttons.length; j++) {
           const button = gamepad.buttons[j];
