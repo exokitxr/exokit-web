@@ -488,7 +488,6 @@ core.animate = (timestamp, frame, referenceSpace) => {
       if (inputSource && (pose = frame.getPose(inputSource.targetRaySpace, referenceSpace)) && (gamepad = inputSource.gamepad)) {
         const {transform} = pose;
         const {position, orientation} = transform;
-        const {gamepad} = inputSource;
 
         xrGamepad.position[0] = position.x;
         xrGamepad.position[1] = position.y;
