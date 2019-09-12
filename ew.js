@@ -468,7 +468,7 @@ core.animate = (timestamp, frame, referenceSpace) => {
     const pose = frame.getViewerPose(referenceSpace);
     const {views} = pose;
     const {inputSources, renderState: {baseLayer: {framebuffer}}} = session;
-    // const gamepads = Array.from(inputSources).map(inputSource => inputSource.gamepad);
+    const gamepads = navigator.getGamepads();
 
     const _loadHmd = () => {
       xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
@@ -485,7 +485,7 @@ core.animate = (timestamp, frame, referenceSpace) => {
       const xrGamepad = xrState.gamepads[i];
 
       let pose, gamepad;
-      if (inputSource && (pose = frame.getPose(inputSource.targetRaySpace, referenceSpace)) && (gamepad = inputSource.gamepad)) {
+      if (inputSource && (pose = frame.getPose(inputSource.targetRaySpace, referenceSpace)) && (gamepad = inputSource.gamepad || gamepads[i])) {
         const {transform} = pose;
         const {position, orientation} = transform;
 
