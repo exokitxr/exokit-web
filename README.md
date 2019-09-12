@@ -67,7 +67,7 @@ npm start
 
 ## How to use
 
-Import `ew.js` into your app.
+Import `ew.js` into your app:
 
 ```html
 <script type=module src="https://web.exokit.org/ew.js"></script>
