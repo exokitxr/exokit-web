@@ -28,7 +28,7 @@
 import 'https://web.exokit.org/ew.js';
 
 xrScene = document.createElement('xr-scene');
-xrIframe.src = 'app.html';
+xrScene.src = 'app.html';
 ```
 
 ### app.html
