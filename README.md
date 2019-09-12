@@ -31,8 +31,12 @@
 
 ## Overview
 
+> *Exokit Web* is a Javascript library that allows composing multiple WebXR applications in a regular web page. It works in all web browsers, VR and AR headsets, with no dependencies.
+
 ### index.html
 ```js
+import 'https://web.exokit.org/ew.js';
+
 xrScene = document.createElement('xr-scene');
 xrIframe.src = 'app.html';
 ```
@@ -40,6 +44,8 @@ xrIframe.src = 'app.html';
 ### app.html
 ```js
 // put A-Painter into a Hub
+
+// ...initialize session as a WebXR session...
 
 fooFrame = document.createElement('xr-iframe');
 fooFrame.src = 'https://hubs.mozilla.com/VxGmqjU/fuchsia-winding-room?vr_entry_type=vr_now';
@@ -50,7 +56,7 @@ barFrame.src = 'https://aframe.io/a-painter';
 session.layers.push(barFrame);
 ```
 
-Exokit web is a Javascript library that gives you the powers of a 3D browser in your regular web app. Exokit web runs in any web browser with no dependency. It works with every WebXR engine, including A-Frame, Babylon.js, THREE.js, JanusWeb, Unity.
+See [`index.html`](index.html) for a full example.
 
 - Run multiple WebXR apps simultaneously
 - Render HTML to texture
