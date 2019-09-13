@@ -80,7 +80,7 @@ If your app acceses other sites (i.e. [CORS](https://developer.mozilla.org/en-US
 
 To access web origins Exokit Web can use a proxy.
 
-This requires setting an API key for the origin (domain) you're using. This is required even if you're only using the `https://dev.exokit.org` origin that points to `127.0.0.1.
+This requires setting an API key for the origin (domain) you're using. This is required even if you're only using the `https://dev.exokit.org` origin that points to `127.0.0.1`.
 
 ### 1. Get an API key
 
