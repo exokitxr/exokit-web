@@ -116,7 +116,7 @@ HTMLCanvasElement.prototype.getContext = (oldGetContext => function getContext(t
 
     setTimeout(() => {
       window.vrdisplayactivate();
-    });
+    }, 1000);
 
     return gl;
   } else {
