@@ -82,7 +82,7 @@ To access web origins Exokit Web can use a proxy. This requires setting an API k
 
 ### 1. Get an API key
 
-API keys are used to whitelist your domain on the proxy, and are free. Get one in our Discord.
+API keys are used to whitelist your domain on the proxy, and are free. Get one in our [Discord](https://discord.gg/zgYEJgS).
 
 ### 2. Add API key
 
