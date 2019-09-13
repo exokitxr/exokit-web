@@ -80,7 +80,11 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
   if (originalUrl === 'https://aframe.io/releases/0.9.2/aframe.min.js') {
     return _rewriteResText(res, jsString => 'delete navigator.xr;' + _flattenWebVrEyeJs(jsString));
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/hub-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
-    return _rewriteResText(res, jsString => jsString.replace('window.top', 'window.self'));
+    return _rewriteResText(res, jsString => {
+      return 'delete navigator.xr;' + jsString
+        .replace('window.top', 'window.self')
+        .replace('.length>0?(yield t.setMediaStreamToDefault()', '?(yield t.setMediaStreamToDefault()');
+    });
   } else if (/^https:\/\/assets-prod\.reticulum\.io\/hubs\/assets\/js\/engine-[a-zA-Z0-9]+\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => 'delete navigator.xr;' + jsString.replace(
       /\.getEyeParameters\("left"\);[a-z]+=2\*/g,

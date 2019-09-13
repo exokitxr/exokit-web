@@ -28,7 +28,7 @@
 import 'https://web.exokit.org/ew.js';
 
 xrScene = document.createElement('xr-scene');
-xrIframe.src = 'app.html';
+xrScene.src = 'app.html';
 ```
 
 ### app.html
@@ -70,7 +70,7 @@ In the _top-level directory of your app_, add `sw.js` with these contents:
 importScripts('https://web.exokit.org/sw.js');
 ```
 
-Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for `Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
+Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
 
 If your app is limited to your own site (same origin), you're done! Read the [API Documentation](https://docs.exokit.org/).
 
@@ -82,7 +82,7 @@ To access web origins Exokit Web can use a proxy. This requires setting an API k
 
 ### 1. Get an API key
 
-API keys are used to whitelist your domain on the proxy, and are free. Get one in our Discord.
+API keys are used to whitelist your domain on the proxy, and are free. Get one in our [Discord](https://discord.gg/zgYEJgS).
 
 ### 2. Add API key
 
