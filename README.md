@@ -70,7 +70,7 @@ In the _top-level directory of your app_, add `sw.js` with these contents:
 importScripts('https://web.exokit.org/sw.js');
 ```
 
-Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for `Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
+Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
 
 If your app is limited to your own site (same origin), you're done! Read the [API Documentation](https://docs.exokit.org/).
 
