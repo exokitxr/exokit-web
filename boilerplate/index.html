@@ -11,8 +11,8 @@
     });
 
     // Import exokit-web
-    // replace ${API_KEY} if accessing web origins, otherwise remove
-    import('https://web.exokit.org/ew.js?key={API_KEY}')
+    // replace API_KEY if accessing web origins, otherwise remove
+    import('https://web.exokit.org/ew.js?key=API_KEY')
     .then(async () => {
       // Create top-level xr-scene, define src attribute, and append/place it wherever you want as if it were a normal canvas
       xrScene = document.createElement('xr-scene');
