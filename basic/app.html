@@ -1,0 +1,41 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+      const layers = [];
+
+      const _enterXr = async () => {
+        const session = await navigator.xr.requestSession({
+          exclusive: true,
+        });
+        session.layers = layers;
+        session.requestAnimationFrame((timestamp, frame) => {
+          renderer.vr.setSession(session, {
+            frameOfReferenceType: 'stage',
+          });
+        });
+      };
+
+     _enterXr()
+      .then(() => {
+        // Add Mozilla Hub
+        fooFrame = document.createElement('xr-iframe');
+        fooFrame.src = 'https://hubs.mozilla.com/VxGmqjU/fuchsia-winding-room?vr_entry_type=vr_now';
+        session.layers.push(fooFrame);
+
+        // Add A-Painter too
+        barFrame = document.createElement('xr-iframe');
+        barFrame.src = 'https://aframe.io/a-painter';
+        session.layers.push(barFrame);
+
+        // Set the xr-iframe position, from any array
+        barFrame.position = [1, 1, 1];
+        // Set the xr-iframe orientation
+        barFrame.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(1*Math.PI, 1*Math.PI, 1*Math.PI, 'YXZ')).toArray();
+        // Set the xr-iframe scale
+        barFrame.scale = [1, 1, 1];
+      })
+      </script>
+  </body>
+</html>
