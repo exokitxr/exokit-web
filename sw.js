@@ -110,6 +110,12 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
       /\.getEyeParameters\("left"\);[a-z]+=2\*/g,
       all => all + '(new FakeXRDisplay().stereo?1:0.5)*'
     ));
+  } else if (/janusweb\.js$/.test(originalUrl)) {
+    return _rewriteResText(res, jsString =>
+      jsString
+        .replace('renderer.setSize( eyeParamsL.renderWidth * 2', 'renderer.setSize( eyeParamsL.renderWidth')
+        .replace('renderer.setSize( eyeWidth * 2', 'renderer.setSize( eyeWidth')
+    );
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/build/build.js') {
     return _rewriteResText(res, jsString => jsString.replace('getDistance:function(){var e=this.axis;', 'getDistance:function(){if (!this.axis)this.axis=[0,0,0];var e=this.axis;'));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/vendor/aframe-master.min.js') {
