@@ -1,19 +1,5 @@
 <html>
   <head>
-    <style>
-      canvas {
-        width: 100% !important;
-        height: 100vh !important;
-        background-color: #f8f8f8;
-      }
-      .iframe-wrapper {
-        position: relative;
-        display: flex;
-        margin-top: 50px;
-        flex: 1;
-        background-color: #FFF;
-      }
-    </style>
   </head>
   <body>
   <a class=button id="enter-xr-button">Enter XR</a>
@@ -26,7 +12,7 @@
 
     // Import exokit-web
     // replace ${API_KEY} if accessing web origins, otherwise remove
-    import('https://web.exokit.org/ew.js?key=zol')
+    import('https://web.exokit.org/ew.js?key={API_KEY}')
     .then(async () => {
       // Create top-level xr-scene, define src attribute, and append/place it wherever you want as if it were a normal canvas
       xrScene = document.createElement('xr-scene');
