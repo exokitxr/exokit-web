@@ -4,16 +4,14 @@
   <body>
     <script>
       const layers = [];
+      let session;
 
       const _enterXr = async () => {
-        const session = await navigator.xr.requestSession({
+        session = await navigator.xr.requestSession({
           exclusive: true,
         });
         session.layers = layers;
         session.requestAnimationFrame((timestamp, frame) => {
-          renderer.vr.setSession(session, {
-            frameOfReferenceType: 'stage',
-          });
         });
       };
 
@@ -32,7 +30,7 @@
         // Set the xr-iframe position, from any array
         barFrame.position = [1, 1, 1];
         // Set the xr-iframe orientation
-        barFrame.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(1*Math.PI, 1*Math.PI, 1*Math.PI, 'YXZ')).toArray();
+        barFrame.orientation = [0, 0, 0, 1];
         // Set the xr-iframe scale
         barFrame.scale = [1, 1, 1];
       })
