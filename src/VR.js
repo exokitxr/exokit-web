@@ -251,6 +251,8 @@ class VRDisplay extends EventTarget {
 
     frameData.leftProjectionMatrix.set(GlobalContext.xrState.leftProjectionMatrix);
     frameData.rightProjectionMatrix.set(GlobalContext.xrState.rightProjectionMatrix);
+
+    return true;
   }
 
   getLayers() {
