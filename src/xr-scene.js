@@ -10,6 +10,7 @@ class XRScene extends HTMLElement {
     super();
 
     this.contentWindow = null;
+    this.queue = [];
     this.canvas = null;
     this.ctx = null;
     this.shadow = null;
@@ -118,6 +119,12 @@ class XRScene extends HTMLElement {
           }));
         });
         this.contentWindow = win;
+
+        for (let i = 0; i < this.queue.length; i++) {
+          const [data, transfers] = this.queue[i];
+          this.contentWindow.postMessage(data, transfers);
+        }
+        this.queue.length = 0;
       };
       GlobalContext.loadPromise
         .then(() => _onnavigate(src));
@@ -133,8 +140,12 @@ class XRScene extends HTMLElement {
     this.setAttribute('src', src);
   }
   
-  postMessage(m, transfers) {
-    this.contentWindow.postMessage(m, transfers);
+  postMessage(data, transfers) {
+    if (this.contentWindow) {
+      this.contentWindow.postMessage(data, transfers);
+    } else {
+      this.queue.push([data, transfers]);
+    }
   }
 
   async enterXr() {
