@@ -181,7 +181,7 @@ class WorkerVm extends EventTarget {
     return requestKey;
   }
 
-  runRepl(jsString, transferList) {
+  /* runRepl(jsString, transferList) {
     return new Promise((accept, reject) => {
       const requestKey = this.queueRequest((err, result) => {
         if (!err) {
@@ -196,7 +196,7 @@ class WorkerVm extends EventTarget {
         requestKey,
       }, transferList);
     });
-  }
+  } */
   runAsync(request, transferList) {
     let result, error;
     const requestKey = this.queueRequest((err, res) => {

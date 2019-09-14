@@ -140,7 +140,7 @@ const _oninitmessage = async e => {
     const {data: m} = e;
 
     switch (m.method) {
-      case 'runRepl': {
+      /* case 'runRepl': {
         let result, err;
         try {
           result = util.inspect((0, eval)(m.jsString));
@@ -154,7 +154,7 @@ const _oninitmessage = async e => {
           error: err,
         });
         break;
-      }
+      } */
       case 'runAsync': {
         let resultSpec, err;
         try {
