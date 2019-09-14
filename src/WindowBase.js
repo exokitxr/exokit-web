@@ -103,25 +103,25 @@ const _oninitmessage = async e => {
   self.Blob = Blob;
   self.FormData = FormData; */
  
-  /* const messageQueue = [];
+  const messageQueue = [];
   const _onmessageQueue = e => {
     messageQueue.push(e);
   };
-  messagePort.addEventListener('message', _onmessageQueue); */
+  self.addEventListener('message', _onmessageQueue);
   self._onbootstrap = e => {
     const {error} = e;
 
-    // messagePort.removeEventListener('message', _onmessageQueue);
+    self.removeEventListener('message', _onmessageQueue);
 
     if (!error) {
       self._postMessageUp({
         method: 'load',
       });
 
-      /* console.log('flush messages', messageQueue.length);
       for (let i = 0; i < messageQueue.length; i++) {
         self.dispatchEvent(messageQueue[i]);
-      } */
+      }
+      messageQueue.length = 0;
     } else {
       self._postMessageUp({
         method: 'error',
@@ -129,7 +129,6 @@ const _oninitmessage = async e => {
       });
     }
 
-    // messageQueue.length = 0;
     self._onbootstrap = undefined;
   };
   self._postMessageUp = function _postMessageUp(data, transfer) {
