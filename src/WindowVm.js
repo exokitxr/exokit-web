@@ -155,11 +155,10 @@ class WorkerVm extends EventTarget {
     messageChannel.port1.addEventListener('message', messageChannel.port1.handleMessage);
     messageChannel.port1.start();
 
-    const queue = [];
     messageChannel.port2.handleMessage = e => {
-      queue.push(e);
+      messageChannel.port2.handleMessage.queue.push(e);
     };
-    messageChannel.port2.handleMessage.queue = queue;
+    messageChannel.port2.handleMessage.queue = [];
     
     iframe._postMessageDown = function _postMessageDown(data, transfer) {
       messageChannel.port1.postMessageSync(data, transfer);
