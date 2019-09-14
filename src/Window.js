@@ -696,6 +696,14 @@ const _fetchText = src => fetch(src)
   document.write(htmlString);
   document.close();
 
+  await new Promise((accept, reject) => {
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'complete') {
+        accept();
+      }
+    });
+  });
+
 })(self).then(() => {
   self._onbootstrap({
     error: null,
