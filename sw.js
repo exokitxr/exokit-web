@@ -1,3 +1,7 @@
+importScripts('./localforage.js');
+
+localforage.config({driver: localforage.INDEXEDDB});
+
 const redirects = new Map();
 const permanentRedirects = {
   // 'https://assets-prod.reticulum.io/hubs/assets/js/vendor-64ef06ca9a87923873c0.js': './vendor-64ef06ca9a87923873c0.js',
@@ -136,23 +140,9 @@ const _resolveFollowUrl = u => fetch(_rewriteUrlToProxy(u), {
   method: 'HEAD',
 }).then(res => _rewriteUrlToRaw(res.url));
 
-const secureCacheName = 'secureCache';
-let secureCache = null;
-self.addEventListener('install', event => event.waitUntil(
-
-(async () => {
-  // console.log('sw install');
-
-  secureCache = await caches.open(secureCacheName);
-
-  /* event.waitUntil(
-    caches.open(PRECACHE)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(self.skipWaiting())
-  ); */
-})()
-
-));
+self.addEventListener('install', event => {
+  self.skipWaiting();
+});
 self.addEventListener('activate', event => {
   // console.log('sw activate');
   self.clients.claim();
@@ -222,23 +212,16 @@ self.addEventListener('fetch', event => {
               .then(client => {
                 if (client.type === 'window' && client.frameType === 'top-level' && /^\/(?:index\.html)?$/.test(new URL(client.url).pathname)) {
                   if (event.request.method === 'GET') {
-                    return secureCache.match(event.request)
-                      .then(response => response || new Response(null, {
+                    return localforage.getItem(event.request.url)
+                      .then(v => v ? new Response(v) : new Response(null, {
                         status: 404,
                       }));
                   } else if (event.request.method === 'PUT') {
-                    return event.request.blob()
-                      .then(blob => secureCache.put(
-                        new Request(event.request.url),
-                        new Response(blob, {
-                          headers: {
-                            'Content-Type': blob.type,
-                          },
-                        })
-                      ))
+                    return event.request.arrayBuffer()
+                      .then(ab => localforage.setItem(event.request.url, ab))
                       .then(() => new Response());
                   } else if (event.request.method === 'DELETE') {
-                    return secureCache.delete(new Request(event.request.url))
+                    return localforage.removeItem(event.request.url)
                       .then(() => new Response());
                   } else {
                     return new Response('bad request', {
