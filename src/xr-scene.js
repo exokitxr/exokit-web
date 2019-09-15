@@ -120,6 +120,7 @@ class XRScene extends HTMLElement {
         });
         this.contentWindow = win;
 
+        console.log('xr-scene flush queue', this.queue.length);
         for (let i = 0; i < this.queue.length; i++) {
           const [data, transfers] = this.queue[i];
           this.contentWindow.postMessage(data, transfers);
@@ -142,8 +143,10 @@ class XRScene extends HTMLElement {
   
   postMessage(data, transfers) {
     if (this.contentWindow) {
+      console.log('xr-scene postMessage direct');
       this.contentWindow.postMessage(data, transfers);
     } else {
+      console.log('xr-scene postMessage queue');
       this.queue.push([data, transfers]);
     }
   }

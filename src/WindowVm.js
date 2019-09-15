@@ -28,6 +28,7 @@ class WorkerVm extends EventTarget {
   constructor(options = {}) {
     super();
 
+    const queue = [];
     const iframe = document.createElement('iframe');
     const _getFollowUrl = u => {
       if (/^[a-z]+:\/\//.test(u) && !u.startsWith(location.origin)) {
@@ -142,6 +143,16 @@ class WorkerVm extends EventTarget {
           break;
         }
         case 'load': {
+          console.log('pre flush 4', queue.length);
+
+          iframe._postMessageDownQueued = iframe._postMessageDown;
+
+          for (let i = 0; i < queue.length; i++) {
+            const [data, transfers] = queue[i];
+            iframe._postMessageDownQueued(data, transfers);
+          }
+          queue.length = 0;
+
           this.dispatchEvent(new CustomEvent('load'));
           break;
         }
@@ -166,8 +177,11 @@ class WorkerVm extends EventTarget {
     };
     messageChannel.port2.handleMessage.queue = [];
     
-    iframe._postMessageDown = function _postMessageDown(data, transfer) {
-      messageChannel.port1.postMessageSync(data, transfer);
+    iframe._postMessageDown = function _postMessageDown(data, transfers) {
+      messageChannel.port1.postMessageSync(data, transfers);
+    };
+    iframe._postMessageDownQueued = function _postMessageDownQueued(data, transfers) {
+      queue.push([data, transfers]);
     };
     this.iframe = iframe;
 
@@ -221,7 +235,7 @@ class WorkerVm extends EventTarget {
     }
   }
   postMessage(message, transferList) {
-    this.iframe._postMessageDown({
+    this.iframe._postMessageDownQueued({
       method: 'postMessage',
       message,
     }, transferList);
