@@ -229,9 +229,7 @@ self.addEventListener('fetch', event => {
                   } else if (event.request.method === 'PUT') {
                     return event.request.blob()
                       .then(blob => secureCache.put(
-                        new Request(event.request.url, {
-                          method: 'GET',
-                        }),
+                        new Request(event.request.url),
                         new Response(blob, {
                           headers: {
                             'Content-Type': blob.type,
