@@ -243,10 +243,27 @@ class OES_vertex_array_object {
     return WebGL2RenderingContext.VERTEX_ARRAY_BINDING;
   }
 }
+class ANGLE_instanced_arrays {
+  drawArraysInstancedANGLE(mode, first, count, primcount) {
+    return GlobalContext.proxyContext.drawArraysInstanced(mode, first, count, primcount);
+  }
+  drawElementsInstancedANGLE(mode, count, type, offset, primcount) {
+    return GlobalContext.proxyContext.drawElementsInstanced(mode, count, type, offset, primcount);
+  }
+  vertexAttribDivisorANGLE(index, divisor) {
+    return GlobalContext.proxyContext.vertexAttribDivisor(index, divisor);
+  }
+}
 ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function getExtension(name) {
   if (name === 'OES_vertex_array_object') {
     if (hasWebGL2) {
       return new OES_vertex_array_object(this);
+    } else {
+      return GlobalContext.proxyContext.getExtension(name);
+    }
+  } else if (name === 'ANGLE_instanced_arrays') {
+    if (hasWebGL2) {
+      return new ANGLE_instanced_arrays();
     } else {
       return GlobalContext.proxyContext.getExtension(name);
     }
@@ -256,7 +273,6 @@ ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function
     'EXT_disjoint_timer_query',
     'EXT_disjoint_timer_query_webgl2',
     'KHR_parallel_shader_compile',
-    'ANGLE_instanced_arrays',
   ].includes(name)) {
     return GlobalContext.proxyContext.getExtension(name);
   } else {
