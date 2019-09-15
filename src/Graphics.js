@@ -256,6 +256,7 @@ ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function
     'EXT_disjoint_timer_query',
     'EXT_disjoint_timer_query_webgl2',
     'KHR_parallel_shader_compile',
+    'ANGLE_instanced_arrays',
   ].includes(name)) {
     return GlobalContext.proxyContext.getExtension(name);
   } else {
