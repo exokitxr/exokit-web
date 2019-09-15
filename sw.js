@@ -216,6 +216,41 @@ self.addEventListener('fetch', event => {
           }
         } else if (match2 = match[1].match(/^\/.d\/(.+)$/)) {
           event.respondWith(fetch(match2[1]));
+        } else if (match2 = match[1].match(/^\/.s\/(.+)$/)) {
+          event.respondWith(
+            clients.get(event.clientId)
+              .then(client => {
+                if (client.type === 'window' && client.frameType === 'top-level' && /^\/(?:index\.html)?$/.test(new URL(client.url).pathname)) {
+                  if (event.request.method === 'GET') {
+                    return secureCache.match(event.request)
+                      .then(response => response || new Response(null, {
+                        status: 404,
+                      }));
+                  } else if (event.request.method === 'PUT') {
+                    return event.request.blob()
+                      .then(blob => secureCache.put(
+                        new Request(event.request.url, {
+                          method: 'GET',
+                        }),
+                        new Response(blob, {
+                          headers: {
+                            'Content-Type': blob.type,
+                          },
+                        })
+                      ))
+                      .then(() => new Response());
+                  } else {
+                    return new Response('bad request', {
+                      status: 400,
+                    });
+                  }
+                } else {
+                  return new Response('forbidden', {
+                    status: 403,
+                  });
+                }
+              })
+          );
         } else if (match2 = match[1].match(/^\/.f\/(.+)$/)) {
           event.respondWith(
             _resolveFollowUrl(match2[1])
