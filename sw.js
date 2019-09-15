@@ -136,16 +136,23 @@ const _resolveFollowUrl = u => fetch(_rewriteUrlToProxy(u), {
   method: 'HEAD',
 }).then(res => _rewriteUrlToRaw(res.url));
 
-self.addEventListener('install', event => {
+const secureCacheName = 'secureCache';
+let secureCache = null;
+self.addEventListener('install', event => event.waitUntil(
+
+(async () => {
   // console.log('sw install');
-  self.skipWaiting();
+
+  secureCache = await caches.open(secureCacheName);
 
   /* event.waitUntil(
     caches.open(PRECACHE)
       .then(cache => cache.addAll(PRECACHE_URLS))
       .then(self.skipWaiting())
   ); */
-});
+})()
+
+));
 self.addEventListener('activate', event => {
   // console.log('sw activate');
   self.clients.claim();
