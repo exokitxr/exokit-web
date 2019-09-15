@@ -696,6 +696,30 @@ const _fetchText = src => fetch(src)
   document.write(htmlString);
   document.close();
 
+  /* await new Promise((accept, reject) => {
+    setTimeout(accept, 1000);
+  }); */
+  /* const scripts = Array.from(document.querySelectorAll('script'));
+  console.log('check scripts', scripts.map(s => s.src));
+  await Promise.all(
+    scripts.map(script => new Promise((accept, reject) => {
+      script.addEventListener('load', accept);
+      script.addEventListener('error', reject);
+    }))
+  )
+    .then(() => {
+      console.log('all scripts done', scripts);
+    })
+    .catch(err => {
+      console.warn(err);
+    }); */
+  /* if (document.readyState2 !== 'complete') {
+    await new Promise((accept, reject) => {
+      document.addEventListener('load2', () => {
+        accept();
+      });
+    });
+  } */
   if (document.readyState !== 'complete') {
     await new Promise((accept, reject) => {
       document.addEventListener('readystatechange', () => {
@@ -705,6 +729,18 @@ const _fetchText = src => fetch(src)
       });
     });
   }
+  console.log('pre script');
+  await new Promise((accept, reject) => {
+    const script = document.createElement('script');
+    console.log('mid script 1');
+    script.onload = accept;
+    script.onerror = reject;
+    script.src = `data:application/javascript,console.log('inner script');`;
+    console.log('mid script 2');
+    document.body.appendChild(script);
+    console.log('mid script 3');
+  });
+  console.log('post script');
 
 })(self).then(() => {
   self._onbootstrap({
