@@ -214,9 +214,9 @@ self.addEventListener('fetch', event => {
               })
             );
           }
-        } else if (match2 = match[1].match(/^\/.d\/(.+)$/)) {
+        } else if (match2 = match[1].match(/^\/\.d\/(.+)$/)) {
           event.respondWith(fetch(match2[1]));
-        } else if (match2 = match[1].match(/^\/.s\/(.+)$/)) {
+        } else if (match2 = match[1].match(/^\/\.s\/(.+)$/)) {
           event.respondWith(
             clients.get(event.clientId)
               .then(client => {
@@ -252,7 +252,7 @@ self.addEventListener('fetch', event => {
                 }
               })
           );
-        } else if (match2 = match[1].match(/^\/.f\/(.+)$/)) {
+        } else if (match2 = match[1].match(/^\/\.f\/(.+)$/)) {
           event.respondWith(
             _resolveFollowUrl(match2[1])
               .then(u => new Response(u, {
