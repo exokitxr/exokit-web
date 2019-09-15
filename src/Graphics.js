@@ -189,7 +189,7 @@ for (const k in WebGLRenderingContext.prototype) {
     const {value} = o;
     if (typeof value === 'function') {
       // const {getError} = WebGLRenderingContext.prototype;
-      if (k === 'drawElements' || k === 'drawArrays' || k === 'clear') {
+      if (k === 'drawElements' || k === 'drawArrays' || k === 'drawElementsInstanced' || k === 'drawArraysInstanced' || k === 'clear') {
         ProxiedWebGLRenderingContext.prototype[k] = function() {
           if (window[symbols.mrDisplaysSymbol].vrDisplay.isPresenting) {
             this.setProxyState();
