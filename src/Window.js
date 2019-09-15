@@ -705,6 +705,13 @@ const _fetchText = src => fetch(src)
       });
     });
   }
+  await new Promise((accept, reject) => {
+    const script = document.createElement('script');
+    script.onload = accept;
+    script.onerror = reject;
+    script.src = `data:application/javascript,1`;
+    document.body.appendChild(script);
+  });
 
 })(self).then(() => {
   self._onbootstrap({
