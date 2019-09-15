@@ -59,6 +59,8 @@ class WorkerVm extends EventTarget {
           iframe.src = src;
 
           iframe.addEventListener('load', () => {
+            const {queue} = messageChannel.port2.handleMessage;
+
             const {contentWindow} = iframe;
             options.args.options.url = followUrl;
             contentWindow.dispatchEvent(new MessageEvent('message', {
@@ -72,8 +74,12 @@ class WorkerVm extends EventTarget {
               },
             }));
             
-            if (!messageChannel.port2.handleMessage || !messageChannel.port2.handleMessage.lol) { // XXX
+            if (!messageChannel.port2.handleMessage.lol) { // XXX
               console.warn('message handler not added!!!!!!!!!!!!!!!!!', messageChannel.port2.handleMessage, messageChannel.port2.handleMessage && messageChannel.port2.handleMessage.lol);
+            }
+
+            for (let i = 0; i < queue.length; i++) {
+              messageChannel.port2.handleMessage(queue[i]);
             }
 
             accept();
