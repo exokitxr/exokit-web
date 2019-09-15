@@ -237,6 +237,9 @@ self.addEventListener('fetch', event => {
                         })
                       ))
                       .then(() => new Response());
+                  } else if (event.request.method === 'DELETE') {
+                    return secureCache.delete(new Request(event.request.url))
+                      .then(() => new Response());
                   } else {
                     return new Response('bad request', {
                       status: 400,
