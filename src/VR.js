@@ -27,7 +27,9 @@ const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
-const localMatrix2 = new THREE.Matrix4();
+// const localMatrix2 = new THREE.Matrix4();
+const localXrOffsetMatrix = new THREE.Matrix4();
+const localXrOffsetMatrix2 = new THREE.Matrix4();
 
 class VRPose {
   constructor() {
@@ -183,6 +185,15 @@ class VRStageParameters {
   } */
 }
 
+const _getXrOffsetMatrix = () => {
+  let win = window;
+  localXrOffsetMatrix.fromArray(win.document.xrOffset.matrix);
+  for (win = win.parent; win.parent !== win; win = win.parent) {
+    localXrOffsetMatrix.premultiply(localXrOffsetMatrix2.fromArray(win.document.xrOffset.matrix));
+  }
+  return localXrOffsetMatrix;
+};
+
 class VRDisplay extends EventTarget {
   constructor(displayName, window) {
     super();
@@ -212,42 +223,31 @@ class VRDisplay extends EventTarget {
   }
 
   getFrameData(frameData) {
-    const {xrOffset} = this.window.document;
-    if (xrOffset) {
-      localMatrix2.compose(
-        localVector.fromArray(xrOffset.position),
-        localQuaternion.fromArray(xrOffset.orientation),
-        localVector2.fromArray(xrOffset.scale)
+    const xrOffsetMatrix = _getXrOffsetMatrix();
+
+    // left
+    localMatrix
+      .fromArray(GlobalContext.xrState.leftViewMatrix)
+      .multiply(
+        xrOffsetMatrix
       )
-      // left
-      localMatrix
-        .fromArray(GlobalContext.xrState.leftViewMatrix)
-        .multiply(
-          localMatrix2
-        )
-        .toArray(frameData.leftViewMatrix);
-      // right
-      localMatrix
-        .fromArray(GlobalContext.xrState.rightViewMatrix)
-        .multiply(
-          localMatrix2
-        )
-        .toArray(frameData.rightViewMatrix);
-      // pose
-      localMatrix
-        .compose(localVector.fromArray(GlobalContext.xrState.position), localQuaternion.fromArray(GlobalContext.xrState.orientation), localVector2.set(1, 1, 1))
-        .premultiply(
-          localMatrix2.getInverse(localMatrix2)
-        )
-        .decompose(localVector, localQuaternion, localVector2);
-      localVector.toArray(frameData.pose.position);
-      localQuaternion.toArray(frameData.pose.orientation);
-    } else {
-      frameData.leftViewMatrix.set(GlobalContext.xrState.leftViewMatrix);
-      frameData.rightViewMatrix.set(GlobalContext.xrState.rightViewMatrix);
-      frameData.pose.position.set(GlobalContext.xrState.position);
-      frameData.pose.orientation.set(GlobalContext.xrState.orientation);
-    }
+      .toArray(frameData.leftViewMatrix);
+    // right
+    localMatrix
+      .fromArray(GlobalContext.xrState.rightViewMatrix)
+      .multiply(
+        xrOffsetMatrix
+      )
+      .toArray(frameData.rightViewMatrix);
+    // pose
+    localMatrix
+      .compose(localVector.fromArray(GlobalContext.xrState.position), localQuaternion.fromArray(GlobalContext.xrState.orientation), localVector2.set(1, 1, 1))
+      .premultiply(
+        xrOffsetMatrix.getInverse(xrOffsetMatrix)
+      )
+      .decompose(localVector, localQuaternion, localVector2);
+    localVector.toArray(frameData.pose.position);
+    localQuaternion.toArray(frameData.pose.orientation);
 
     frameData.leftProjectionMatrix.set(GlobalContext.xrState.leftProjectionMatrix);
     frameData.rightProjectionMatrix.set(GlobalContext.xrState.rightProjectionMatrix);
