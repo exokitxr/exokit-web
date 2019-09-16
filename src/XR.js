@@ -349,22 +349,18 @@ class XRWebGLLayer {
 }
 
 const _applyXrOffsetToPose = (pose, xrOffsetMatrix, inverse, premultiply) => {
-  // if (xrOffset) {
-    localMatrix
-      .fromArray(pose._realViewMatrix);
-    if (inverse) {
-      xrOffsetMatrix.getInverse(xrOffsetMatrix);
-    }
-    if (premultiply) {
-      localMatrix.premultiply(xrOffsetMatrix);
-    } else {
-      localMatrix.multiply(xrOffsetMatrix);
-    }
-    localMatrix
-      .toArray(pose._localViewMatrix);
-  /* } else {
-    pose._localViewMatrix.set(pose._realViewMatrix);
-  } */
+  localMatrix
+    .fromArray(pose._realViewMatrix);
+  if (inverse) {
+    xrOffsetMatrix.getInverse(xrOffsetMatrix);
+  }
+  if (premultiply) {
+    localMatrix.premultiply(xrOffsetMatrix);
+  } else {
+    localMatrix.multiply(xrOffsetMatrix);
+  }
+  localMatrix
+    .toArray(pose._localViewMatrix);
 };
 
 class XRFrame {
@@ -478,19 +474,12 @@ class XRViewerPose extends XRPose {
   }
   set views(views) {}
   getViewMatrix(view) { // non-standard
-    // if (this.frame.session.renderState.baseLayer && this.frame.session.renderState.baseLayer.context.canvas.ownerDocument.xrOffset) {
-      // const {xrOffset} = this.frame.session.renderState.baseLayer.context.canvas.ownerDocument;
-      const xrOffsetMatrix = GlobalContext.getXrOffsetMatrix();
-      localMatrix
-        .fromArray(view._realViewMatrix)
-        .multiply(
-          xrOffsetMatrix
-        )
-        .toArray(view._localViewMatrix);
-    /* } else {
-      view._localViewMatrix.set(view._realViewMatrix);
-    } */
-    return view._localViewMatrix;
+    return localMatrix
+      .fromArray(view._realViewMatrix)
+      .multiply(
+        GlobalContext.getXrOffsetMatrix()
+      )
+      .toArray(view._localViewMatrix);
   }
 }
 
