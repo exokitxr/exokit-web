@@ -3,6 +3,9 @@ importScripts('./localforage.js');
 localforage.config({driver: localforage.INDEXEDDB});
 
 const redirects = new Map();
+const nonProxyUrls = {
+  'https://www.google-analytics.com/analytics.js': true,
+};
 const permanentRedirects = {
   // 'https://assets-prod.reticulum.io/hubs/assets/js/vendor-64ef06ca9a87923873c0.js': './vendor-64ef06ca9a87923873c0.js',
 };
@@ -149,6 +152,10 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   // console.log('got request', event.request.url);
+
+  if (nonProxyUrls[event.request.url]) {
+    return;
+  }
 
   const permanentRedirect = permanentRedirects[event.request.url];
   if (permanentRedirect) {
