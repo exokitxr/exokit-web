@@ -22,14 +22,14 @@ const _oninitmessage = async e => {
   };
   GlobalContext.xrState = args.xrState;
 
-  self.parent = {
+  /* self.parent = {
     postMessage(m, transfers) {
       self._postMessageUp({
         method: 'postMessage',
         data: m,
       }, transfers);
     },
-  };
+  }; */
   History.prototype.pushState = (_pushState => function pushState(data, title, url) {
     url = self.location.origin + url;
     const result = _pushState.call(this, data, title, url);
@@ -134,6 +134,7 @@ const _oninitmessage = async e => {
   self._postMessageUp = function _postMessageUp(data, transfer) {
     messagePort.postMessageSync(data, transfer);
   };
+  self.xrPostMessage = self._postMessageUp;
   const {queue} = messagePort.handleMessage;
   messagePort.handleMessage = e => {
     const {data: m} = e;
