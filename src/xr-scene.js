@@ -160,12 +160,19 @@ class XRScene extends HTMLElement {
             requiredFeatures: ['local-floor'],
           });
           let referenceSpace;
+          let referenceSpaceType = '';
           const _loadReferenceSpace = async () => {
+            const lastReferenceSpaceType = referenceSpaceType;
             try {
               referenceSpace = await session.requestReferenceSpace('local-floor');
+              referenceSpaceType = 'local-floor';
             } catch (err) {
-              console.warn('could not get local-floor reference space', err);
               referenceSpace = await session.requestReferenceSpace('local');
+              referenceSpaceType = 'local';
+            }
+
+            if (referenceSpaceType !== lastReferenceSpaceType) {
+              console.log(`referenceSpace changed to ${referenceSpaceType}`);
             }
           };
           await _loadReferenceSpace();
