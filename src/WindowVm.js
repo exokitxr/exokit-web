@@ -143,8 +143,6 @@ class WorkerVm extends EventTarget {
           break;
         }
         case 'load': {
-          console.log('pre flush 4', queue.length);
-
           iframe._postMessageDownQueued = iframe._postMessageDown;
 
           for (let i = 0; i < queue.length; i++) {
