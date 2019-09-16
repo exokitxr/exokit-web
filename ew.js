@@ -183,6 +183,12 @@ GlobalContext.xrState = xrState;
       shiftKey: e.shiftKey,
       which: e.which,
       // timeStamp: e.timeStamp,
+      preventDefault() {
+        e.preventDefault();
+      },
+      stopPropagation() {
+        e.stopPropagation();
+      },
     };
     for (let i = 0; i < windows.length; i++) {
       windows[i].emit(type, event);
