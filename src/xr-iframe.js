@@ -162,6 +162,11 @@ class XRIFrame extends HTMLElement {
     }
   }
 
+  get loaded() {
+    return !!this.contentWindow && this.contentWindow.loaded;
+  }
+  set loaded(loaded) {}
+
   postMessage(m, transfers) {
     this.contentWindow.postMessage(m, transfers);
   }
