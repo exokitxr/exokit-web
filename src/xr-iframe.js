@@ -162,6 +162,13 @@ class XRIFrame extends HTMLElement {
     }
   }
 
+  get name() {
+    return this.getAttribute('name');
+  }
+  set name(name) {
+    this.setAttribute('name', name);
+  }
+
   get loaded() {
     return !!this.contentWindow && this.contentWindow.loaded;
   }
