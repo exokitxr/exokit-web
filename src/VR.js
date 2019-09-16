@@ -185,14 +185,15 @@ class VRStageParameters {
   } */
 }
 
-const getXrOffsetMatrix = () => {
+function getXrOffsetMatrix() {
   let win = window;
   localXrOffsetMatrix.fromArray(win.document.xrOffset.matrix);
   for (win = win.parent; win.parent !== win; win = win.parent) {
     localXrOffsetMatrix.premultiply(localXrOffsetMatrix2.fromArray(win.document.xrOffset.matrix));
   }
   return localXrOffsetMatrix;
-};
+}
+GlobalContext.getXrOffsetMatrix = getXrOffsetMatrix;
 
 class VRDisplay extends EventTarget {
   constructor(displayName, window) {
