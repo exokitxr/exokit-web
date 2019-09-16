@@ -160,14 +160,18 @@ class XRScene extends HTMLElement {
             requiredFeatures: ['local-floor'],
           });
           let referenceSpace;
-          try {
-            referenceSpace = await session.requestReferenceSpace('local-floor');
-          } catch (err) {
-            console.warn(err);
-            referenceSpace = await session.requestReferenceSpace('local');
-          }
+          const _loadReferenceSpace = async () => {
+            try {
+              referenceSpace = await session.requestReferenceSpace('local-floor');
+            } catch (err) {
+              console.warn('could not get local-floor reference space', err);
+              referenceSpace = await session.requestReferenceSpace('local');
+            }
+          };
+          await _loadReferenceSpace();
+          const loadReferenceSpaceInterval = setInterval(_loadReferenceSpace, 1000);
+
           const baseLayer = new XRWebGLLayer(session, win.ctx);
-          
           session.updateRenderState({baseLayer});
 
           session.requestAnimationFrame(async (timestamp, frame) => {
