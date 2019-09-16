@@ -185,7 +185,7 @@ class VRStageParameters {
   } */
 }
 
-const _getXrOffsetMatrix = () => {
+const getXrOffsetMatrix = () => {
   let win = window;
   localXrOffsetMatrix.fromArray(win.document.xrOffset.matrix);
   for (win = win.parent; win.parent !== win; win = win.parent) {
@@ -223,7 +223,7 @@ class VRDisplay extends EventTarget {
   }
 
   getFrameData(frameData) {
-    const xrOffsetMatrix = _getXrOffsetMatrix();
+    const xrOffsetMatrix = getXrOffsetMatrix();
 
     // left
     localMatrix
@@ -565,4 +565,5 @@ export {
   lookupHMDTypeIndex,
   createFakeXRDisplay,
   getGamepads,
+  getXrOffsetMatrix,
 };
