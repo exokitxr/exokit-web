@@ -220,3 +220,5 @@ class XRScene extends HTMLElement {
   }
 }
 customElements.define('xr-scene', XRScene);
+
+export default XRScene;

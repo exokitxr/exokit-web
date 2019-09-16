@@ -12,7 +12,8 @@ import THREE from './lib/three-min.js';
 
 import GlobalContext from './src/GlobalContext.js';
 
-import './src/xr-scene.js';
+import XRScene from './src/xr-scene.js';
+window.XRScene = XRScene;
 
 GlobalContext.args = {};
 GlobalContext.version = '';
