@@ -131,10 +131,15 @@ const _oninitmessage = async e => {
 
     self._onbootstrap = undefined;
   };
-  self._postMessageUp = function _postMessageUp(data, transfer) {
-    messagePort.postMessageSync(data, transfer);
+  self._postMessageUp = function _postMessageUp(data, transfers) {
+    messagePort.postMessageSync(data, transfers);
   };
-  self.xrPostMessage = self._postMessageUp;
+  self.parentPostMessage = function parentPostMessage(data, transfers) {
+    self._postMessageUp({
+      method: 'postMessage',
+      data,
+    });
+  };
   const {queue} = messagePort.handleMessage;
   messagePort.handleMessage = e => {
     const {data: m} = e;
