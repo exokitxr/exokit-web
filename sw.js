@@ -101,7 +101,7 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
     return _rewriteResText(res, jsString => jsString.replace('getDistance:function(){var e=this.axis;', 'getDistance:function(){if (!this.axis)this.axis=[0,0,0];var e=this.axis;'));
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/vendor/aframe-master.min.js') {
     return _rewriteResText(res, jsString => 'delete navigator.xr;' + _flattenWebVrEyeJs(jsString));
-  } else if (originalUrl === 'https://js.cryptovoxels.com/client.js') {
+  } else if (/https:\/\/js\.cryptovoxels\.com\/client(?:\-[0-9\.]+)?\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString => {
       const result = jsString
         .replace(/https:\/\/www\.cryptovoxels\.com\//g, '/')
