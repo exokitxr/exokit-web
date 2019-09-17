@@ -1,4 +1,5 @@
-importScripts('./localforage.js');
+const baseUrl = new URL(self.location.href).origin;
+importScripts(`${baseUrl}/localforage.js`);
 
 localforage.config({driver: localforage.INDEXEDDB});
 
