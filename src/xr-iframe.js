@@ -127,7 +127,8 @@ class XRIFrame extends HTMLElement {
   }
 
   get position() {
-    return this.getAttribute('position').split(' ').map(s => parseFloat(s));
+    const s = this.getAttribute('position');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [0, 0, 0];
   }
   set position(position) {
     if (!Array.isArray(position)) {
@@ -139,7 +140,8 @@ class XRIFrame extends HTMLElement {
   }
 
   get orientation() {
-    return this.getAttribute('orientation').split(' ').map(s => parseFloat(s));
+    const s = this.getAttribute('orientation');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [0, 0, 0, 1];
   }
   set orientation(orientation) {
     if (!Array.isArray(orientation)) {
@@ -151,7 +153,8 @@ class XRIFrame extends HTMLElement {
   }
 
   get scale() {
-    return this.getAttribute('scale').split(' ').map(s => parseFloat(s));
+    const s = this.getAttribute('scale');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [1, 1, 1];
   }
   set scale(scale) {
     if (!Array.isArray(scale)) {
