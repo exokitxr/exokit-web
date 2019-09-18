@@ -134,17 +134,23 @@ a:hover {
 a:active {
   color: #1976d2;
 }
-.button {
+.buttons {
   position: absolute;
   right: 30px;
   bottom: 30px;
-  display: inline-flex;
+  display: flex;
   margin: 5px 20px;
+}
+.button {
+  display: inline-flex;
   padding: 8px 20px;
   border: 2px solid;
   border-radius: 100px;
   color: #5c6bc0;
   cursor: pointer;
+}
+.button:not(:last-child) {
+  margin-right: 20px;
 }
 .button:not([disabled]):hover {
   background-color: #5c6bc0;
@@ -155,6 +161,12 @@ a:active {
   color: #b71c1c;
   cursor: auto;
 }
+#code-header:not(.open),
+#code-button:not(.open) .opened-text,
+#code-button.open .closed-text
+{
+  display: none;
+}
 .coming-soon {
   color: #ccc;
 }
@@ -164,6 +176,32 @@ a:active {
 }
 .header-link {
   color: #666;
+}
+.code-header {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: 32px;
+  padding: 5px;
+  font-size: 13px;
+  color: #4caf50;
+  background-color: #f2f3f5;
+}
+.code {
+  position: absolute;
+  top: 82px;
+  bottom: 0;
+  right: 0;
+  width: 600px;
+  border: 0;
+  border-left: 5px solid #f2f3f5;
+  outline: none;
+}
+.code:not(.open) {
+  display: none;
 }
     </style>
   </head>
@@ -203,8 +241,14 @@ a:active {
           <div class=tabs id=tabs></div>
         </div>
 
-        <a class=button id="enter-xr-button" style="display: none;">Enter XR</a>
-        <a class=button id="no-xr-button" disabled style="display: none;">No XR</a>
+        <div class=code-header id=code-header>This code works in Exokit Browser! Copy-paste it, or just edit here.</div>
+        <textarea id=code class=code spellcheck=false></textarea>
+
+        <div class=buttons>
+          <a class=button id="code-button"><span class=closed-text>Open code</span><span class=opened-text>Save &amp; close</span></a>
+          <a class=button id="enter-xr-button" style="display: none;">Enter XR</a>
+          <a class=button id="no-xr-button" disabled style="display: none;">No XR</a>
+        </div>
 
       </div>
     <script type=module>
@@ -222,6 +266,17 @@ import(`./ew.js${window.location.search}`)
       setTimeout(() => {
         _loadLink(aCubes[0], true);
       });
+    });
+    xrScene.addEventListener('message', e => {
+      const {data} = e;
+      const {method} = data;
+      switch (method) {
+        case 'code': {
+          code.value = data.code;
+          codeDirty = false;
+          break;
+        }
+      }
     });
 
     let result;
@@ -280,6 +335,36 @@ for (let i = 0; i < aCubes.length; i++) {
   });
 }
 
+const codeHeader = document.getElementById('code-header');
+const codeButton = document.getElementById('code-button');
+const code = document.getElementById('code');
+let codeDirty = false;
+codeButton.addEventListener('click', () => {
+  codeHeader.classList.toggle('open');
+  codeButton.classList.toggle('open');
+  code.classList.toggle('open');
+
+  if (codeButton.classList.contains('open')) {
+    code.value = '';
+
+    xrScene.postMessage({
+      method: 'getCode',
+    });
+  } else {
+    if (codeDirty) {
+      xrScene.postMessage({
+        method: 'setCode',
+        code: code.value,
+      });
+    }
+  }
+});
+code.addEventListener('change', () => {
+  codeDirty = true;
+});
+code.addEventListener('mousedown', e => {
+  e.stopPropagation();
+});
 const enterXrButton = document.getElementById('enter-xr-button');
 const noXrButton = document.getElementById('no-xr-button');
 enterXrButton.addEventListener('click', () => {
