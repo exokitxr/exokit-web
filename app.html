@@ -15,7 +15,38 @@ try {
 console.log('app 1');
 
 const root = document.querySelector('xr-site');
-const floorXrIframe = document.querySelector('xr-iframe');
+const floorXrIframe = document.querySelector('xr-iframe[name=Floor]');
+const introductionXrIframe = document.querySelector('xr-iframe[name=Introduction]');
+const _addControls = xrIframe => {
+  const object = new THREE.Object3D();
+  object.position.fromArray(xrIframe.position);
+  scene.add(object);
+
+  const control = new THREE.TransformControls(vrCamera, renderer.domElement);
+  control.attach(object);
+  control.size = 3;
+  control.addEventListener('change', e => {
+    xrIframe.position = object.position.toArray();
+    xrIframe.quaternion = object.quaternion.toArray();
+    xrIframe.scale = object.scale.toArray();
+  });
+  control.addEventListener('dragging-changed', e => {
+    orbitControls.enabled = !e.value;
+  });
+  xrIframe.control = control;
+  scene.add(control);
+};
+const _removeControls = xrIframe => {
+  scene.remove(xrIframe.control);
+};
+const _postTabs = () => {
+  window.parentPostMessage({
+    method: 'tabs',
+    tabs: Array.from(root.childNodes)
+      .filter(childNode => childNode instanceof XRIFrame)
+      .map(childNode => childNode.name),
+  });
+};
 new MutationObserver(async mutations => {
   for (let i = 0; i < mutations.length; i++) {
     const {addedNodes, removedNodes} = mutations[i];
@@ -24,40 +55,14 @@ new MutationObserver(async mutations => {
       const removedNode = removedNodes[j];
 
       if (removedNode instanceof XRIFrame) {
-        const xrIframe = removedNode;
-
-        if (xrIframe.control) {
-          scene.remove(xrIframe.control);
-        }
+        _removeControls(removedNode);
       }
     }
     for (let j = 0; j < addedNodes.length; j++) {
       const addedNode = addedNodes[j];
 
       if (addedNode instanceof XRIFrame) {
-        const xrIframe = addedNode;
-
-        if (xrIframe.src !== 'examples/floor.html') {
-          const object = new THREE.Object3D();
-          object.position.fromArray(xrIframe.position);
-          scene.add(object);
-
-          const control = new THREE.TransformControls(vrCamera, renderer.domElement);
-          control.attach(object);
-          control.size = 3;
-          control.addEventListener('change', e => {
-            xrIframe.position = object.position.toArray();
-            xrIframe.quaternion = object.quaternion.toArray();
-            xrIframe.scale = object.scale.toArray();
-          });
-          control.addEventListener('dragging-changed', e => {
-            orbitControls.enabled = !e.value;
-          });
-          xrIframe.control = control;
-          scene.add(control);
-        } else {
-          xrIframe.control = null;
-        }
+        _addControls(addedNode);
       }
     }
   }
@@ -92,6 +97,10 @@ renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
 
 root.addLayer(renderer.domElement);
+
+_addControls(floorXrIframe);
+_addControls(introductionXrIframe);
+_postTabs();
 
 function animate() {
   const _updateOrbitControls = () => {
@@ -175,31 +184,34 @@ window.addEventListener('message', e => {
         xrIframe.parentNode.removeChild(xrIframe.previousSibling);
       }
       xrIframe.parentNode.removeChild(xrIframe);
+      if (!Array.from(root.childNodes).some(childNode => childNode instanceof XRIFrame)) {
+        root.innerHTML = '';
+      }
 
       break;
     }
     case 'getCode': {
       window.parentPostMessage({
         method: 'code',
-        code: root.outerHTML.replace(
-          '\n  <xr-iframe src="examples/floor.html" name="Floor"></xr-iframe>',
-          ''
-        ),
+        code: root.outerHTML
+          .replace(
+            '<xr-iframe src="examples\/floor.html"',
+            `<xr-iframe src="${window.location.origin}/examples/floor.html"`
+          )
+          .replace(
+            '<xr-iframe src="examples\/tutorial.html"',
+            `<xr-iframe src="${window.location.origin}/examples/tutorial.html"`
+          ),
       });
       break;
     }
     case 'setCode': {
       const {code} = data;
-      const match = code.match(/^\s*<xr-site>([\s\S]*)<\/xr-site>\s*$/mi);
+      const match = code.match(/^\s*<xr-site[^>]*>([\s\S]*)<\/xr-site>\s*$/mi);
       if (match) {
-        root.innerHTML = match[1] + '\n  <xr-iframe src="examples/floor.html" name="Floor"></xr-iframe>';
+        root.innerHTML = /\S/.test(match[1]) ? match[1] : '';
       }
-      window.parentPostMessage({
-        method: 'tabs',
-        tabs: Array.from(root.childNodes)
-          .filter(childNode => childNode instanceof XRIFrame && childNode.src !== 'examples/floor.html')
-          .map(childNode => childNode.name),
-      });
+      _postTabs();
       break;
     }
   }

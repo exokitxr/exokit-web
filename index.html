@@ -263,9 +263,9 @@ import(`./ew.js${window.location.search}`)
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
 
-      setTimeout(() => {
+      /* setTimeout(() => {
         _loadLink(aCubes[0], true);
-      });
+      }); */
     });
     xrScene.addEventListener('message', e => {
       const {data} = e;
@@ -371,9 +371,11 @@ codeButton.addEventListener('click', () => {
     }
   }
 });
-code.addEventListener('change', () => {
+const _setDirty = () => {
   codeDirty = true;
-});
+};
+code.addEventListener('keydown', _setDirty);
+code.addEventListener('change', _setDirty);
 code.addEventListener('mousedown', e => {
   e.stopPropagation();
 });
