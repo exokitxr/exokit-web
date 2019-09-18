@@ -25,6 +25,19 @@ class XRSite extends HTMLElement {
     this.observer = new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
 
+      for (let i = 0; i < mutations.length; i++) {
+        const {addedNodes, removedNodes} = mutations[i];
+
+        for (let j = 0; j < removedNodes.length; j++) {
+          const removedNode = removedNodes[j];
+
+          if (removedNode instanceof XRIFrame) {
+            const xrIframe = removedNode;
+            xrIframe.destroy();
+          }
+        }
+      }
+
       this.session.layers = Array.from(this.childNodes)
         .filter(childNode => childNode instanceof XRIFrame)
         .concat(this.customLayers);
