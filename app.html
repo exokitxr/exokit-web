@@ -197,7 +197,6 @@ window.addEventListener('message', e => {
     case 'setCode': {
       const {code} = data;
       const match = code.match(/^\s*<xr-site>([\s\S]*)<\/xr-site>\s*$/mi);
-      console.log('set match', code, match);
       if (match) {
         root.innerHTML = match[1];
       }
