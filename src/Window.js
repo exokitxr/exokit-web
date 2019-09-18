@@ -52,6 +52,7 @@ import utils from './utils.js';
 const {_elementGetter, _elementSetter} = utils;
 
 import XRIFrame from './xr-iframe.js';
+import XRSite from './xr-site.js';
 
 // const isMac = os.platform() === 'darwin';
 
@@ -314,6 +315,7 @@ const _fetchText = src => fetch(src)
     window.XRBoundedReferenceSpace = XR.XRBoundedReferenceSpace;
   // }
   window.XRIFrame = XRIFrame;
+  window.XRSite = XRSite;
   window.FakeXRDisplay = FakeXRDisplay;
   window.PaymentRequest = PaymentRequest;
 
