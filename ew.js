@@ -168,7 +168,7 @@ const xrState = (() => {
 })();
 GlobalContext.xrState = xrState;
 
-['keydown', 'keyup', 'keypress'].forEach(type => {
+['keydown', 'keyup', 'keypress', 'paste'].forEach(type => {
   window.addEventListener(type, e => {
     const event = {
       altKey: e.altKey,
@@ -184,6 +184,7 @@ GlobalContext.xrState = xrState;
       shiftKey: e.shiftKey,
       which: e.which,
       // timeStamp: e.timeStamp,
+      clipboardData: e.clipboardData,
       preventDefault() {
         e.preventDefault();
       },
