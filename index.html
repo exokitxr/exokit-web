@@ -252,6 +252,16 @@ a:active {
 
       </div>
     <script type=module>
+function parseQuery(s) {
+  var query = {};
+  var pairs = (s[0] === '?' ? s.substr(1) : s).split('&');
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i].split('=');
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
+
 let xrScene = null;
 
 import(`./ew.js${window.location.search}`)
@@ -263,9 +273,14 @@ import(`./ew.js${window.location.search}`)
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
 
-      /* setTimeout(() => {
-        _loadLink(aCubes[0], true);
-      }); */
+      const {u} = parseQuery(window.location.search);
+      if (u) {
+        setTimeout(() => {
+          _unloadLink(0);
+          _unloadLink(0);
+          _loadLink({href: u, innerText: 'URL'});
+        });
+      }
     });
     xrScene.addEventListener('message', e => {
       const {data} = e;
@@ -316,11 +331,7 @@ const _addTab = name => {
   closeX.addEventListener('click', e => {
     e.preventDefault();
     const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
-    xrScene.postMessage({
-      method: 'unload',
-      index,
-    });
-    tabs.removeChild(tab);
+    _unloadLink(index);
   });
   tabs.appendChild(tab);
 };
@@ -335,6 +346,12 @@ const _loadLink = (aCube, origin = false) => {
   });
 
   _addTab(name);
+};
+const _unloadLink = index => {
+  xrScene.postMessage({
+    method: 'unload',
+    index,
+  });
 };
 for (let i = 0; i < aCubes.length; i++) {
   const aCube = aCubes[i];

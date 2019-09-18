@@ -182,6 +182,8 @@ window.addEventListener('message', e => {
         }
       }
 
+      _postTabs();
+
       break;
     }
     case 'unload': {
@@ -194,6 +196,8 @@ window.addEventListener('message', e => {
       if (!Array.from(root.childNodes).some(childNode => childNode instanceof XRIFrame)) {
         root.innerHTML = '';
       }
+
+      _postTabs();
 
       break;
     }
