@@ -77,9 +77,8 @@ const scene = new THREE.Scene();
 scene.matrixAutoUpdate = false;
 
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 3);
-camera.lookAt(new THREE.Vector3(0, 0.5, 0));
-
+camera.position.fromArray(root.cameraPosition);
+camera.quaternion.fromArray(root.cameraOrientation);
 scene.add(camera);
 
 const renderer = new THREE.WebGLRenderer({
@@ -98,20 +97,16 @@ function animate() {
     if (orbitControls) {
       orbitControls.update();
 
-      if (root.fakeXrDisplay) {
-        root.fakeXrDisplay.position.copy(orbitControls.object.position);
-        root.fakeXrDisplay.quaternion.copy(orbitControls.object.quaternion);
-
-        root.fakeXrDisplay.pushUpdate();
-      }
+      root.cameraPosition = orbitControls.object.position.toArray();
+      root.cameraOrientation = orbitControls.object.quaternion.toArray();
     }
   };
   _updateOrbitControls();
 
   const _updateVrCamera = () => {
-    vrCamera.matrixWorldInverse.fromArray(root.fakeXrDisplay.viewMatrix);
+    vrCamera.matrixWorldInverse.fromArray(root.viewMatrix);
     vrCamera.matrixWorld.getInverse(vrCamera.matrixWorldInverse);
-    vrCamera.projectionMatrix.fromArray(root.fakeXrDisplay.projectionMatrix);
+    vrCamera.projectionMatrix.fromArray(root.projectionMatrix);
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
   };
   _updateVrCamera();
@@ -134,14 +129,8 @@ renderer.vr.enabled = true;
 // renderer.vr.setSession(session);
 renderer.vr.setAnimationLoop(animate);
 
-root.fakeXrDisplay.position.copy(camera.position);
-root.fakeXrDisplay.quaternion.copy(camera.quaternion);
-root.fakeXrDisplay.pushUpdate();
-
-const orbitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+const orbitCamera = camera.clone();
 orbitControls = new THREE.OrbitControls(orbitCamera, renderer.domElement);
-orbitCamera.position.copy(root.fakeXrDisplay.position);
-orbitCamera.quaternion.copy(root.fakeXrDisplay.quaternion);
 orbitControls.screenSpacePanning = true;
 orbitControls.enableKeys = false;
 orbitControls.update();

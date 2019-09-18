@@ -94,6 +94,48 @@ class XRSite extends HTMLElement {
       'camera-scale',
     ];
   }
+  get cameraPosition() {
+    const s = this.getAttribute('camera-position');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [0, 0, 0];
+  }
+  set cameraPosition(cameraPosition) {
+    if (!Array.isArray(cameraPosition)) {
+      cameraPosition = Array.from(cameraPosition);
+    }
+    if (cameraPosition.length === 3 && cameraPosition.every(n => isFinite(n))) {
+      this.setAttribute('camera-position', cameraPosition.join(' '));
+    }
+  }
+  get cameraOrientation() {
+    const s = this.getAttribute('cameraOrientation');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [0, 0, 0, 1];
+  }
+  set cameraOrientation(cameraOrientation) {
+    if (!Array.isArray(cameraOrientation)) {
+      cameraOrientation = Array.from(cameraOrientation);
+    }
+    if (cameraOrientation.length === 4 && cameraOrientation.every(n => isFinite(n))) {
+      this.setAttribute('camera-orientation', cameraOrientation.join(' '));
+    }
+  }
+  get cameraScale() {
+    const s = this.getAttribute('camera-scale');
+    return s ? s.split(' ').map(s => parseFloat(s)) : [1, 1, 1];
+  }
+  set cameraScale(cameraScale) {
+    if (!Array.isArray(cameraScale)) {
+      cameraScale = Array.from(cameraScale);
+    }
+    if (cameraScale.length === 3 && cameraScale.every(n => isFinite(n))) {
+      this.setAttribute('camera-scale', cameraScale.join(' '));
+    }
+  }
+  get viewMatrix() {
+    return this.fakeXrDisplay.viewMatrix;
+  }
+  get projectionMatrix() {
+    return this.fakeXrDisplay.projectionMatrix;
+  }
   requestSession() {
     return this.sessionPromise;
   }
