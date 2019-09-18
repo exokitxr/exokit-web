@@ -97,6 +97,7 @@ orbitControls = new THREE.OrbitControls(orbitCamera, renderer.domElement);
 orbitCamera.position.copy(root.fakeXrDisplay.position);
 orbitCamera.quaternion.copy(root.fakeXrDisplay.quaternion);
 orbitControls.screenSpacePanning = true;
+orbitControls.enableKeys = false;
 orbitControls.update();
 
 /* const floorXrIframe = document.createElement('xr-iframe');
