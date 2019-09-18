@@ -460,13 +460,29 @@ const _fetchText = src => fetch(src)
     if (window.loaded) {
       window.runAsync({
         method: 'tickAnimationFrame',
-        layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+        // layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+        layered,
       });
     }
   };
   const _render = layered => {
     for (let i = 0; i < windows.length; i++) {
-      _renderChild(windows[i], layered);
+      windows[i].rendered = false;
+    }
+    for (let i = 0; i < vrPresentState.layers.length; i++) {
+      const layer = vrPresentState.layers[i];
+      const contentWindow = layer && layer.contentWindow;
+      if (contentWindow) {
+         _renderChild(contentWindow, true);
+        contentWindow.rendered = true;
+      }
+    }
+    for (let i = 0; i < windows.length; i++) {
+      const win = windows[i];
+      if (win && !win.rendered) {
+        _renderChild(win, false);
+        win.rendered = true;
+      }
     }
     _renderLocal(layered);
   };
