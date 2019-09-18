@@ -3,7 +3,7 @@ import {_makeWindow} from './WindowVm.js';
 import {XRRigidTransform} from './XR.js';
 
 import utils from './utils.js';
-const {_normalizeUrl, _getProxyUrl} = utils;
+const {_normalizeUrl/*, _getProxyUrl*/} = utils;
 
 import symbols from './symbols.js';
 
