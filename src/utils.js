@@ -110,4 +110,16 @@ const _elementSetter = (self, attribute, cb) => {
 };
 module.exports._elementSetter = _elementSetter;
 
+const _makeNullPromise = () => {
+  let resolve, reject;
+  const result = new Promise((a, b) => {
+    resolve = a;
+    reject = b;
+  });
+  result.resolve = resolve;
+  result.reject = reject;
+  return result;
+};
+module.exports._makeNullPromise = _makeNullPromise;
+
 export default module.exports;

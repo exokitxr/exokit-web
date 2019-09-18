@@ -15,6 +15,9 @@ import GlobalContext from './src/GlobalContext.js';
 import XRScene from './src/xr-scene.js';
 window.XRScene = XRScene;
 
+import utils from './src/utils.js';
+const {_makeNullPromise} = utils;
+
 GlobalContext.args = {};
 GlobalContext.version = '';
 
@@ -24,16 +27,7 @@ core.setVersion('0.0.1');
 
 const windows = [];
 GlobalContext.windows = windows;
-GlobalContext.loadPromise = (() => {
-  let accept, reject;
-  const result = new Promise((a, r) => {
-    accept = a;
-    reject = r;
-  });
-  result.accept = accept;
-  result.reject = reject;
-  return result;
-})();
+GlobalContext.loadPromise = _makeNullPromise();
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -58,7 +52,7 @@ if (!key) {
 }
 await navigator.serviceWorker.register('sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''));
 if (navigator.serviceWorker.controller) {
-  GlobalContext.loadPromise.accept();
+  GlobalContext.loadPromise.resolve();
 } else {
   window.location.reload();
 }
