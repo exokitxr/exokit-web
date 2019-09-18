@@ -157,17 +157,29 @@ window.addEventListener('message', e => {
         0,
       ] : [
         -1 + Math.random() * 2,
-        0.25,
+        0.1,
         -1 + Math.random() * 2,
       ];
-      root.insertBefore(xrIframe, floorXrIframe);
-      root.insertBefore(new Text('\n  '), floorXrIframe);
+      const xrIframes = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame);
+      if (xrIframes.length > 0 && xrIframes[xrIframes.length - 1] === floorXrIframe) {
+        root.insertBefore(xrIframe, floorXrIframe);
+        root.insertBefore(new Text('\n  '), floorXrIframe);
+      } else {
+        root.appendChild(new Text('\n  '));
+        root.appendChild(xrIframe);
+        if (root.lastChild.nodeType !== Node.TEXT_NODE) {
+          root.appendChild(new Text('\n'));
+        }
+      }
 
       break;
     }
     case 'unload': {
       const {index} = data;
       const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
+      if (xrIframe.previousSibling && xrIframe.previousSibling.nodeType === Node.TEXT_NODE) {
+        xrIframe.parentNode.removeChild(xrIframe.previousSibling);
+      }
       xrIframe.parentNode.removeChild(xrIframe);
 
       break;
@@ -175,7 +187,10 @@ window.addEventListener('message', e => {
     case 'getCode': {
       window.parentPostMessage({
         method: 'code',
-        code: root.outerHTML,
+        code: root.outerHTML.replace(
+          '<xr-iframe src="examples/floor.html" name="Floor"></xr-iframe>',
+          `<xr-iframe src="${window.location.origin}/examples/floor.html" name="Floor"></xr-iframe>`
+        ),
       });
       break;
     }
