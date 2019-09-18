@@ -22,6 +22,13 @@ import {
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
 
+import * as XR from './XR.js';
+import utils from './utils.js';
+const {_elementGetter, _elementSetter} = utils;
+
+import XRIFrame from './xr-iframe.js';
+import XRSite from './xr-site.js';
+
 const {
   args: {
     options,
@@ -35,24 +42,6 @@ GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 GlobalContext.proxyContext = null;
-
-/* import {
-  HTMLElement,
-  getBoundDOMElements,
-  DOMTokenList,
-  NodeList,
-  HTMLCollection,
-  DOMRect,
-  DOMPoint,
-  // createImageBitmap,
-} from './DOM.js'; */
-import * as XR from './XR.js';
-// const DevTools = require('./DevTools');
-import utils from './utils.js';
-const {_elementGetter, _elementSetter} = utils;
-
-import XRIFrame from './xr-iframe.js';
-import XRSite from './xr-site.js';
 
 // const isMac = os.platform() === 'darwin';
 
