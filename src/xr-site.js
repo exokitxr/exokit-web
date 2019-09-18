@@ -55,6 +55,45 @@ class XRSite extends HTMLElement {
   disconnectedCallback() {
     console.log('disconnected', this);
   }
+  async attributeChangedCallback(name, oldValue, newValue) {
+    await GlobalContext.loadPromise;
+
+    if (name === 'camera-position') {
+      let position = newValue.split(' ');
+      if (position.length === 3) {
+        position = position.map(s => parseFloat(s));
+        if (position.every(n => isFinite(n))) {
+          this.fakeXrDisplay.position.fromArray(position);
+          this.fakeXrDisplay.pushUpdate();
+        }
+      }
+    } else if (name === 'camera-orientation') {
+      let orientation = newValue.split(' ');
+      if (orientation.length === 4) {
+        orientation = orientation.map(s => parseFloat(s));
+        if (orientation.every(n => isFinite(n))) {
+          this.fakeXrDisplay.quaternion.fromArray(orientation);
+          this.fakeXrDisplay.pushUpdate();
+        }
+      }
+    } else if (name === 'camera-scale') {
+      let scale = newValue.split(' ');
+      if (scale.length === 3) {
+        scale = scale.map(s => parseFloat(s));
+        if (scale.every(n => isFinite(n))) {
+          this.fakeXrDisplay.scale.fromArray(scale);
+          this.fakeXrDisplay.pushUpdate();
+        }
+      }
+    }
+  }
+  static get observedAttributes() {
+    return [
+      'camera-position',
+      'camera-orientation',
+      'camera-scale',
+    ];
+  }
   requestSession() {
     return this.sessionPromise;
   }

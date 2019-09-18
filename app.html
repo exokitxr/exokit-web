@@ -1,15 +1,13 @@
 <!doctype html>
 <html>
-<head>
-  <script src="three.js"></script>
-  <script src="OrbitControls.js"></script>
-  <script src="TransformControls.js"></script>
-</head>
 <body>
-<xr-site>
+<xr-site camera-position="0 2 3" camera-orientation="-0.2297529205473612 0 0 0.9732489894677301">
   <xr-iframe src="examples/floor.html" name="Floor"></xr-iframe>
 </xr-site>
-<script>
+<script src="three.js"></script>
+<script src="OrbitControls.js"></script>
+<script src="TransformControls.js"></script>
+<script type=module>
 (async () => {
 try {
 
@@ -223,6 +221,7 @@ console.log('app 2');
   console.warn(err);
 }
 })();
+
 </script>
 </body>
 </html>
