@@ -17,6 +17,48 @@ console.log('app 1');
 
 const root = document.querySelector('xr-site');
 const floorXrIframe = document.querySelector('xr-iframe');
+new MutationObserver(async mutations => {
+  for (let i = 0; i < mutations.length; i++) {
+    const {addedNodes, removedNodes} = mutations[i];
+
+    for (let j = 0; j < removedNodes.length; j++) {
+      const removedNode = removedNodes[j];
+
+      if (removedNode instanceof XRIFrame) {
+        const xrIframe = removedNode;
+
+        scene.remove(xrIframe.control);
+      }
+    }
+    for (let j = 0; j < addedNodes.length; j++) {
+      const addedNode = addedNodes[j];
+
+      if (addedNode instanceof XRIFrame) {
+        const xrIframe = addedNode;
+
+        const object = new THREE.Object3D();
+        object.position.fromArray(xrIframe.position);
+        scene.add(object);
+
+        const control = new THREE.TransformControls(vrCamera, renderer.domElement);
+        control.attach(object);
+        control.size = 3;
+        control.addEventListener('change', e => {
+          xrIframe.position = object.position.toArray();
+          xrIframe.quaternion = object.quaternion.toArray();
+          xrIframe.scale = object.scale.toArray();
+        });
+        control.addEventListener('dragging-changed', e => {
+          orbitControls.enabled = !e.value;
+        });
+        xrIframe.control = control;
+        scene.add(control);
+      }
+    }
+  }
+}).observe(root, {
+  childList: true,
+});
 
 const vrCamera = new THREE.PerspectiveCamera();
 vrCamera.updateMatrixWorld = () => {};
@@ -122,24 +164,7 @@ window.addEventListener('message', e => {
         -1 + Math.random() * 2,
       ];
       root.insertBefore(xrIframe, floorXrIframe);
-
-      const object = new THREE.Object3D();
-      object.position.fromArray(xrIframe.position);
-      scene.add(object);
-
-      const control = new THREE.TransformControls(vrCamera, renderer.domElement);
-      control.attach(object);
-      control.size = 3;
-      control.addEventListener('change', e => {
-        xrIframe.position = object.position.toArray();
-        xrIframe.quaternion = object.quaternion.toArray();
-        xrIframe.scale = object.scale.toArray();
-      });
-      control.addEventListener('dragging-changed', e => {
-        orbitControls.enabled = !e.value;
-      });
-      xrIframe.control = control;
-      scene.add(control);
+      root.insertBefore(new Text('\n  '), floorXrIframe);
 
       break;
     }
@@ -147,8 +172,6 @@ window.addEventListener('message', e => {
       const {index} = data;
       const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
       xrIframe.parentNode.removeChild(xrIframe);
-      scene.remove(xrIframe.control);
-      xrIframe.destroy();
 
       break;
     }
