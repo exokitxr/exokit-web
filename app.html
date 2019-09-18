@@ -150,6 +150,7 @@ window.addEventListener('message', e => {
     case 'load': {
       const xrIframe = document.createElement('xr-iframe');
       xrIframe.src = data.url;
+      xrIframe.name = data.name;
       xrIframe.position = data.origin ? [
         0,
         0.5,
@@ -185,6 +186,12 @@ window.addEventListener('message', e => {
       if (match) {
         root.innerHTML = match[1];
       }
+      window.parentPostMessage({
+        method: 'tabs',
+        tabs: Array.from(root.childNodes)
+          .filter(childNode => childNode instanceof XRIFrame)
+          .map(childNode => childNode.name),
+      });
       break;
     }
   }
