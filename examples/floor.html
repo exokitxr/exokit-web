@@ -115,7 +115,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 const _enterXr = async () => {
-  console.log('get request session', navigator.xr, navigator.xr.requestSession, new Error().stack);
   const session = await navigator.xr.requestSession({
     exclusive: true,
   });
