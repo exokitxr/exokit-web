@@ -26,7 +26,7 @@ class XRSite extends HTMLElement {
       await GlobalContext.loadPromise;
 
       for (let i = 0; i < mutations.length; i++) {
-        const {addedNodes, removedNodes} = mutations[i];
+        const {removedNodes} = mutations[i];
 
         for (let j = 0; j < removedNodes.length; j++) {
           const removedNode = removedNodes[j];
