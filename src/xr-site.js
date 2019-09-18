@@ -28,7 +28,6 @@ class XRSite extends HTMLElement {
       this.session.layers = Array.from(this.childNodes)
         .filter(childNode => childNode instanceof XRIFrame)
         .concat(this.customLayers);
-      // console.log('update layers', Array.from(this.childNodes), XRIFrame, this.session.layers);
     });
     this.observer.observe(this, {
       childList: true,
@@ -37,7 +36,6 @@ class XRSite extends HTMLElement {
     const session = await navigator.xr.requestSession({
       exclusive: true,
     });
-    // session.layers = [];
     this.session = session;
     this.sessionPromise.resolve(session);
   }
