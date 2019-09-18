@@ -6,16 +6,21 @@
     <script src="TransformControls.js"></script>
   </head>
   <body>
-    <script type=module>
+    <xr-site>
+      <xr-iframe src="examples/floor.html"></xr-iframe>
+    </xr-site>
+    <script>
 (async () => {
 try {
 
 console.log('app 1');
 
+const root = document.querySelector('xr-site');
+const floorXrIframe = document.querySelector('xr-iframe');
+
 const vrCamera = new THREE.PerspectiveCamera();
 vrCamera.updateMatrixWorld = () => {};
 let orbitControls = null;
-// let tutorialXrIframe = null;
 let fakeXrDisplay;
 
 // main
@@ -40,44 +45,34 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
 
-const layers = [renderer.domElement];
+root.addLayer(renderer.domElement);
 
 function animate() {
   const _updateOrbitControls = () => {
     if (orbitControls) {
       orbitControls.update();
 
-      if (fakeXrDisplay) {
-        fakeXrDisplay.position.copy(orbitControls.object.position);
-        fakeXrDisplay.quaternion.copy(orbitControls.object.quaternion);
+      if (root.fakeXrDisplay) {
+        root.fakeXrDisplay.position.copy(orbitControls.object.position);
+        root.fakeXrDisplay.quaternion.copy(orbitControls.object.quaternion);
 
-        fakeXrDisplay.pushUpdate();
+        root.fakeXrDisplay.pushUpdate();
       }
     }
   };
   _updateOrbitControls();
 
   const _updateVrCamera = () => {
-    vrCamera.matrixWorldInverse.fromArray(fakeXrDisplay.viewMatrix);
+    vrCamera.matrixWorldInverse.fromArray(root.fakeXrDisplay.viewMatrix);
     vrCamera.matrixWorld.getInverse(vrCamera.matrixWorldInverse);
-    vrCamera.projectionMatrix.fromArray(fakeXrDisplay.projectionMatrix);
+    vrCamera.projectionMatrix.fromArray(root.fakeXrDisplay.projectionMatrix);
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
   };
   _updateVrCamera();
 
   renderer.render(scene, camera);
 }
-const _startFakeVrDisplay = async () => {
-  fakeXrDisplay = new FakeXRDisplay();
-  fakeXrDisplay.position.copy(camera.position);
-  fakeXrDisplay.quaternion.copy(camera.quaternion);
-  fakeXrDisplay.pushUpdate();
-  fakeXrDisplay.enable();
-  await _enterXr();
-
-  // renderer.setAnimationLoop(animate);
-};
-const _enterXr = async () => {
+/* const _enterXr = async () => {
   const session = await navigator.xr.requestSession({
     exclusive: true,
   });
@@ -112,76 +107,93 @@ const _enterXr = async () => {
     orbitControls = new THREE.OrbitControls(orbitCamera, renderer.domElement);
     orbitCamera.position.copy(fakeXrDisplay.position);
     orbitCamera.quaternion.copy(fakeXrDisplay.quaternion);
-    /* scene.add(orbitCamera);
-    orbitCamera.updateMatrixWorld();
-    orbitControls.target.copy(orbitCamera.position).add(new THREE.Vector3(0, 0, -1).applyQuaternion(orbitCamera.quaternion)); */
     orbitControls.screenSpacePanning = true;
     orbitControls.update();
 
     console.log('loaded root in XR');
   });
-};
-_startFakeVrDisplay()
-  .then(() => {
-    const xrIframe = document.createElement('xr-iframe');
-    xrIframe.src = 'examples/floor.html';
-    layers.push(xrIframe);
+}; */
 
-    // Listen to messages from parent window
-    window.addEventListener('message', e => {
-      const {data} = e;
-      const {method} = data;
-      switch (method) {
-        case 'load': {
-          const xrIframe = document.createElement('xr-iframe');
-          xrIframe.src = data.url;
-          xrIframe.position = data.origin ? [
-            0,
-            0.1,
-            0,
-          ] : [
-            -1 + Math.random() * 2,
-            0.25,
-            -1 + Math.random() * 2,
-          ];
-          layers.push(xrIframe);
+const session = await root.requestSession();
 
-          const object = new THREE.Object3D();
-          object.position.fromArray(xrIframe.position);
-          scene.add(object);
+renderer.vr.setSession(session, {
+  frameOfReferenceType: 'stage',
+});
+console.log('set size', root.width, root.height);
+renderer.setSize(root.width, root.height);
+renderer.setPixelRatio(1);
 
-          const control = new THREE.TransformControls(vrCamera, renderer.domElement);
-          control.attach(object);
-          control.size = 3;
-          control.addEventListener('change', e => {
-            xrIframe.position = object.position.toArray();
-            xrIframe.quaternion = object.quaternion.toArray();
-            xrIframe.scale = object.scale.toArray();
-          });
-          control.addEventListener('dragging-changed', e => {
-            orbitControls.enabled = !e.value;
-          });
-          xrIframe.control = control;
-          scene.add(control);
+renderer.setAnimationLoop(null);
 
-          break;
-        }
-        case 'unload': {
-          const {index} = data;
-          const xrIframe = layers.splice(1 + index, 1)[0];
-          scene.remove(xrIframe.control);
-          xrIframe.destroy();
+renderer.vr.enabled = true;
+// renderer.vr.setSession(session);
+renderer.vr.setAnimationLoop(animate);
 
-          break;
-        }
-      }
-    });
+root.fakeXrDisplay.position.copy(camera.position);
+root.fakeXrDisplay.quaternion.copy(camera.quaternion);
+root.fakeXrDisplay.pushUpdate();
 
-    console.log('loaded fake display');
-  })
-  .catch(err => {
-    console.warn(err.stack);
-  });
+const orbitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+orbitControls = new THREE.OrbitControls(orbitCamera, renderer.domElement);
+orbitCamera.position.copy(root.fakeXrDisplay.position);
+orbitCamera.quaternion.copy(root.fakeXrDisplay.quaternion);
+orbitControls.screenSpacePanning = true;
+orbitControls.update();
+
+/* const floorXrIframe = document.createElement('xr-iframe');
+floorXrIframe.src = 'examples/floor.html';
+root.appendChild(floorXrIframe); */
+
+// Listen to messages from parent window
+window.addEventListener('message', e => {
+  const {data} = e;
+  const {method} = data;
+  switch (method) {
+    case 'load': {
+      const xrIframe = document.createElement('xr-iframe');
+      xrIframe.src = data.url;
+      xrIframe.position = data.origin ? [
+        0,
+        0.1,
+        0,
+      ] : [
+        -1 + Math.random() * 2,
+        0.25,
+        -1 + Math.random() * 2,
+      ];
+      root.insertBefore(xrIframe, floorXrIframe);
+
+      const object = new THREE.Object3D();
+      object.position.fromArray(xrIframe.position);
+      scene.add(object);
+
+      const control = new THREE.TransformControls(vrCamera, renderer.domElement);
+      control.attach(object);
+      control.size = 3;
+      control.addEventListener('change', e => {
+        xrIframe.position = object.position.toArray();
+        xrIframe.quaternion = object.quaternion.toArray();
+        xrIframe.scale = object.scale.toArray();
+      });
+      control.addEventListener('dragging-changed', e => {
+        orbitControls.enabled = !e.value;
+      });
+      xrIframe.control = control;
+      scene.add(control);
+
+      break;
+    }
+    case 'unload': {
+      const {index} = data;
+      const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
+      xrIframe.parentNode.removeChild(xrIframe);
+      scene.remove(xrIframe.control);
+      xrIframe.destroy();
+
+      break;
+    }
+  }
+});
 
 console.log('app 2');
 
