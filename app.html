@@ -25,94 +25,6 @@ const scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xFFFFFF);
 scene.matrixAutoUpdate = false;
 
-const floorMesh = (() => {
-  const geometry = new THREE.PlaneBufferGeometry(300, 300, 300, 300)
-    .applyMatrix(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1))))
-    // .applyMatrix(new THREE.Matrix4().makeTranslation(-0.5, 0, -0.5));
-  const floorVsh = `
-    uniform float uAnimation;
-    // attribute float scene;
-    varying vec3 vPosition;
-    // varying float vScene;
-    varying float vDepth;
-    void main() {
-      float radius = sqrt(position.x*position.x + position.z*position.z);
-      // vec3 p = vec3(position.x, position.y - (1.0 - uAnimation * radius), position.z);
-      vec3 p = vec3(position.x, position.y - (1.0 - uAnimation) * radius, position.z);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.);
-      vPosition = position;
-      // vScene = scene;
-      vDepth = gl_Position.z / 200.0;
-    }
-  `;
-  const floorFsh = `
-    uniform float uAnimation;
-    // uniform sampler2D uTex;
-    varying vec3 vPosition;
-    // varying float vScene;
-    varying float vDepth;
-    void main() {
-      vec3 c;
-      float a;
-      c = vec3(min(0.8 + vDepth, 0.9725490196078431)); // 0xf8/0xff
-      /* vec2 uv = floor(vPosition + 150).xz / 300.0;
-      c = texture2D(uTex, uv).rgb; */
-      vec3 f = fract(vPosition);
-      if (f.x <= 0.01 || f.x >= 0.99 || f.z <= 0.01 || f.z >= 0.99) {
-        // a = 0.0;
-        discard;
-      } else {
-        a = uAnimation*0.5;
-      }
-      gl_FragColor = vec4(c, a);
-    }
-  `;
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      /* uTex: {
-        type: 't',
-        value: new THREE.Texture(),
-      }, */
-      uAnimation: {
-        type: 'f',
-        value: 1,
-      },
-    },
-    vertexShader: floorVsh,
-    fragmentShader: floorFsh,
-    transparent: true,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
-  mesh.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), new THREE.Vector3());
-  mesh.intersect = ray => {
-    const point = ray.origin.y !== 0 ? ray.intersectPlane(mesh.plane, localVector) : null;
-    if (point) {
-      const distance = ray.origin.distanceTo(point);
-      if (distance < 10) {
-        const {x, z: y} = point;
-        return {
-          type: 'floor',
-          mesh,
-          point,
-          distance,
-          cancel: false,
-          x,
-          y,
-        };
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  };
-  return mesh;
-})();
-if (!/helio/i.test(navigator.userAgent)) {
-  scene.add(floorMesh);
-}
-
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 2, 3);
 camera.lookAt(new THREE.Vector3(0, 0.5, 0));
@@ -129,13 +41,6 @@ renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
 
 const layers = [renderer.domElement];
-
-const ambientLight = new THREE.AmbientLight(0x808080);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 4);
-directionalLight.position.set(1, 1, 1);
-scene.add(directionalLight);
 
 function animate() {
   const _updateOrbitControls = () => {
@@ -159,13 +64,6 @@ function animate() {
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
   };
   _updateVrCamera();
-
-  /* const rate = 5000;
-  const f = (Date.now() % rate) / rate;
-  tutorialXrIframe.position = [0, Math.sin(f * Math.PI*2) / 2, 0];
-  tutorialXrIframe.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (-1 + Math.sin(f * Math.PI*4) * 2) * 0.1, 'YXZ')).toArray();
-  const s = 0.3 + (1 + Math.sin(f * Math.PI*4)) / 2 * 0.7;
-  tutorialXrIframe.scale = [s, s, s]; */
 
   renderer.render(scene, camera);
 }
@@ -225,10 +123,9 @@ const _enterXr = async () => {
 };
 _startFakeVrDisplay()
   .then(() => {
-
-    /* tutorialXrIframe = document.createElement('xr-iframe');
-    tutorialXrIframe.src = 'examples/tutorial.html';
-    layers.push(tutorialXrIframe); */
+    const xrIframe = document.createElement('xr-iframe');
+    xrIframe.src = 'examples/floor.html';
+    layers.push(xrIframe);
 
     // Listen to messages from parent window
     window.addEventListener('message', e => {
