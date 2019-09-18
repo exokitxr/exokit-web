@@ -130,10 +130,9 @@ const _enterXr = async () => {
 };
 _startFakeVrDisplay()
   .then(() => {
-
-    /* tutorialXrIframe = document.createElement('xr-iframe');
-    tutorialXrIframe.src = 'examples/tutorial.html';
-    layers.push(tutorialXrIframe); */
+    const xrIframe = document.createElement('xr-iframe');
+    xrIframe.src = 'examples/floor.html';
+    layers.push(xrIframe);
 
     // Listen to messages from parent window
     window.addEventListener('message', e => {
