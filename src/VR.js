@@ -463,6 +463,18 @@ class FakeXRDisplay {
   set height(height) {
     GlobalContext.xrState.renderHeight[0] = height;
   } */
+  get width() {
+    if (GlobalContext.xrState.stereo[0]) {
+      return GlobalContext.xrState.renderWidth[0];
+    } else {
+      return GlobalContext.xrState.renderWidth[0] * 2;
+    }
+  }
+  set width(width) {}
+  get height() {
+    return GlobalContext.xrState.renderHeight[0];
+  }
+  set height(height) {}
   get projectionMatrix() {
     return GlobalContext.xrState.leftProjectionMatrix;
   }
