@@ -6,9 +6,6 @@ import utils from './utils.js';
 const {_makeNullPromise} = utils;
 
 class XRSite extends HTMLElement {
-  constructor() {
-    super();
-  }
   async connectedCallback() {
     console.log('connected 1', this);
 
