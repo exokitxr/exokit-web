@@ -6,8 +6,6 @@
   <script type=module src="https://web.exokit.org/ew.js?key=API_KEY"></script>
   <template is=xr-engine-template id=xr-engine>
     <html>
-      <head>
-      </head>
       <body>
         <script>
           const layers = [];
@@ -22,9 +20,9 @@
 
          _enterXr()
           .then(() => {
-            // Add Mozilla Hub
+            // Add solar system
             fooFrame = document.createElement('xr-iframe');
-            fooFrame.src = 'https://hubs.mozilla.com/VxGmqjU/fuchsia-winding-room?vr_entry_type=vr_now';
+            fooFrame.src = 'https://rawcdn.githack.com/exokitxr/webxr-samples/8a13dcbb22fa52feadfab7b7f41f85bdb3601a3f/xr-presentation.html';
             session.layers.push(fooFrame);
 
             // Add A-Painter too
