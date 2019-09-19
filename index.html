@@ -290,7 +290,7 @@ import(`./ew.js${window.location.search}`)
       switch (method) {
         case 'code': {
           code.value = data.code;
-          codeDirty = false;
+          lastCode = code.value;
           break;
         }
         case 'tabs': {
@@ -367,7 +367,7 @@ for (let i = 0; i < aCubes.length; i++) {
 const codeHeader = document.getElementById('code-header');
 const codeButton = document.getElementById('code-button');
 const code = document.getElementById('code');
-let codeDirty = false;
+let lastCode = '';
 codeButton.addEventListener('click', () => {
   codeHeader.classList.toggle('open');
   codeButton.classList.toggle('open');
@@ -380,19 +380,15 @@ codeButton.addEventListener('click', () => {
       method: 'getCode',
     });
   } else {
-    if (codeDirty) {
+    const currentCode = code.value;
+    if (currentCode !== lastCode) {
       xrScene.postMessage({
         method: 'setCode',
-        code: code.value,
+        code: currentCode,
       });
     }
   }
 });
-const _setDirty = () => {
-  codeDirty = true;
-};
-code.addEventListener('keydown', _setDirty);
-code.addEventListener('change', _setDirty);
 code.addEventListener('mousedown', e => {
   e.stopPropagation();
 });
