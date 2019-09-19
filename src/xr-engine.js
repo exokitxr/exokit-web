@@ -17,7 +17,9 @@ class XREngine extends HTMLTemplateElement {
     this.session = null;
     this.baseLayer = null;
 
-    const _updateInnerHTML = () => {
+    const _updateInnerHTML = async () => {
+      await GlobalContext.loadPromise;
+
       const innerHTML = this.innerHTML;
       const src = this.getAttribute('src');
       if (!src) {
