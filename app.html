@@ -165,6 +165,7 @@ const _cleanupRoot = () => {
   for (let i = 0; i < xrIframes.length; i++) {
     root.insertBefore(new Text('\n  '), xrIframes[i]);
   }
+  root.appendChild(new Text('\n'));
 };
 window.addEventListener('message', e => {
   const {data} = e;
