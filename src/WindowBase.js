@@ -8,7 +8,9 @@ import {DragEvent, KeyboardEvent, MouseEvent, WheelEvent} from './Event.js';
 import GlobalContext from './GlobalContext.js';
 
 import utils from './utils.js';
-const {_getProxyUrl} = utils;
+const {_getProxyUrl, _makeNullPromise} = utils;
+
+GlobalContext.loadPromise = _makeNullPromise();
 
 const _oninitmessage = async e => {
   const {workerData, messagePort} = e.data;
@@ -130,6 +132,8 @@ const _oninitmessage = async e => {
     }
 
     self._onbootstrap = undefined;
+
+    GlobalContext.loadPromise.resolve();
   };
   self._postMessageUp = function _postMessageUp(data, transfers) {
     messagePort.postMessageSync(data, transfers);

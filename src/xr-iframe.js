@@ -7,6 +7,8 @@ const {_normalizeUrl/*, _getProxyUrl*/} = utils;
 
 import symbols from './symbols.js';
 
+import GlobalContext from './GlobalContext.js';
+
 class XRIFrame extends HTMLElement {
   constructor() {
     super();
@@ -14,7 +16,9 @@ class XRIFrame extends HTMLElement {
     this.contentWindow = null;
     this.xrOffset = new XRRigidTransform();
   }
-  attributeChangedCallback(name, oldValue, newValue) {
+  async attributeChangedCallback(name, oldValue, newValue) {
+    await GlobalContext.loadPromise;
+
     if (name === 'src') {
       let url = this.getAttribute('src');
 

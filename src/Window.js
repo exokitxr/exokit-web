@@ -1,5 +1,5 @@
 import path from '../modules/path-browserify.js';
-import util from '../modules/util.js';
+// import util from '../modules/util.js';
 
 // import {EventTarget, KeyboardEvent, SpatialEvent} from './Event.js';
 import {CanvasRenderingContext2D, WebGLRenderingContext, WebGL2RenderingContext} from './Graphics.js';
@@ -22,6 +22,13 @@ import {
 import GlobalContext from './GlobalContext.js';
 import symbols from './symbols.js';
 
+import * as XR from './XR.js';
+import utils from './utils.js';
+const {_elementGetter, _elementSetter} = utils;
+
+import XRIFrame from './xr-iframe.js';
+import XRSite from './xr-site.js';
+
 const {
   args: {
     options,
@@ -35,23 +42,6 @@ GlobalContext.args = args;
 GlobalContext.version = version;
 GlobalContext.baseUrl = options.baseUrl;
 GlobalContext.proxyContext = null;
-
-/* import {
-  HTMLElement,
-  getBoundDOMElements,
-  DOMTokenList,
-  NodeList,
-  HTMLCollection,
-  DOMRect,
-  DOMPoint,
-  // createImageBitmap,
-} from './DOM.js'; */
-import * as XR from './XR.js';
-// const DevTools = require('./DevTools');
-import utils from './utils.js';
-const {_elementGetter, _elementSetter} = utils;
-
-import XRIFrame from './xr-iframe.js';
 
 // const isMac = os.platform() === 'darwin';
 
@@ -314,6 +304,7 @@ const _fetchText = src => fetch(src)
     window.XRBoundedReferenceSpace = XR.XRBoundedReferenceSpace;
   // }
   window.XRIFrame = XRIFrame;
+  window.XRSite = XRSite;
   window.FakeXRDisplay = FakeXRDisplay;
   window.PaymentRequest = PaymentRequest;
 
@@ -469,13 +460,29 @@ const _fetchText = src => fetch(src)
     if (window.loaded) {
       window.runAsync({
         method: 'tickAnimationFrame',
-        layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+        // layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
+        layered,
       });
     }
   };
   const _render = layered => {
     for (let i = 0; i < windows.length; i++) {
-      _renderChild(windows[i], layered);
+      windows[i].rendered = false;
+    }
+    for (let i = 0; i < vrPresentState.layers.length; i++) {
+      const layer = vrPresentState.layers[i];
+      const contentWindow = layer && layer.contentWindow;
+      if (contentWindow) {
+         _renderChild(contentWindow, true);
+        contentWindow.rendered = true;
+      }
+    }
+    for (let i = 0; i < windows.length; i++) {
+      const win = windows[i];
+      if (win && !win.rendered) {
+        _renderChild(win, false);
+        win.rendered = true;
+      }
     }
     _renderLocal(layered);
   };

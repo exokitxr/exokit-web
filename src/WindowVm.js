@@ -276,6 +276,7 @@ const _makeWindow = (options = {}) => {
   });
   window.id = id;
   window.loaded = false;
+  window.rendered = false;
   // window.framebuffer = null;
   // window.phase = 0; // XXX
   // window.rendered = false;
