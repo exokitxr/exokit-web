@@ -13,122 +13,35 @@ class XREngine extends HTMLTemplateElement {
     this.queue = [];
     this.canvas = null;
     this.ctx = null;
-    this.shadow = null;
+    // this.shadow = null;
     this.session = null;
     this.baseLayer = null;
 
-    /* window.addEventListener('resize', e => { // XXX
-      this.shadow.childNodes[0].style.width = `${window.innerWidth}px`;
-      this.shadow.childNodes[0].style.height = `${window.innerHeight}px`;
-    }); */
-  }
-  attributeChangedCallback() {
-    const src = this.getAttribute('src');
-
-    if (src) {
-      const _onnavigate = u => {
+    const _updateInnerHTML = () => {
+      const innerHTML = this.innerHTML;
+      const src = this.getAttribute('src');
+      if (!src) {
         if (this.contentWindow) {
           this.contentWindow.destroy();
           this.contentWindow = null;
         }
-
-        const baseUrl = _getBaseUrl(u);
-        // u = _getProxyUrl(u);
-
-        const win = core.load(u, {
-          baseUrl,
-          // dataPath: null,
-          args: GlobalContext.args,
-          replacements: {},
-          xrTop: true,
-          onnavigate: _onnavigate,
-          onrequest: GlobalContext.handleRequest,
-          onpointerlock: GlobalContext.handlePointerLock,
-          onhapticpulse: GlobalContext.handleHapticPulse,
-          onpaymentrequest: GlobalContext.handlePaymentRequest,
-        });
-        win.canvas = null;
-        win.ctx = null;
-        win.session = null;
-        win.baseLayer = null;
-        win.install = () => {
-          if (!win.canvas) {
-            win.canvas = document.createElement('canvas');
-            win.canvas.width = GlobalContext.xrState.renderWidth[0] * 2;
-            win.canvas.height = GlobalContext.xrState.renderHeight[0];
-            win.canvas.style.width = '100%';
-            win.canvas.style.height = '100%';
-            win.canvas.addEventListener('mousedown', e => {
-              e.preventDefault();
-            });
-            win.canvas.addEventListener('mouseenter', e => {
-              const {x, y, width, height} = win.canvas.getBoundingClientRect();
-              GlobalContext.xrState.canvasViewport[0] = x;
-              GlobalContext.xrState.canvasViewport[1] = y;
-              GlobalContext.xrState.canvasViewport[2] = width;
-              GlobalContext.xrState.canvasViewport[3] = height;
-            });
-            win.ctx = win.canvas.getContext(window.WebGL2RenderingContext ? 'webgl2' : 'webgl', {
-              antialias: true,
-              alpha: true,
-              xrCompatible: true,
-            });
-            win.ctx.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) { // XXX return the correct undone binding in gl.getParameter
-              if (!fbo) {
-                fbo = win.ctx.xrFramebuffer;
-              }
-              return _bindFramebuffer.call(this, target, fbo);
-            })(win.ctx.bindFramebuffer);
-            win.ctx.binding = null;
-            win.ctx.xrFramebuffer = null;
-            const extensions = win.ctx.getSupportedExtensions();
-            for (let i = 0; i < extensions.length; i++) {
-              win.ctx.getExtension(extensions[i]);
-            }
-
-            if (!this.shadow) {
-              this.shadow = this.attachShadow({mode: 'closed'});
-            }
-            this.shadow.appendChild(win.canvas);
-
-            this.dispatchEvent(new MessageEvent('canvas', {
-              data: win.canvas,
-            }));
-          }
-          return win.ctx;
-        };
-        win.clear = () => {
-          if (win.ctx) {
-            win.ctx.binding = null;
-            win.ctx.clearColor(0, 0, 0, 0);
-            win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
-          }
-        };
-        win.destroy = (destroy => function() {
-          if (win.canvas) {
-            this.shadow.removeChild(win.canvas);
-            win.canvas = null;
-            win.ctx = null;
-          }
-
-          return destroy.apply(this, arguments);
-        })(win.destroy);
-        win.addEventListener('message', m => {
-          const {data} = m;
-          this.dispatchEvent(new MessageEvent('message', {
-            data,
-          }));
-        });
-        this.contentWindow = win;
-
-        for (let i = 0; i < this.queue.length; i++) {
-          const [data, transfers] = this.queue[i];
-          this.contentWindow.postMessage(data, transfers);
+        if (innerHTML) {
+          this.navigate('data:text/html,' + innerHTML);
         }
-        this.queue.length = 0;
-      };
-      GlobalContext.loadPromise
-        .then(() => _onnavigate(src));
+      }
+    };
+    new MutationObserver(mutations => {
+      _updateInnerHTML();
+    }).observe(this, {
+      childList: true,
+      subtree: true,
+    });
+    _updateInnerHTML();
+  }
+  attributeChangedCallback() {
+    const src = this.getAttribute('src');
+    if (src) {
+      GlobalContext.loadPromise.then(() => this.navigate(src));
     }
   }
   static get observedAttributes() {
@@ -139,6 +52,105 @@ class XREngine extends HTMLTemplateElement {
   }
   set src(src) {
     this.setAttribute('src', src);
+  }
+
+  navigate(u) {
+    const baseUrl = _getBaseUrl(u);
+
+    const win = core.load(u, {
+      baseUrl,
+      // dataPath: null,
+      args: GlobalContext.args,
+      replacements: {},
+      xrTop: true,
+      onnavigate: this.navigate.bind(this),
+      onrequest: GlobalContext.handleRequest,
+      onpointerlock: GlobalContext.handlePointerLock,
+      onhapticpulse: GlobalContext.handleHapticPulse,
+      onpaymentrequest: GlobalContext.handlePaymentRequest,
+    });
+    win.canvas = null;
+    win.ctx = null;
+    win.session = null;
+    win.baseLayer = null;
+    win.install = () => {
+      if (!win.canvas) {
+        win.canvas = document.createElement('canvas');
+        win.canvas.width = GlobalContext.xrState.renderWidth[0] * 2;
+        win.canvas.height = GlobalContext.xrState.renderHeight[0];
+        win.canvas.style.width = '100%';
+        win.canvas.style.height = '100%';
+        win.canvas.addEventListener('mousedown', e => {
+          e.preventDefault();
+        });
+        win.canvas.addEventListener('mouseenter', e => {
+          const {x, y, width, height} = win.canvas.getBoundingClientRect();
+          GlobalContext.xrState.canvasViewport[0] = x;
+          GlobalContext.xrState.canvasViewport[1] = y;
+          GlobalContext.xrState.canvasViewport[2] = width;
+          GlobalContext.xrState.canvasViewport[3] = height;
+        });
+        win.ctx = win.canvas.getContext(window.WebGL2RenderingContext ? 'webgl2' : 'webgl', {
+          antialias: true,
+          alpha: true,
+          xrCompatible: true,
+        });
+        win.ctx.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) { // XXX return the correct undone binding in gl.getParameter
+          if (!fbo) {
+            fbo = win.ctx.xrFramebuffer;
+          }
+          return _bindFramebuffer.call(this, target, fbo);
+        })(win.ctx.bindFramebuffer);
+        win.ctx.binding = null;
+        win.ctx.xrFramebuffer = null;
+        const extensions = win.ctx.getSupportedExtensions();
+        for (let i = 0; i < extensions.length; i++) {
+          win.ctx.getExtension(extensions[i]);
+        }
+
+        /* if (!this.shadow) {
+          this.shadow = this.attachShadow({mode: 'closed'});
+        }
+        this.shadow.appendChild(win.canvas); */
+
+        this.dispatchEvent(new MessageEvent('canvas', {
+          data: win.canvas,
+        }));
+        if (!win.canvas.parentNode) {
+          this.parentNode.insertAfter(win.canvas, this);
+        }
+      }
+      return win.ctx;
+    };
+    win.clear = () => {
+      if (win.ctx) {
+        win.ctx.binding = null;
+        win.ctx.clearColor(0, 0, 0, 0);
+        win.ctx.clear(win.ctx.COLOR_BUFFER_BIT|win.ctx.STENCIL_BUFFER_BIT|win.ctx.DEPTH_BUFFER_BIT);
+      }
+    };
+    win.destroy = (destroy => function() {
+      if (win.canvas) {
+        win.canvas.parentNode.removeChild(win.canvas);
+        win.canvas = null;
+        win.ctx = null;
+      }
+
+      return destroy.apply(this, arguments);
+    })(win.destroy);
+    win.addEventListener('message', m => {
+      const {data} = m;
+      this.dispatchEvent(new MessageEvent('message', {
+        data,
+      }));
+    });
+    this.contentWindow = win;
+
+    for (let i = 0; i < this.queue.length; i++) {
+      const [data, transfers] = this.queue[i];
+      this.contentWindow.postMessage(data, transfers);
+    }
+    this.queue.length = 0;
   }
   
   postMessage(data, transfers) {
