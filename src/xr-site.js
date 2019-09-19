@@ -143,6 +143,8 @@ class XRSite extends HTMLElement {
     this.customLayers.push(layer);
   }
 }
-customElements.define('xr-site', XRSite);
+if (!window.xrTop) {
+  customElements.define('xr-site', XRSite);
+}
 
 export default XRSite;

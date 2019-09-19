@@ -32,6 +32,7 @@ const _oninitmessage = async e => {
       }, transfers);
     },
   }; */
+  self.xrTop = args.options.xrTop;
   History.prototype.pushState = (_pushState => function pushState(data, title, url) {
     url = self.location.origin + url;
     const result = _pushState.call(this, data, title, url);
