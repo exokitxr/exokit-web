@@ -1,3 +1,5 @@
+window._ew = true;
+
 import './event-target-shim.mjs';
 
 import util from '../modules/util.js';

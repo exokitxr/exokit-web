@@ -1,3 +1,5 @@
+if (window._ew) throw 'skipping layered ew.js';
+
 import './src/webxr-polyfill.module.js';
 import './src/HelioWebXRPolyfill.js';
 import './src/event-target-shim.mjs';
