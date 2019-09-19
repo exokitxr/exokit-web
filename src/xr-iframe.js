@@ -74,6 +74,9 @@ class XRIFrame extends HTMLElement {
             }
           },
         });
+        win.addEventListener('load', () => {
+          this.dispatchEvent(new CustomEvent('load'));
+        });
         win.addEventListener('message', m => {
           const {data} = m;
           this.dispatchEvent(new MessageEvent('message', {
