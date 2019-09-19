@@ -7,7 +7,7 @@ const {_makeNullPromise} = utils;
 
 class XRSite extends HTMLElement {
   async connectedCallback() {
-    console.log('connected 1', this);
+    // console.log('connected', this);
 
     this.session = null;
     this.customLayers = [];
@@ -48,9 +48,9 @@ class XRSite extends HTMLElement {
     this.session = session;
     this.sessionPromise.resolve(session);
   }
-  disconnectedCallback() {
+  /* disconnectedCallback() {
     console.log('disconnected', this);
-  }
+  } */
   async attributeChangedCallback(name, oldValue, newValue) {
     if (this.cameraEnabled) {
       await GlobalContext.loadPromise;
