@@ -1,7 +1,6 @@
 import path from '../modules/path-browserify.js';
 import GlobalContext from './GlobalContext.js';
  
-// const iframeSrc = `${import.meta.url.replace(/[^\/]+$/, '')}iframe.html`;
 const entrypointSrc = `${import.meta.url.replace(/[^\/]+$/, '')}WindowBase.js`;
 
 class MessagePort2 extends EventTarget {
