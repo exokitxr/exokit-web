@@ -12,15 +12,13 @@ class XRSite extends HTMLElement {
   async connectedCallback() {
     console.log('connected 1', this);
 
+    this.session = null;
+    this.customLayers = [];
+    this.sessionPromise = _makeNullPromise();
+
     this.fakeXrDisplay = new FakeXRDisplay();
     this.fakeXrDisplay.pushUpdate();
     this.fakeXrDisplay.enable();
-
-    this.session = null;
-    this.width = this.fakeXrDisplay.width;
-    this.height = this.fakeXrDisplay.height;
-    this.customLayers = [];
-    this.sessionPromise = _makeNullPromise();
 
     new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
@@ -134,6 +132,18 @@ class XRSite extends HTMLElement {
   }
   get projectionMatrix() {
     return this.fakeXrDisplay.projectionMatrix;
+  }
+  get width() {
+    return this.fakeXrDisplay.width;
+  }
+  get height() {
+    return this.fakeXrDisplay.height;
+  }
+  get layers() {
+    return this.customLayers;
+  }
+  set layers(layers) {
+    this.customLayers = layers;
   }
   requestSession() {
     return this.sessionPromise;
