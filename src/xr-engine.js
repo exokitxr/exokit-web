@@ -106,17 +106,18 @@ const XREngineProto = {
           win.ctx.getExtension(extensions[i]);
         }
 
-        /* if (!this.shadow) {
-          this.shadow = this.attachShadow({mode: 'closed'});
+        if (this._canShadow) {
+          if (!this.shadow) {
+            this.shadow = this.attachShadow({mode: 'closed'});
+          }
+          this.shadow.appendChild(win.canvas);
+        } else {
+          this.insertAdjacentElement('afterend', win.canvas);
         }
-        this.shadow.appendChild(win.canvas); */
 
         this.dispatchEvent(new MessageEvent('canvas', {
           data: win.canvas,
         }));
-        if (!win.canvas.parentNode) {
-          this.insertAdjacentElement('afterend', win.canvas);
-        }
       }
       return win.ctx;
     };
@@ -239,12 +240,14 @@ const XREngineStatic = {
 class XREngine extends HTMLElement {
   constructor() {
     super();
+    this._canShadow = true;
     this._constructor();
   }
 }
 class XREngineTemplate extends HTMLTemplateElement {
   constructor() {
     super();
+    this._canShadow = false;
     this._constructor();
   }
 }
