@@ -5,12 +5,9 @@ import './src/HelioWebXRPolyfill.js';
 import './src/event-target-shim.mjs';
 
 import core from './src/core.js';
-// import minimist from '../modules/minimist.js';
 
 import symbols from './src/symbols.js';
 import THREE from './lib/three-min.js';
-
-// import {lookupHMDTypeIndex, FakeMesher, FakePlaneTracker} from './VR.js';
 
 import GlobalContext from './src/GlobalContext.js';
 
