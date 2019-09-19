@@ -151,9 +151,6 @@ class XRSite extends HTMLElement {
   requestSession() {
     return this.sessionPromise;
   }
-  addLayer(layer) {
-    this.customLayers.push(layer);
-  }
 }
 customElements.define('xr-site', XRSite);
 

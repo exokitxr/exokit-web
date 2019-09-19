@@ -103,7 +103,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
 document.body.appendChild(renderer.domElement);
 
-root.addLayer(renderer.domElement);
+root.layers.push(renderer.domElement);
 
 _addControls(floorXrIframe);
 _addControls(introductionXrIframe);
