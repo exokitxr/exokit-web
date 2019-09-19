@@ -19,6 +19,7 @@ class XRSite extends HTMLElement {
     this.fakeXrDisplay = new FakeXRDisplay();
     this.fakeXrDisplay.pushUpdate();
     this.fakeXrDisplay.enable();
+    this.cameraEnabled = true;
 
     new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
@@ -53,33 +54,35 @@ class XRSite extends HTMLElement {
     console.log('disconnected', this);
   }
   async attributeChangedCallback(name, oldValue, newValue) {
-    await GlobalContext.loadPromise;
+    if (this.cameraEnabled) {
+      await GlobalContext.loadPromise;
 
-    if (name === 'camera-position') {
-      let position = newValue.split(' ');
-      if (position.length === 3) {
-        position = position.map(s => parseFloat(s));
-        if (position.every(n => isFinite(n))) {
-          this.fakeXrDisplay.position.fromArray(position);
-          this.fakeXrDisplay.pushUpdate();
+      if (name === 'camera-position') {
+        let position = newValue.split(' ');
+        if (position.length === 3) {
+          position = position.map(s => parseFloat(s));
+          if (position.every(n => isFinite(n))) {
+            this.fakeXrDisplay.position.fromArray(position);
+            this.fakeXrDisplay.pushUpdate();
+          }
         }
-      }
-    } else if (name === 'camera-orientation') {
-      let orientation = newValue.split(' ');
-      if (orientation.length === 4) {
-        orientation = orientation.map(s => parseFloat(s));
-        if (orientation.every(n => isFinite(n))) {
-          this.fakeXrDisplay.quaternion.fromArray(orientation);
-          this.fakeXrDisplay.pushUpdate();
+      } else if (name === 'camera-orientation') {
+        let orientation = newValue.split(' ');
+        if (orientation.length === 4) {
+          orientation = orientation.map(s => parseFloat(s));
+          if (orientation.every(n => isFinite(n))) {
+            this.fakeXrDisplay.quaternion.fromArray(orientation);
+            this.fakeXrDisplay.pushUpdate();
+          }
         }
-      }
-    } else if (name === 'camera-scale') {
-      let scale = newValue.split(' ');
-      if (scale.length === 3) {
-        scale = scale.map(s => parseFloat(s));
-        if (scale.every(n => isFinite(n))) {
-          this.fakeXrDisplay.scale.fromArray(scale);
-          this.fakeXrDisplay.pushUpdate();
+      } else if (name === 'camera-scale') {
+        let scale = newValue.split(' ');
+        if (scale.length === 3) {
+          scale = scale.map(s => parseFloat(s));
+          if (scale.every(n => isFinite(n))) {
+            this.fakeXrDisplay.scale.fromArray(scale);
+            this.fakeXrDisplay.pushUpdate();
+          }
         }
       }
     }
