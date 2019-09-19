@@ -15,7 +15,6 @@ class XRSite extends HTMLElement {
 
     this.fakeXrDisplay = new FakeXRDisplay();
     this.fakeXrDisplay.enable();
-    this.cameraEnabled = window.xrTop;
 
     const _collectLayers = () => Array.from(this.childNodes)
       .filter(childNode => childNode instanceof XRIFrame)
@@ -52,7 +51,7 @@ class XRSite extends HTMLElement {
     console.log('disconnected', this);
   } */
   async attributeChangedCallback(name, oldValue, newValue) {
-    if (this.cameraEnabled) {
+    if (!GlobalContext.xrState.isPresentingReal[0]) {
       await GlobalContext.loadPromise;
 
       if (name === 'camera-position') {
