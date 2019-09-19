@@ -212,12 +212,8 @@ window.addEventListener('message', e => {
         method: 'code',
         code: root.outerHTML
           .replace(
-            '<xr-iframe src="examples\/floor.html"',
-            `<xr-iframe src="${window.location.origin}/examples/floor.html"`
-          )
-          .replace(
-            '<xr-iframe src="examples\/tutorial.html"',
-            `<xr-iframe src="${window.location.origin}/examples/tutorial.html"`
+            /(<xr-iframe src=")(examples\/)/g,
+            `$1${window.location.origin}/$2`
           ),
       });
       break;
