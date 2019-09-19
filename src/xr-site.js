@@ -18,7 +18,7 @@ class XRSite extends HTMLElement {
 
     this.fakeXrDisplay = new FakeXRDisplay();
     this.fakeXrDisplay.enable();
-    this.cameraEnabled = true;
+    this.cameraEnabled = window.xrTop;
 
     new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
