@@ -15,6 +15,7 @@ import THREE from './lib/three-min.js';
 import GlobalContext from './src/GlobalContext.js';
 
 import {XREngine} from './src/xr-engine.js';
+window.XREngine = XREngine;
 
 import utils from './src/utils.js';
 const {_makeNullPromise} = utils;
@@ -29,34 +30,6 @@ core.setVersion('0.0.1');
 const windows = [];
 GlobalContext.windows = windows;
 GlobalContext.loadPromise = _makeNullPromise();
-
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localQuaternion = new THREE.Quaternion();
-const localMatrix = new THREE.Matrix4();
-
-(async () => {
-
-function parseQuery(queryString) {
-  var query = {};
-  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-  for (var i = 0; i < pairs.length; i++) {
-    var pair = pairs[i].split('=');
-    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
-  }
-  return query;
-}
-
-const {key} = parseQuery(new URL(import.meta.url).search);
-if (!key) {
-  console.warn('exokit-web API key not set! Web origins will not work. See https://github.com/exokitxr/exokit-web/');
-}
-await navigator.serviceWorker.register('/sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''));
-if (navigator.serviceWorker.controller) {
-  GlobalContext.loadPromise.resolve();
-} else {
-  window.location.reload();
-}
 
 const xrState = (() => {
   const _makeSab = size => {
@@ -162,6 +135,38 @@ const xrState = (() => {
   return result;
 })();
 GlobalContext.xrState = xrState;
+
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
+const localMatrix = new THREE.Matrix4();
+
+customElements.define('xr-engine', XREngine, {
+  extends: 'template',
+});
+
+(async () => {
+
+function parseQuery(queryString) {
+  var query = {};
+  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i].split('=');
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
+
+const {key} = parseQuery(new URL(import.meta.url).search);
+if (!key) {
+  console.warn('exokit-web API key not set! Web origins will not work. See https://github.com/exokitxr/exokit-web/');
+}
+await navigator.serviceWorker.register('/sw.js' + (key ? `?key=${encodeURIComponent(key)}` : ''));
+if (navigator.serviceWorker.controller) {
+  GlobalContext.loadPromise.resolve();
+} else {
+  window.location.reload();
+}
 
 ['keydown', 'keyup', 'keypress', 'paste'].forEach(type => {
   window.addEventListener(type, e => {
@@ -606,10 +611,5 @@ core.animate = (timestamp, frame, referenceSpace) => {
   _tickAnimationFrames();
 };
 core.setSession(null);
-
-window.XREngine = XREngine;
-customElements.define('xr-engine', XREngine, {
-  extends: 'template',
-});
 
 })();
