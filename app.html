@@ -152,7 +152,20 @@ orbitControls.screenSpacePanning = true;
 orbitControls.enableKeys = false;
 orbitControls.update();
 
-// Listen to messages from parent window
+const _cleanupRoot = () => {
+  while (root.firstChild && root.firstChild.nodeType === Node.TEXT_NODE) {
+    root.removeChild(root.firstChild);
+  }
+  for (let el = root.firstChild; el; el = el.nextSibling) {
+    while (el.nextSibling && el.nextSibling.nodeType === Node.TEXT_NODE) {
+      el.parentNode.removeChild(el.nextSibling);
+    }
+  }
+  const xrIframes = Array.from(root.childNodes);
+  for (let i = 0; i < xrIframes.length; i++) {
+    root.insertBefore(new Text('\n  '), xrIframes[i]);
+  }
+};
 window.addEventListener('message', e => {
   const {data} = e;
   const {method} = data;
@@ -173,15 +186,10 @@ window.addEventListener('message', e => {
       const xrIframes = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame);
       if (xrIframes.length > 0 && xrIframes[xrIframes.length - 1] === floorXrIframe) {
         root.insertBefore(xrIframe, floorXrIframe);
-        root.insertBefore(new Text('\n  '), floorXrIframe);
       } else {
-        root.appendChild(new Text('\n  '));
         root.appendChild(xrIframe);
-        if (root.lastChild.nodeType !== Node.TEXT_NODE) {
-          root.appendChild(new Text('\n'));
-        }
       }
-
+      _cleanupRoot();
       _postTabs();
 
       break;
@@ -193,10 +201,7 @@ window.addEventListener('message', e => {
         xrIframe.parentNode.removeChild(xrIframe.previousSibling);
       }
       xrIframe.parentNode.removeChild(xrIframe);
-      if (!Array.from(root.childNodes).some(childNode => childNode instanceof XRIFrame)) {
-        root.innerHTML = '';
-      }
-
+      _cleanupRoot();
       _postTabs();
 
       break;
