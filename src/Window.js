@@ -67,6 +67,36 @@ const vrPresentState = {
 };
 GlobalContext.vrPresentState = vrPresentState;
 
+// unpack xr-engine-template in recursive load scenario
+class XREngineTemplate extends HTMLTemplateElement {
+  constructor() {
+    super();
+
+    (async () => {
+      if (document.readyState !== 'complete') {
+        await new Promise((accept, reject) => {
+          document.addEventListener('readystatechange', () => {
+            if (document.readyState === 'complete') {
+              accept();
+            }
+          });
+        });
+      }
+      const childNodes = Array.from(this.content.childNodes);
+      for (let i = 0; i < childNodes.length; i++) {
+        const childNode = childNodes[i];
+        if (childNode.nodeType === Node.ELEMENT_NODE) {
+          const xrIframe = document.importNode(childNode, true);
+          this.insertAdjacentElement('afterend', xrIframe);
+        }
+      }
+    })();
+  }
+}
+customElements.define('xr-engine-template', XREngineTemplate, {
+  extends: 'template',
+});
+
 class PaymentRequest {
   constructor(methodData, details, options) {
     this.methodData = methodData;
