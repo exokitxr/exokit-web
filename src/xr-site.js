@@ -17,6 +17,9 @@ class XRSite extends HTMLElement {
     this.fakeXrDisplay.enable();
     this.cameraEnabled = window.xrTop;
 
+    const _collectLayers = () => Array.from(this.childNodes)
+      .filter(childNode => childNode instanceof XRIFrame)
+      .concat(this.customLayers);
     new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
 
@@ -33,9 +36,7 @@ class XRSite extends HTMLElement {
         }
       }
 
-      this.session.layers = Array.from(this.childNodes)
-        .filter(childNode => childNode instanceof XRIFrame)
-        .concat(this.customLayers);
+      this.session.layers = _collectLayers();
     }).observe(this, {
       childList: true,
     });
@@ -43,6 +44,7 @@ class XRSite extends HTMLElement {
     const session = await navigator.xr.requestSession({
       exclusive: true,
     });
+    session.layers = _collectLayers();
     this.session = session;
     this.sessionPromise.resolve(session);
   }
