@@ -10,12 +10,12 @@ import GlobalContext from './GlobalContext.js';
 
 const module = {exports: {}};
 
-function _getBaseUrl(u, currentBaseUrl = '') {
+function _getBaseUrl(u) {
   let result;
   if (/^file:\/\//.test(u)) {
     result = u;
   } else if (/^(?:data|blob):/.test(u)) {
-    result = currentBaseUrl;
+    result = location.origin;
   } else {
     if (!/^[a-z]+:/.test(u)) {
       let {href} = location;
