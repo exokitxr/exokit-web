@@ -115,7 +115,7 @@ const XREngineProto = {
           data: win.canvas,
         }));
         if (!win.canvas.parentNode) {
-          this.parentNode.insertAfter(win.canvas, this);
+          this.insertAdjacentElement('afterend', win.canvas);
         }
       }
       return win.ctx;
