@@ -46,7 +46,8 @@ exokit.load = (src, options = {}) => {
   return exokit.make({
     url: options.url || src,
     baseUrl,
-    dataPath: options.dataPath,
+    xrTop: options.xrTop,
+    // dataPath: options.dataPath,
     args: options.args,
     replacements: options.replacements,
     onnavigate: options.onnavigate,

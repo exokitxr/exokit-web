@@ -37,9 +37,10 @@ class XRScene extends HTMLElement {
 
         const win = core.load(u, {
           baseUrl,
-          dataPath: null,
+          // dataPath: null,
           args: GlobalContext.args,
           replacements: {},
+          xrTop: true,
           onnavigate: _onnavigate,
           onrequest: GlobalContext.handleRequest,
           onpointerlock: GlobalContext.handlePointerLock,

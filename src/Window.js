@@ -132,6 +132,7 @@ const _fetchText = src => fetch(src)
 
   // window.parent = options.parent || window;
   // window.top = options.top || window;
+  window.xrTop = options.xrTop;
 
   Object.defineProperty(window, 'innerWidth', {
     get() {
