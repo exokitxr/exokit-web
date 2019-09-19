@@ -2,7 +2,7 @@
 <html>
 <body>
 <xr-site camera-position="0 2 3" camera-orientation="-0.2297529205473612 0 0 0.9732489894677301">
-  <xr-iframe src="examples/recursion.html" position="0 0.5 0" name="Recursion"></xr-iframe>
+  <xr-iframe src="examples/subscene.html" position="0 0.5 0" name="Subscene"></xr-iframe>
   <xr-iframe src="examples/floor.html" position="-1 0 0" name="Floor"></xr-iframe>
 </xr-site>
 <!-- optional UI follows -->
@@ -20,8 +20,8 @@ const floorXrIframe = document.querySelector('xr-iframe[name=Floor]');
 floorXrIframe.addEventListener('load', e => {
   console.log('floor load', e);
 });
-const recursionXrIframe = document.querySelector('xr-iframe[name=Recursion]');
-recursionXrIframe.addEventListener('load', e => {
+const subsceneXrIframe = document.querySelector('xr-iframe[name=Subscene]');
+subsceneXrIframe.addEventListener('load', e => {
   console.log('introduction load', e);
 });
 const _addControls = xrIframe => {
@@ -106,7 +106,7 @@ document.body.appendChild(renderer.domElement);
 root.layers.push(renderer.domElement);
 
 _addControls(floorXrIframe);
-_addControls(recursionXrIframe);
+_addControls(subsceneXrIframe);
 _postTabs();
 
 function animate() {
