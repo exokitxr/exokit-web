@@ -1,16 +1,13 @@
 <!doctype html>
 <html>
-<head>
-<script type=module>import(`../ew.js${window.location.search}`);</script>
-</head>
 <body>
-<!-- <template is=xr-engine-template> -->
-<xr-engine>
-  <xr-site camera-position="0 2 3" camera-orientation="-0.2297529205473612 0 0 0.9732489894677301">
-    <xr-iframe src="/examples/example1xr.html" position="0 0 -1" name="Red Cube"></xr-iframe>
-    <xr-iframe src="/examples/example2xr.html" position="0 0 0" name="Green Cube"></xr-iframe>
-  </xr-site>
-</xr-engine>
-<!-- </template> -->
+  <script type=module>import(`../ew.js${window.location.search}`);</script>
+  <!-- <template is=xr-engine-template> -->
+  <xr-engine>
+    <xr-site camera-position="0 2 3" camera-orientation="-0.2297529205473612 0 0 0.9732489894677301">
+      <xr-iframe src="/examples/example1xr.html" position="0 0 -1" name="Red Cube"></xr-iframe>
+      <xr-iframe src="/examples/example2xr.html" position="0 0 0" name="Green Cube"></xr-iframe>
+    </xr-site>
+  </xr-engine>
 </body>
 </html>
