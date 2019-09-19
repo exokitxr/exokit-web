@@ -267,7 +267,8 @@ function parseQuery(s) {
 let xrEngine;
 import(`./ew.js${window.location.search}`)
   .then(async () => {
-    xrEngine = document.createElement('xr-engine');
+    xrEngine = new XREngine();
+    // xrEngine = document.createElement('template', {is: 'xr-engine'});
     xrEngine.src = 'app.html';
     xrEngine.addEventListener('canvas', e => {
       const canvas = e.data;
