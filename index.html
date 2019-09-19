@@ -273,15 +273,6 @@ import(`./ew.js${window.location.search}`)
     xrEngine.addEventListener('canvas', e => {
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
-
-      const {u} = parseQuery(window.location.search);
-      if (u) {
-        setTimeout(() => {
-          _unloadLink(0);
-          _unloadLink(0);
-          _loadLink({href: u, innerText: 'URL'});
-        });
-      }
     });
     xrEngine.addEventListener('message', e => {
       const {data} = e;
@@ -301,6 +292,14 @@ import(`./ew.js${window.location.search}`)
         }
       }
     });
+
+    const {u} = parseQuery(window.location.search);
+    if (u) {
+      while (tabs.childNodes.length > 0) {
+        _unloadLink(0);
+      }
+      _loadLink({href: u, innerText: 'URL'});
+    }
 
     let result;
     if (navigator.xr) {
