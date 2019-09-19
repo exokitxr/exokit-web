@@ -5,10 +5,8 @@ const {_getBaseUrl, _getProxyUrl} = utils;
 
 import GlobalContext from './GlobalContext.js';
 
-class XREngine extends HTMLTemplateElement {
-  constructor() {
-    super();
-
+const XREngineProto = {
+  _constructor() {
     this.contentWindow = null;
     this.queue = [];
     this.canvas = null;
@@ -39,22 +37,20 @@ class XREngine extends HTMLTemplateElement {
       subtree: true,
     });
     _updateInnerHTML();
-  }
+  },
   attributeChangedCallback() {
     const src = this.getAttribute('src');
     if (src) {
       GlobalContext.loadPromise.then(() => this.navigate(src));
     }
-  }
-  static get observedAttributes() {
-    return ['src'];
-  }
+  },
+
   get src() {
     return this.getAttribute('src');
-  }
+  },
   set src(src) {
     this.setAttribute('src', src);
-  }
+  },
 
   navigate(u) {
     const baseUrl = _getBaseUrl(u);
@@ -153,7 +149,7 @@ class XREngine extends HTMLTemplateElement {
       this.contentWindow.postMessage(data, transfers);
     }
     this.queue.length = 0;
-  }
+  },
   
   postMessage(data, transfers) {
     if (this.contentWindow) {
@@ -161,7 +157,7 @@ class XREngine extends HTMLTemplateElement {
     } else {
       this.queue.push([data, transfers]);
     }
-  }
+  },
 
   async enterXr() {
     if (navigator.xr) {
@@ -232,7 +228,46 @@ class XREngine extends HTMLTemplateElement {
     } else {
       throw new Error('no webxr');
     }
+  },
+}
+const XREngineStatic = {
+  get observedAttributes() {
+    return ['src'];
+  }
+};
+
+class XREngine extends HTMLElement {
+  constructor() {
+    super();
+    this._constructor();
   }
 }
+class XREngineTemplate extends HTMLTemplateElement {
+  constructor() {
+    super();
+    this._constructor();
+  }
+}
+[XREngine, XREngineTemplate].forEach(XREngine => {
+  for (const k in XREngineStatic) {
+    const o = Object.getOwnPropertyDescriptor(XREngineStatic, k);
+    if (o.get || o.set) {
+      Object.defineProperty(XREngine, k, o);
+    } else {
+      XREngine[k] = XREngineStatic[k];
+    }
+  }
+  for (const k in XREngineProto) {
+    const o = Object.getOwnPropertyDescriptor(XREngineProto, k);
+    if (o.get || o.set) {
+      Object.defineProperty(XREngine.prototype, k, o);
+    } else {
+      XREngine.prototype[k] = XREngineProto[k];
+    }
+  }
+});
 
-export {XREngine};
+export {
+  XREngine,
+  XREngineTemplate,
+};

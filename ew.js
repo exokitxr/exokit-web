@@ -14,8 +14,9 @@ import THREE from './lib/three-min.js';
 
 import GlobalContext from './src/GlobalContext.js';
 
-import {XREngine} from './src/xr-engine.js';
+import {XREngine, XREngineTemplate} from './src/xr-engine.js';
 window.XREngine = XREngine;
+window.XREngineTemplate = XREngineTemplate;
 
 import utils from './src/utils.js';
 const {_makeNullPromise} = utils;
@@ -141,7 +142,8 @@ const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 
-customElements.define('xr-engine', XREngine, {
+customElements.define('xr-engine', XREngine);
+customElements.define('xr-engine-template', XREngineTemplate, {
   extends: 'template',
 });
 
