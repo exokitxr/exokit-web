@@ -1,45 +1,58 @@
 <!doctype html>
 <html>
-  <body>
+<body>
   <input type=button value="Enter XR" onclick="document.getElementById('xr-engine').enterXr();">
   <!-- import exokit-web; replace API_KEY if accessing web origins, otherwise remove -->
   <script type=module src="https://web.exokit.org/ew.js?key=API_KEY"></script>
+  <!-- the below runs in engine context -->
   <template is=xr-engine-template id=xr-engine>
     <html>
-      <body>
-        <script>
-          const layers = [];
-          let session;
+    <body>
+      <!-- xr-site attaches us to engine's virtual WebXR -->
+      <xr-site>
+        <xr-iframe src="https://rawcdn.githack.com/exokitxr/webxr-samples/8a13dcbb22fa52feadfab7b7f41f85bdb3601a3f/xr-presentation.html"></xr-iframe>
+      </xr-site>
+      <script src="https://threejs.org/build/three.min.js"></script>
+      <script>
+        // Add A-Painter too
+        const fooFrame = document.createElement('xr-iframe');
+        fooFrame.src = 'https://aframe.io/a-painter';
+        fooFrame.addEventListener('load', () => {
+          console.log('A-Painter loaded!');
+        });
+        // Set the xr-iframe position, from any array
+        fooFrame.position = [0, 0, 0];
+        // Set the xr-iframe orientation
+        fooFrame.orientation = [0, 0, 0, 1];
+        // Set the xr-iframe scale
+        fooFrame.scale = [1, 1, 1];
+        // append the frame for rendering
+        const xrSite = document.querySelector('xr-site');
+        xrSite.appendChild(fooFrame);
 
-          const _enterXr = async () => {
-            session = await navigator.xr.requestSession({
-              exclusive: true,
-            });
-            session.layers = layers;
+        // animate the camera
+        (async () => {
+          const session = await xrSite.requestSession();
+
+          const camera = new THREE.PerspectiveCamera();
+          const _recurse = () => {
+            session.requestAnimationFrame(_recurse);
+
+            const f1 = (Date.now() % 5000) / 5000;
+            const solarSystemFrame = xrSite.querySelector('xr-iframe');
+            solarSystemFrame.position = new THREE.Vector3(0, Math.sin(f1*Math.PI*2), 0, 0).toArray();
+
+            const f2 = (Date.now() % 30000) / 30000;
+            camera.position.set(Math.cos(f2*Math.PI*2)*3, 3, Math.sin(f2*Math.PI*2)*3);
+            camera.lookAt(new THREE.Vector3());
+            xrSite.cameraPosition = camera.position.toArray();
+            xrSite.cameraOrientation = camera.quaternion.toArray();
           };
-
-         _enterXr()
-          .then(() => {
-            // Add solar system
-            fooFrame = document.createElement('xr-iframe');
-            fooFrame.src = 'https://rawcdn.githack.com/exokitxr/webxr-samples/8a13dcbb22fa52feadfab7b7f41f85bdb3601a3f/xr-presentation.html';
-            session.layers.push(fooFrame);
-
-            // Add A-Painter too
-            barFrame = document.createElement('xr-iframe');
-            barFrame.src = 'https://aframe.io/a-painter';
-            session.layers.push(barFrame);
-
-            // Set the xr-iframe position, from any array
-            barFrame.position = [1, 1, 1];
-            // Set the xr-iframe orientation
-            barFrame.orientation = [0, 0, 0, 1];
-            // Set the xr-iframe scale
-            barFrame.scale = [1, 1, 1];
-          })
-          </script>
-      </body>
+          _recurse();
+        })();
+      </script>
+    </body>
     </html>
   </template>
-  </body>
+</body>
 </html>
