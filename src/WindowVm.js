@@ -41,7 +41,7 @@ class WorkerVm extends EventTarget {
       .then(followUrl => new Promise((accept, reject) => {
         const src = window.location.origin +
           (options.args.options.url.startsWith('data:') ?
-            `${window.location.origin}/xr-engine-${Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)}.html`
+            `/xr-engine-${Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)}.html`
           :
             options.args.options.url.replace(/^[a-z]+:\/\/[a-zA-Z0-9\-\.]+(?::[0-9]+)?/, ''));
         const dst = `\
