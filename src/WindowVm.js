@@ -30,7 +30,7 @@ class WorkerVm extends EventTarget {
     const queue = [];
     const iframe = document.createElement('iframe');
     const _getFollowUrl = u => {
-      if (/^[a-z]+:\/\//.test(u) && !u.startsWith(location.origin)) {
+      if (/^[a-z]+:\/\//.test(u) && !u.startsWith('data:') && !u.startsWith(location.origin)) {
         return fetch('/.f/' + u)
           .then(res => res.text());
       } else {
