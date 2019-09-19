@@ -17,7 +17,13 @@ console.log('app 1');
 
 const root = document.querySelector('xr-site');
 const floorXrIframe = document.querySelector('xr-iframe[name=Floor]');
+floorXrIframe.addEventListener('load', e => {
+  console.log('floor load', e);
+});
 const introductionXrIframe = document.querySelector('xr-iframe[name=Introduction]');
+introductionXrIframe.addEventListener('load', e => {
+  console.log('introduction load', e);
+});
 const _addControls = xrIframe => {
   const object = new THREE.Object3D();
   object.position.fromArray(xrIframe.position);
