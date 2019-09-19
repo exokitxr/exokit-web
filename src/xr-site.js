@@ -22,7 +22,7 @@ class XRSite extends HTMLElement {
     this.customLayers = [];
     this.sessionPromise = _makeNullPromise();
 
-    this.observer = new MutationObserver(async mutations => {
+    new MutationObserver(async mutations => {
       await GlobalContext.loadPromise;
 
       for (let i = 0; i < mutations.length; i++) {
@@ -41,8 +41,7 @@ class XRSite extends HTMLElement {
       this.session.layers = Array.from(this.childNodes)
         .filter(childNode => childNode instanceof XRIFrame)
         .concat(this.customLayers);
-    });
-    this.observer.observe(this, {
+    }).observe(this, {
       childList: true,
     });
 
