@@ -4,20 +4,21 @@
   <body>
   <a class=button id="enter-xr-button">Enter XR</a>
   <script>
+    let xrEngine;
     const enterXrButton = document.getElementById('enter-xr-button');
     enterXrButton.addEventListener('click', () => {
       // Enter XR mode when button is clicked
-      xrScene.enterXr();
+      xrEngine.enterXr();
     });
 
     // Import exokit-web
     // replace API_KEY if accessing web origins, otherwise remove
     import('https://web.exokit.org/ew.js?key=API_KEY')
     .then(async () => {
-      // Create top-level xr-scene, define src attribute, and append/place it wherever you want as if it were a normal canvas
-      xrScene = document.createElement('xr-scene');
-      xrScene.src = 'app.html';
-      document.body.appendChild(xrScene);
+      // Create top-level xr-engine, define src attribute, and append/place it wherever you want as if it were a normal canvas
+      xrEngine = document.createElement('xr-engine');
+      xrEngine.src = 'app.html';
+      document.body.appendChild(xrEngine);
     });
     </script>
   </body>

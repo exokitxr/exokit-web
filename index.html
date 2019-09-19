@@ -264,14 +264,12 @@ function parseQuery(s) {
   return query;
 }
 
-let xrScene = null;
-
+let xrEngine;
 import(`./ew.js${window.location.search}`)
   .then(async () => {
-    xrScene = document.createElement('xr-scene');
-    xrScene.src = 'app.html';
-    // document.getElementById('iframe-wrapper').appendChild(xrScene);
-    xrScene.addEventListener('canvas', e => {
+    xrEngine = document.createElement('xr-engine');
+    xrEngine.src = 'app.html';
+    xrEngine.addEventListener('canvas', e => {
       const canvas = e.data;
       document.getElementById('iframe-wrapper').appendChild(canvas);
 
@@ -284,7 +282,7 @@ import(`./ew.js${window.location.search}`)
         });
       }
     });
-    xrScene.addEventListener('message', e => {
+    xrEngine.addEventListener('message', e => {
       const {data} = e;
       const {method} = data;
       switch (method) {
@@ -340,7 +338,7 @@ const _addTab = name => {
 const _loadLink = (aCube, origin = false) => {
   const name = aCube.innerText;
   const url = aCube.href;
-  xrScene.postMessage({
+  xrEngine.postMessage({
     method: 'load',
     name,
     url,
@@ -348,7 +346,7 @@ const _loadLink = (aCube, origin = false) => {
   });
 };
 const _unloadLink = index => {
-  xrScene.postMessage({
+  xrEngine.postMessage({
     method: 'unload',
     index,
   });
@@ -376,13 +374,13 @@ codeButton.addEventListener('click', () => {
   if (codeButton.classList.contains('open')) {
     code.value = '';
 
-    xrScene.postMessage({
+    xrEngine.postMessage({
       method: 'getCode',
     });
   } else {
     const currentCode = code.value;
     if (currentCode !== lastCode) {
-      xrScene.postMessage({
+      xrEngine.postMessage({
         method: 'setCode',
         code: currentCode,
       });
@@ -395,7 +393,7 @@ code.addEventListener('mousedown', e => {
 const enterXrButton = document.getElementById('enter-xr-button');
 const noXrButton = document.getElementById('no-xr-button');
 enterXrButton.addEventListener('click', () => {
-  xrScene.enterXr();
+  xrEngine.enterXr();
 });
     </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-147624282-1"></script>

@@ -14,8 +14,8 @@ import THREE from './lib/three-min.js';
 
 import GlobalContext from './src/GlobalContext.js';
 
-import XRScene from './src/xr-scene.js';
-window.XRScene = XRScene;
+import XREngine from './src/xr-engine.js';
+window.XREngine = XREngine;
 
 import utils from './src/utils.js';
 const {_makeNullPromise} = utils;

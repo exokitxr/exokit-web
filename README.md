@@ -27,8 +27,8 @@
 ```js
 import 'https://web.exokit.org/ew.js';
 
-xrScene = document.createElement('xr-scene');
-xrScene.src = 'app.html';
+xrEngine = document.createElement('xr-engine');
+xrEngine.src = 'app.html';
 ```
 
 ### app.html
