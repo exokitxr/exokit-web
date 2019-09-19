@@ -274,19 +274,6 @@ const _oninitmessage = async e => {
   }
   queue.length = 0;
 
-  // run init module
-
-  /* if (workerData.args) {
-    global.args = workerData.args;
-  } */
-
-  /* process.on('uncaughtException', err => {
-    console.warn('uncaught exception:', (err && err.stack) || err);
-  });
-  process.on('unhandledRejection', err => {
-    console.warn('unhandled rejection:', (err && err.stack) || err);
-  }); */
-
   await import(initModule);
 };
 self.addEventListener('message', _oninitmessage, {once: true});
