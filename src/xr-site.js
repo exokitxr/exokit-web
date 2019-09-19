@@ -17,7 +17,6 @@ class XRSite extends HTMLElement {
     this.sessionPromise = _makeNullPromise();
 
     this.fakeXrDisplay = new FakeXRDisplay();
-    this.fakeXrDisplay.pushUpdate();
     this.fakeXrDisplay.enable();
     this.cameraEnabled = true;
 
