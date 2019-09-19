@@ -5,7 +5,7 @@ const {_getBaseUrl, _getProxyUrl} = utils;
 
 import GlobalContext from './GlobalContext.js';
 
-class XREngine extends HTMLElement {
+class XREngine extends HTMLTemplateElement {
   constructor() {
     super();
 
@@ -220,6 +220,5 @@ class XREngine extends HTMLElement {
     }
   }
 }
-customElements.define('xr-engine', XREngine);
 
-export default XREngine;
+export {XREngine};

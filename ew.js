@@ -14,8 +14,7 @@ import THREE from './lib/three-min.js';
 
 import GlobalContext from './src/GlobalContext.js';
 
-import XREngine from './src/xr-engine.js';
-window.XREngine = XREngine;
+import {XREngine} from './src/xr-engine.js';
 
 import utils from './src/utils.js';
 const {_makeNullPromise} = utils;
@@ -607,5 +606,10 @@ core.animate = (timestamp, frame, referenceSpace) => {
   _tickAnimationFrames();
 };
 core.setSession(null);
+
+window.XREngine = XREngine;
+customElements.define('xr-engine', XREngine, {
+  extends: 'template',
+});
 
 })();
