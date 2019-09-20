@@ -10,7 +10,7 @@
 
 localforage.config({driver: localforage.INDEXEDDB});
 
-const redirects = new Map();
+const redirects = {};
 const nonProxyUrls = {
   'https://www.google-analytics.com/analytics.js': true,
 };
@@ -23,7 +23,12 @@ self.addEventListener('message', e => {
   const {method} = data;
   if (method === 'redirect') {
     const {src, dst} = data;
-    redirects.set(src, dst);
+    let redirectsArray = redirects[src];
+    if (!redirectsArray) {
+      redirectsArray = [];
+      redirects[src] = redirectsArray;
+    }
+    redirectsArray.push(dst);
   }
   e.ports[0].postMessage({});
 });
@@ -186,9 +191,12 @@ self.addEventListener('fetch', event => {
     }));
   } else {
     let u = event.request.url;
-    const dst = redirects.get(u);
-    if (dst) {
-      redirects.delete(event.request.url);
+    const redirectsArray = redirects[u];
+    if (redirectsArray) {
+      const dst = redirectsArray.shift();
+      if (redirectsArray.length === 0) {
+        delete redirects[u];
+      }
 
       const res = new Response(dst, {
         headers: {
