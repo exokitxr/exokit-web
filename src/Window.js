@@ -889,11 +889,11 @@ self.onrunasync = req => {
         }
       }
       break;
-    } */
+    }
     case 'eval': {// used in tests
       (0, eval)(req.scriptString);
       break;
-    }
+    } */
     default:
       throw new Error(`invalid window async request: ${JSON.stringify(req)}`);
   }
