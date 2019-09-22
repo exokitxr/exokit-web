@@ -475,10 +475,20 @@ const _fetchText = src => fetch(src)
       _clearLocalCbs(); // release garbage
     }
   };
-  const _renderLocal = layered => {
+  const _renderLocal = (layered, disabled) => {
     for (let i = 0; i < contexts.length; i++) {
       const context = contexts[i];
       context._exokitClearEnabled && context._exokitClearEnabled(true);
+      if (context._exokitBlendEnabled) {
+        if (disabled) {
+          context._exokitBlendEnabled(false);
+          context._exokitBlendFuncSeparate(context.CONSTANT_COLOR, context.ONE_MINUS_SRC_ALPHA, context.CONSTANT_COLOR, context.ONE_MINUS_SRC_ALPHA);
+          context._exokitBlendEquationSeparate(context.FUNC_ADD, context.FUNC_ADD);
+          context._exokitBlendColor(1, 0, 0, 0.5);
+        } else {
+          context._exokitBlendEnabled(true);
+        }
+      }
     }
     const layerContext = layered ? vrPresentState.glContext : null;
     if (layerContext) {
@@ -486,16 +496,17 @@ const _fetchText = src => fetch(src)
     }
     _tickLocalRafs();
   };
-  const _renderChild = (window, layered) => {
-    if (window.loaded) {
-      window.runAsync({
+  const _renderChild = (win, layered, disabled) => {
+    if (win.loaded) {
+      win.runAsync({
         method: 'tickAnimationFrame',
         // layered: layered && vrPresentState.layers.some(layer => layer.contentWindow === window),
         layered,
+        disabled,
       });
     }
   };
-  const _render = layered => {
+  const _render = (layered, disabled) => {
     for (let i = 0; i < windows.length; i++) {
       windows[i].rendered = false;
     }
@@ -503,23 +514,23 @@ const _fetchText = src => fetch(src)
       const layer = vrPresentState.layers[i];
       const contentWindow = layer && layer.contentWindow;
       if (contentWindow) {
-         _renderChild(contentWindow, true);
+         _renderChild(contentWindow, true, disabled || contentWindow.disabled);
         contentWindow.rendered = true;
       }
     }
     for (let i = 0; i < windows.length; i++) {
       const win = windows[i];
       if (win && !win.rendered) {
-        _renderChild(win, false);
+        _renderChild(win, false, disabled || win.disabled);
         win.rendered = true;
       }
     }
-    _renderLocal(layered);
+    _renderLocal(layered, disabled);
   };
-  window.tickAnimationFrame = ({layered = false}) => {
+  window.tickAnimationFrame = ({layered = false, disabled = false}) => {
     _updateXr();
     _emitXrEvents();
-    _render(layered);
+    _render(layered, disabled);
   };
 
   const _ensureProxyContext = () => {
