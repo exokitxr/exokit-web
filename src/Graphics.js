@@ -295,6 +295,16 @@ ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function
     return {};
   }
 })(ProxiedWebGLRenderingContext.prototype.getExtension);
+ProxiedWebGLRenderingContext.prototype.enable = (oldEnable => function enable(flag) {
+  if (flag !== this.BLEND || this._enabled.blend) {
+    oldEnable.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.enable);
+ProxiedWebGLRenderingContext.prototype.disable = (oldDisable => function disable(flag) {
+  if (flag !== this.BLEND || this._enabled.blend) {
+    oldDisable.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.disable);
 ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
     oldClear.apply(this, arguments);
@@ -325,7 +335,9 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
       gl.bindFramebuffer(k, state.framebuffer[k]);
     }
 
-    enableDisable(gl, gl.BLEND, state.blend);
+    if (this._enabled.blend) {
+      enableDisable(gl, gl.BLEND, state.blend);
+    }
     enableDisable(gl, gl.CULL_FACE, state.cullFace);
     enableDisable(gl, gl.DEPTH_TEST, state.depthTest);
     enableDisable(gl, gl.DITHER, state.dither);
