@@ -15,6 +15,7 @@ class XRIFrame extends HTMLElement {
 
     this.contentWindow = null;
     this.xrOffset = new XRRigidTransform();
+    this._disabled = false;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -79,6 +80,7 @@ class XRIFrame extends HTMLElement {
             }
           },
         });
+        win.disabled = this._disabled;
         win.addEventListener('load', () => {
           this.dispatchEvent(new CustomEvent('load'));
         });
@@ -117,6 +119,8 @@ class XRIFrame extends HTMLElement {
           this.xrOffset.pushUpdate();
         }
       }
+    } else if (name === 'disabled') {
+      this.disabled = newValue === '' || newValue === 'true';
     }
   }
   static get observedAttributes() {
@@ -125,6 +129,7 @@ class XRIFrame extends HTMLElement {
       'position',
       'orientation',
       'scale',
+      'disabled',
     ];
   }
   get src() {
@@ -184,6 +189,16 @@ class XRIFrame extends HTMLElement {
     return !!this.contentWindow && this.contentWindow.loaded;
   }
   set loaded(loaded) {}
+
+  get disabled() {
+    return !!this.contentWindow && this.contentWindow.disabled;
+  }
+  set disabled(disabled) {
+    this._disabled = disabled;
+    if (this.contentWindow) {
+      this.contentWindow.disabled = disabled;
+    }
+  }
 
   postMessage(m, transfers) {
     this.contentWindow.postMessage(m, transfers);

@@ -280,6 +280,15 @@ const _makeWindow = (options = {}) => {
   window.id = id;
   window.loaded = false;
   window.rendered = false;
+  let disabled = false;
+  Object.defineProperty(window, 'disabled', {
+    get() {
+      return disabled;
+    },
+    set(newDisabled) {
+      disabled = newDisabled;
+    },
+  });
   // window.framebuffer = null;
   // window.phase = 0; // XXX
   // window.rendered = false;
