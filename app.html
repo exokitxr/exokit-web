@@ -227,6 +227,18 @@ window.addEventListener('message', e => {
       _postTabs();
       break;
     }
+    case 'mouseenter': {
+      const {index} = data;
+      const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
+      xrIframe.highlight = [0.5, 0, 0, 0.7];
+      break;
+    }
+    case 'mouseleave': {
+      const {index} = data;
+      const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
+      xrIframe.highlight = null;
+      break;
+    }
   }
 });
 

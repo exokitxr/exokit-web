@@ -327,6 +327,20 @@ const _addTab = name => {
   const div = document.createElement('div');
   div.innerHTML = `<div class=tab><span class=text>${name}</span><a href="#" class=close-x><i class="fal fa-times"></i></a></div>`;
   const tab = div.childNodes[0];
+  tab.addEventListener('mouseenter', e => {
+    const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
+    xrEngine.postMessage({
+      method: 'mouseenter',
+      index,
+    });
+  });
+  tab.addEventListener('mouseleave', e => {
+    const index = Array.prototype.indexOf.call(tabs.childNodes, tab);
+    xrEngine.postMessage({
+      method: 'mouseleave',
+      index,
+    });
+  });
   const closeX = tab.querySelector('.close-x');
   closeX.addEventListener('click', e => {
     e.preventDefault();
