@@ -15,7 +15,7 @@ class XRIFrame extends HTMLElement {
 
     this.contentWindow = null;
     this.xrOffset = new XRRigidTransform();
-    this._disabled = false;
+    this._highlight = null;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -80,7 +80,7 @@ class XRIFrame extends HTMLElement {
             }
           },
         });
-        win.disabled = this._disabled;
+        win.highlight = this._highlight;
         win.addEventListener('load', () => {
           this.dispatchEvent(new CustomEvent('load'));
         });
@@ -119,8 +119,14 @@ class XRIFrame extends HTMLElement {
           this.xrOffset.pushUpdate();
         }
       }
-    } else if (name === 'disabled') {
-      this.disabled = newValue === '' || newValue === 'true';
+    } else if (name === 'highlight') {
+      let highlight = newValue.split(' ');
+      if (highlight.length === 4) {
+        highlight = highlight.map(s => parseFloat(s));
+        if (highlight.every(n => isFinite(n))) {
+          this.highlight = highlight;
+        }
+      }
     }
   }
   static get observedAttributes() {
@@ -129,7 +135,7 @@ class XRIFrame extends HTMLElement {
       'position',
       'orientation',
       'scale',
-      'disabled',
+      'highlight',
     ];
   }
   get src() {
@@ -190,13 +196,13 @@ class XRIFrame extends HTMLElement {
   }
   set loaded(loaded) {}
 
-  get disabled() {
-    return !!this.contentWindow && this.contentWindow.disabled;
+  get highlight() {
+    return !!this.contentWindow && this.contentWindow.highlight;
   }
-  set disabled(disabled) {
-    this._disabled = disabled;
+  set highlight(highlight) {
+    this._highlight = highlight;
     if (this.contentWindow) {
-      this.contentWindow.disabled = disabled;
+      this.contentWindow.highlight = highlight;
     }
   }
 
