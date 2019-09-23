@@ -15,6 +15,7 @@ class XRIFrame extends HTMLElement {
 
     this.contentWindow = null;
     this.xrOffset = new XRRigidTransform();
+    this._highlight = null;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -79,6 +80,7 @@ class XRIFrame extends HTMLElement {
             }
           },
         });
+        win.highlight = this._highlight;
         win.addEventListener('load', () => {
           this.dispatchEvent(new CustomEvent('load'));
         });
@@ -117,6 +119,14 @@ class XRIFrame extends HTMLElement {
           this.xrOffset.pushUpdate();
         }
       }
+    } else if (name === 'highlight') {
+      let highlight = newValue.split(' ');
+      if (highlight.length === 4) {
+        highlight = highlight.map(s => parseFloat(s));
+        if (highlight.every(n => isFinite(n))) {
+          this.highlight = highlight;
+        }
+      }
     }
   }
   static get observedAttributes() {
@@ -125,6 +135,7 @@ class XRIFrame extends HTMLElement {
       'position',
       'orientation',
       'scale',
+      'highlight',
     ];
   }
   get src() {
@@ -184,6 +195,16 @@ class XRIFrame extends HTMLElement {
     return !!this.contentWindow && this.contentWindow.loaded;
   }
   set loaded(loaded) {}
+
+  get highlight() {
+    return !!this.contentWindow && this.contentWindow.highlight;
+  }
+  set highlight(highlight) {
+    this._highlight = highlight;
+    if (this.contentWindow) {
+      this.contentWindow.highlight = highlight;
+    }
+  }
 
   postMessage(m, transfers) {
     this.contentWindow.postMessage(m, transfers);

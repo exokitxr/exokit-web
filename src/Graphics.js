@@ -154,6 +154,7 @@ function ProxiedWebGLRenderingContext(canvas) {
   this.id = ++GlobalContext.xrState.id[0];
   this.state = _makeState();
   this._enabled = {
+    blend: true,
     clear: true,
   };
 
@@ -217,6 +218,21 @@ ProxiedWebGLRenderingContext.prototype._exokitClear = function _exokitClear() {
 ProxiedWebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
   this._enabled.clear = enabled;
 };
+ProxiedWebGLRenderingContext.prototype._exokitBlendFuncSeparate = function _exokitBlendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha) {
+  const gl = GlobalContext.proxyContext;
+  gl.blendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha);
+};
+ProxiedWebGLRenderingContext.prototype._exokitBlendEquationSeparate = function _exokitBlendEquationSeparate(rgb, a) {
+  const gl = GlobalContext.proxyContext;
+  gl.blendEquationSeparate(rgb, a);
+};
+ProxiedWebGLRenderingContext.prototype._exokitBlendColor = function _exokitBlendColor(r, g, b, a) {
+  const gl = GlobalContext.proxyContext;
+  gl.blendColor(r, g, b, a);
+};
+ProxiedWebGLRenderingContext.prototype._exokitBlendEnabled = function _exokitBlendEnabled(enabled) {
+  this._enabled.blend = enabled;
+};
 class OES_vertex_array_object {
   constructor(gl) {
     this.gl = gl;
@@ -279,6 +295,16 @@ ProxiedWebGLRenderingContext.prototype.getExtension = (_getExtension => function
     return {};
   }
 })(ProxiedWebGLRenderingContext.prototype.getExtension);
+ProxiedWebGLRenderingContext.prototype.enable = (oldEnable => function enable(flag) {
+  if (flag !== this.BLEND || this._enabled.blend) {
+    oldEnable.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.enable);
+ProxiedWebGLRenderingContext.prototype.disable = (oldDisable => function disable(flag) {
+  if (flag !== this.BLEND || this._enabled.blend) {
+    oldDisable.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.disable);
 ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
   if (this._enabled.clear) {
     oldClear.apply(this, arguments);
@@ -309,7 +335,9 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
       gl.bindFramebuffer(k, state.framebuffer[k]);
     }
 
-    enableDisable(gl, gl.BLEND, state.blend);
+    if (this._enabled.blend) {
+      enableDisable(gl, gl.BLEND, state.blend);
+    }
     enableDisable(gl, gl.CULL_FACE, state.cullFace);
     enableDisable(gl, gl.DEPTH_TEST, state.depthTest);
     enableDisable(gl, gl.DITHER, state.dither);
@@ -329,9 +357,11 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
 
     gl.viewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3]);
     gl.scissor(state.scissor[0], state.scissor[1], state.scissor[2], state.scissor[3]);
-    gl.blendFuncSeparate(state.blendSrcRgb, state.blendDstRgb, state.blendSrcAlpha, state.blendDstAlpha);
-    gl.blendEquationSeparate(state.blendEquationRgb, state.blendEquationAlpha);
-    gl.blendColor(state.blendColor[0], state.blendColor[1], state.blendColor[2], state.blendColor[3]);
+    if (this._enabled.blend) {
+      gl.blendFuncSeparate(state.blendSrcRgb, state.blendDstRgb, state.blendSrcAlpha, state.blendDstAlpha);
+      gl.blendEquationSeparate(state.blendEquationRgb, state.blendEquationAlpha);
+      gl.blendColor(state.blendColor[0], state.blendColor[1], state.blendColor[2], state.blendColor[3]);
+    }
     gl.clearColor(state.colorClearValue[0], state.colorClearValue[1], state.colorClearValue[2], state.colorClearValue[3]);
     gl.colorMask(state.colorMask[0], state.colorMask[1], state.colorMask[2], state.colorMask[3]);
     gl.cullFace(state.cullFaceMode);
@@ -494,24 +524,46 @@ ProxiedWebGLRenderingContext.prototype.scissor = (_scissor => function scissor(x
   this.state.scissor[3] = h;
   return _scissor.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.scissor);
+ProxiedWebGLRenderingContext.prototype.blendFunc = (_blendFunc => function blendFunc(blendSrc, blendDst) {
+  this.state.blendSrcRgb = blendSrc;
+  this.state.blendDstRgb = blendDst;
+  this.state.blendSrcAlpha = blendSrc;
+  this.state.blendDstAlpha = blendDst;
+  if (this._enabled.blend) {
+    return _blendFunc.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.blendFunc);
 ProxiedWebGLRenderingContext.prototype.blendFuncSeparate = (_blendFuncSeparate => function blendFuncSeparate(blendSrcRgb, blendDstRgb, blendSrcAlpha, blendDstAlpha) {
   this.state.blendSrcRgb = blendSrcRgb;
   this.state.blendDstRgb = blendDstRgb;
   this.state.blendSrcAlpha = blendSrcAlpha;
   this.state.blendDstAlpha = blendDstAlpha;
-  return _blendFuncSeparate.apply(this, arguments);
+  if (this._enabled.blend) {
+    return _blendFuncSeparate.apply(this, arguments);
+  }
 })(ProxiedWebGLRenderingContext.prototype.blendFuncSeparate);
+ProxiedWebGLRenderingContext.prototype.blendEquation = (_blendEquation => function blendEquation(blendEquation) {
+  this.state.blendEquationRgb = blendEquation;
+  this.state.blendEquationAlpha = blendEquation;
+  if (this._enabled.blend) {
+    return _blendEquation.apply(this, arguments);
+  }
+})(ProxiedWebGLRenderingContext.prototype.blendEquation);
 ProxiedWebGLRenderingContext.prototype.blendEquationSeparate = (_blendEquationSeparate => function blendEquationSeparate(blendEquationRgb, blendEquationAlpha) {
   this.state.blendEquationRgb = blendEquationRgb;
   this.state.blendEquationAlpha = blendEquationAlpha;
-  return _blendEquationSeparate.apply(this, arguments);
+  if (this._enabled.blend) {
+    return _blendEquationSeparate.apply(this, arguments);
+  }
 })(ProxiedWebGLRenderingContext.prototype.blendEquationSeparate);
 ProxiedWebGLRenderingContext.prototype.blendColor = (_blendColor => function blendColor(r, g, b, a) {
   this.state.blendColor[0] = r;
   this.state.blendColor[1] = g;
   this.state.blendColor[2] = b;
   this.state.blendColor[3] = a;
-  return _blendColor.apply(this, arguments);
+  if (this._enabled.blend) {
+    return _blendColor.apply(this, arguments);
+  }
 })(ProxiedWebGLRenderingContext.prototype.blendColor);
 ProxiedWebGLRenderingContext.prototype.clearColor = (_clearColor => function clearColor(r, g, b, a) {
   this.state.colorClearValue[0] = r;
