@@ -35,6 +35,9 @@ THREE.TransformControls = function ( camera, domElement ) {
 	defineProperty( "showX", true );
 	defineProperty( "showY", true );
 	defineProperty( "showZ", true );
+	defineProperty( "translationScale", 1 );
+	defineProperty( "rotationScale", 1 );
+	defineProperty( "scaleScale", 1 );
 
 	var changeEvent = { type: "change" };
 	var mouseDownEvent = { type: "mouseDown" };
@@ -344,6 +347,8 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 			}
 
+      offset.multiplyScalar(this.translationScale);
+
 			object.position.copy( offset ).add( positionStart );
 
 			// Apply translation snap
@@ -450,6 +455,8 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 			}
 
+      _tempVector2.multiplyScalar(this.scaleScale);
+
 			// Apply scale
 
 			object.scale.copy( scaleStart ).multiply( _tempVector2 );
@@ -494,6 +501,8 @@ THREE.TransformControls = function ( camera, domElement ) {
 			// Apply rotation snap
 
 			if ( this.rotationSnap ) rotationAngle = Math.round( rotationAngle / this.rotationSnap ) * this.rotationSnap;
+
+      rotationAngle *= this.rotationScale;
 
 			this.rotationAngle = rotationAngle;
 
