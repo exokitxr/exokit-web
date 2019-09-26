@@ -404,6 +404,29 @@ codeButton.addEventListener('click', () => {
 code.addEventListener('mousedown', e => {
   e.stopPropagation();
 });
+window.addEventListener('keydown', e => {
+  console.log('got key', e.keyCode);
+  switch (e.keyCode) {
+    case 87: // W
+      xrEngine.postMessage({
+        method: 'setMode',
+        mode: 'translate',
+      });
+      break;
+    case 69: // E
+      xrEngine.postMessage({
+        method: 'setMode',
+        mode: 'rotate',
+      });
+      break;
+    case 82: // R
+      xrEngine.postMessage({
+        method: 'setMode',
+        mode: 'scale',
+      });
+      break;
+  }
+});
 const enterXrButton = document.getElementById('enter-xr-button');
 const noXrButton = document.getElementById('no-xr-button');
 enterXrButton.addEventListener('click', () => {

@@ -227,6 +227,17 @@ window.addEventListener('message', e => {
       _postTabs();
       break;
     }
+    case 'setMode': {
+      const {mode} = data;
+      const xrIframes = Array.from(root.childNodes);
+      for (let i = 0; i < xrIframes.length; i++) {
+        const xrIframe = xrIframes[i];
+        if (xrIframe instanceof XRIFrame) {
+          xrIframe.control.setMode(mode);
+        }
+      }
+      break;
+    }
     case 'mouseenter': {
       const {index} = data;
       const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];
