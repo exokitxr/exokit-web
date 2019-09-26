@@ -238,6 +238,21 @@ window.addEventListener('message', e => {
       }
       break;
     }
+    case 'setScale': {
+      const {scale} = data;
+      const xrIframes = Array.from(root.childNodes);
+      const dragging = xrIframes.some(xrIframe => xrIframe instanceof XRIFrame && xrIframe.control.dragging);
+      if (!dragging) {
+        for (let i = 0; i < xrIframes.length; i++) {
+          const xrIframe = xrIframes[i];
+          if (xrIframe instanceof XRIFrame) {
+            xrIframe.control.rotationScale = scale;
+            xrIframe.control.scaleScale = scale;
+          }
+        }
+      }
+      break;
+    }
     case 'mouseenter': {
       const {index} = data;
       const xrIframe = Array.from(root.childNodes).filter(childNode => childNode instanceof XRIFrame)[index];

@@ -424,6 +424,30 @@ window.addEventListener('keydown', e => {
         mode: 'scale',
       });
       break;
+    case 49: // 1
+      xrEngine.postMessage({
+        method: 'setScale',
+        scale: 1,
+      });
+      break;
+    case 50: // 2
+      xrEngine.postMessage({
+        method: 'setScale',
+        scale: 0.1,
+      });
+      break;
+    case 51: // 3
+      xrEngine.postMessage({
+        method: 'setScale',
+        scale: 0.01,
+      });
+      break;
+    case 52: // 4
+      xrEngine.postMessage({
+        method: 'setScale',
+        scale: 0.001,
+      });
+      break;
   }
 });
 const enterXrButton = document.getElementById('enter-xr-button');
