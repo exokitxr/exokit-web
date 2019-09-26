@@ -2,8 +2,7 @@
 <html>
 <body>
   <input type=button value="Enter XR" onclick="document.getElementById('xr-engine').enterXr();">
-  <!-- import exokit-web; replace API_KEY if accessing web origins, otherwise remove -->
-  <script type=module src="https://web.exokit.org/ew.js?key=API_KEY"></script>
+  <script type=module src="https://web.exokit.org/ew.js"></script>
   <!-- the below runs in engine context -->
   <template is=xr-engine-template id=xr-engine>
     <html>
