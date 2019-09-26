@@ -72,28 +72,6 @@ importScripts('https://web.exokit.org/sw.js');
 
 Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
 
-If your app is limited to your own site (same origin), you're done! Read the [API Documentation](https://docs.exokit.org/).
-
-If your app acceses other sites (i.e. [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)), the above will not work.
-
-## Cross-origin setup
-
-To access web origins Exokit Web can use a proxy.
-
-This requires setting an API key for the origin (domain) you're using. This is required even if you're only using the `https://dev.exokit.org` origin that points to `127.0.0.1`.
-
-### 1. Get an API key
-
-API keys are free; ask for one in our [Discord](https://discord.gg/zgYEJgS).
-
-### 2. Add API key
-
-Add your API key to your Exokit Web import:
-
-```html
-<script type=module src="https://web.exokit.org/ew.js"></script>
-```
-
 And that's it! Read the [API Documentation](https://docs.exokit.org/).
 
 ## Future directions
