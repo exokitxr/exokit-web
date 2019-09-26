@@ -405,7 +405,6 @@ code.addEventListener('mousedown', e => {
   e.stopPropagation();
 });
 window.addEventListener('keydown', e => {
-  console.log('got key', e.keyCode);
   switch (e.keyCode) {
     case 87: // W
       xrEngine.postMessage({
