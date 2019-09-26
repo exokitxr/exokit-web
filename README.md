@@ -49,7 +49,7 @@ session.layers.push(barFrame);
 
 See [`index.html`](index.html) for a full example.
 
-## Run examples
+## Start example server
 
 ```
 npm install
@@ -64,11 +64,13 @@ Import `ew.js` into your app:
 <script type=module src="https://web.exokit.org/ew.js"></script>
 ```
 
-In the _top-level directory of your app_, add `sw.js` with these contents:
+In the _top-level directory of your app_, create the file `sw.js` with these contents:
 
 ```js
 importScripts('https://web.exokit.org/sw.js');
 ```
+
+The [boilerplate code](https://github.com/exokitxr/exokit-web/blob/master/boilerplate/sw.js) has this set up already.
 
 Finally, make sure you are serving your app over `https://` (or `localhost`), which is [required for Service Workers](https://developers.google.com/web/fundamentals/primers/service-workers/#you_need_https).
 
