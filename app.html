@@ -33,7 +33,7 @@ const _addControls = xrIframe => {
   control.size = 3;
   control.addEventListener('change', e => {
     xrIframe.position = object.position.toArray();
-    xrIframe.quaternion = object.quaternion.toArray();
+    xrIframe.orientation = object.quaternion.toArray();
     xrIframe.scale = object.scale.toArray();
   });
   control.addEventListener('dragging-changed', e => {
