@@ -91,7 +91,7 @@ API keys are free; ask for one in our [Discord](https://discord.gg/zgYEJgS).
 Add your API key to your Exokit Web import:
 
 ```html
-<script type=module src="https://web.exokit.org/ew.js?key=YOUR_API_KEY_HERE"></script>
+<script type=module src="https://web.exokit.org/ew.js"></script>
 ```
 
 And that's it! Read the [API Documentation](https://docs.exokit.org/).
