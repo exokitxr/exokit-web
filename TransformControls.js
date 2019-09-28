@@ -25,6 +25,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 	defineProperty( "camera", camera );
 	defineProperty( "object", undefined );
 	defineProperty( "enabled", true );
+	defineProperty( "draggable", true );
 	defineProperty( "axis", null );
 	defineProperty( "mode", "translate" );
 	defineProperty( "translationSnap", null );
@@ -572,7 +573,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 	function onPointerDown( event ) {
 
-		if ( ! scope.enabled ) return;
+		if ( ! scope.enabled || ! scope.draggable ) return;
 
 		document.addEventListener( "mousemove", onPointerMove, false );
 
@@ -583,7 +584,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 	function onPointerMove( event ) {
 
-		if ( ! scope.enabled ) return;
+		if ( ! scope.enabled || ! scope.draggable ) return;
 
 		scope.pointerMove( getPointer( event ) );
 
@@ -591,7 +592,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 	function onPointerUp( event ) {
 
-		if ( ! scope.enabled ) return;
+		if ( ! scope.enabled || ! scope.draggable ) return;
 
 		document.removeEventListener( "mousemove", onPointerMove, false );
 
