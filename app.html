@@ -39,6 +39,15 @@ const _addControls = xrIframe => {
   control.addEventListener('dragging-changed', e => {
     orbitControls.enabled = !e.value;
   });
+  control.addEventListener('mouseEnter', () => {
+    const xrIframes = Array.from(root.childNodes).filter(xrIframe => xrIframe instanceof XRIFrame);
+    if (!xrIframes.some(xrIframe => xrIframe.control.draggable)) {
+      xrIframe.control.draggable = true;
+    }
+  });
+  control.addEventListener('mouseLeave', () => {
+    xrIframe.control.draggable = false;
+  });
   xrIframe.control = control;
   scene.add(control);
 };
