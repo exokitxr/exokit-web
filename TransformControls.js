@@ -43,6 +43,8 @@ THREE.TransformControls = function ( camera, domElement ) {
 	var changeEvent = { type: "change" };
 	var mouseDownEvent = { type: "mouseDown" };
 	var mouseUpEvent = { type: "mouseUp", mode: scope.mode };
+	var mouseEnterEvent = { type: "mouseEnter" };
+	var mouseLeaveEvent = { type: "mouseLeave" };
 	var objectChangeEvent = { type: "objectChange" };
 
 	// Reusable utility variables
@@ -232,9 +234,13 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 			this.axis = intersect.object.name;
 
+			this.dispatchEvent( mouseEnterEvent );
+
 		} else {
 
 			this.axis = null;
+
+			this.dispatchEvent( mouseLeaveEvent );
 
 		}
 
