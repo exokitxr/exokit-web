@@ -122,4 +122,28 @@ const _makeNullPromise = () => {
 };
 module.exports._makeNullPromise = _makeNullPromise;
 
+const _replaceDocument = async htmlString => {
+  document.open();
+  document.write(htmlString);
+  document.close();
+
+  if (document.readyState !== 'complete') {
+    await new Promise((accept, reject) => {
+      document.addEventListener('readystatechange', () => {
+        if (document.readyState === 'complete') {
+          accept();
+        }
+      });
+    });
+  }
+  await new Promise((accept, reject) => {
+    const script = document.createElement('script');
+    script.onload = accept;
+    script.onerror = reject;
+    script.src = `data:application/javascript,1`;
+    document.body.appendChild(script);
+  });
+};
+module.exports._replaceDocument = _replaceDocument;
+
 export default module.exports;

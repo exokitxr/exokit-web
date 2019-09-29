@@ -23,7 +23,7 @@ import symbols from './symbols.js';
 
 import * as XR from './XR.js';
 import utils from './utils.js';
-const {_elementGetter, _elementSetter} = utils;
+const {_elementGetter, _elementSetter, _replaceDocument} = utils;
 
 import XRIFrame from './xr-iframe.js';
 import XRSite from './xr-site.js';
@@ -740,26 +740,7 @@ const _fetchText = src => fetch(src)
     }
   } */
 
-  document.open();
-  document.write(htmlString);
-  document.close();
-
-  if (document.readyState !== 'complete') {
-    await new Promise((accept, reject) => {
-      document.addEventListener('readystatechange', () => {
-        if (document.readyState === 'complete') {
-          accept();
-        }
-      });
-    });
-  }
-  await new Promise((accept, reject) => {
-    const script = document.createElement('script');
-    script.onload = accept;
-    script.onerror = reject;
-    script.src = `data:application/javascript,1`;
-    document.body.appendChild(script);
-  });
+  await _replaceDocument(htmlString);
 
 })(self).then(() => {
   self._onbootstrap({
