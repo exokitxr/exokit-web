@@ -85,8 +85,44 @@ class XREngineTemplate extends HTMLTemplateElement {
       for (let i = 0; i < childNodes.length; i++) {
         const childNode = childNodes[i];
         if (childNode.nodeType === Node.ELEMENT_NODE) {
-          const xrIframe = document.importNode(childNode, true);
-          this.insertAdjacentElement('afterend', xrIframe);
+          let node = document.importNode(childNode, true);
+          let scripts = node.matches('script') ? [node] : Array.from(node.querySelectorAll('script'));
+          scripts = scripts.map(oldScript => {
+            const {src, innerHTML} = oldScript;
+            const script = document.createElement('script');
+            if (src) {
+              script.spec = {
+                type: 'src',
+                data: src,
+              };
+            } else {
+              script.spec = {
+                type: 'innerHTML',
+                data: innerHTML,
+              };
+            }
+            if (oldScript.parentNode) {
+              oldScript.parentNode.replaceChild(script, oldScript);
+            }
+            if (oldScript === node) {
+              node = script;
+            }
+            return script;
+          });
+          this.insertAdjacentElement('afterend', node);
+          for (let i = 0; i < scripts.length; i++) {
+            const script = scripts[i];
+            const p = new Promise((accept, reject) => {
+              script.addEventListener('load', accept);
+              script.addEventListener('error', reject);
+            });
+            if (script.spec.type === 'src') {
+              script.src = script.spec.data;
+            } else if (script.spec.type === 'innerHTML') {
+              script.innerHTML = script.spec.data;
+            }
+            await p;
+          }
         }
       }
     })();
