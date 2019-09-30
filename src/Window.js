@@ -517,6 +517,7 @@ const _fetchText = src => fetch(src)
       if (context._exokitBlendEnabled) {
         if (highlight) {
           context._exokitBlendEnabled(false);
+          context._exokitEnable(context.BLEND);
           context._exokitBlendFuncSeparate(context.CONSTANT_COLOR, context.ONE_MINUS_SRC_ALPHA, context.CONSTANT_COLOR, context.ONE_MINUS_SRC_ALPHA);
           context._exokitBlendEquationSeparate(context.FUNC_ADD, context.FUNC_ADD);
           context._exokitBlendColor(highlight[0], highlight[1], highlight[2], highlight[3]);
