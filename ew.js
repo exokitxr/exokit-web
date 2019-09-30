@@ -111,7 +111,6 @@ const xrState = (() => {
       return result;
     })(),
     axes: _makeTypedArray(Float32Array, 10),
-    bones: _makeTypedArray(Float32Array, 31*16),
   });
   result.gamepads = (() => {
     const result = Array(2);
