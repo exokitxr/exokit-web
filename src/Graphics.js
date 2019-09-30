@@ -218,6 +218,14 @@ ProxiedWebGLRenderingContext.prototype._exokitClear = function _exokitClear() {
 ProxiedWebGLRenderingContext.prototype._exokitClearEnabled = function _exokitClearEnabled(enabled) {
   this._enabled.clear = enabled;
 };
+ProxiedWebGLRenderingContext.prototype._exokitEnable = function _exokitEnable(flag) {
+  const gl = GlobalContext.proxyContext;
+  gl.enable(flag);
+};
+ProxiedWebGLRenderingContext.prototype._exokitDisable = function _exokitDisable(flag) {
+  const gl = GlobalContext.proxyContext;
+  gl.disable(flag);
+};
 ProxiedWebGLRenderingContext.prototype._exokitBlendFuncSeparate = function _exokitBlendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha) {
   const gl = GlobalContext.proxyContext;
   gl.blendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha);
