@@ -1,5 +1,6 @@
 import {_makeWindow} from './WindowVm.js';
 
+import THREE from '../lib/three-min.js';
 import {XRRigidTransform} from './XR.js';
 
 import utils from './utils.js';
@@ -8,6 +9,9 @@ const {_normalizeUrl/*, _getProxyUrl*/} = utils;
 import symbols from './symbols.js';
 
 import GlobalContext from './GlobalContext.js';
+
+const localVector = new THREE.Vector3();
+const localMatrix = new THREE.Matrix4();
 
 function parseExtents(s) {
   const regex = /(?:\[([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\]|([0-9]+)\s+([0-9]+))\s*/g;
@@ -249,6 +253,36 @@ class XRIFrame extends HTMLElement {
   }
   set loadFactor(loadFactor) {
     this._loadFactor = loadFactor;
+  }
+
+  contains(position) {
+    if (Array.isArray(position) && position.length === 3 && position.every(n => isFinite(n))) {
+      localVector
+        .fromArray(position)
+        .applyMatrix4(
+          localMatrix
+            .copy(GlobalContext.getXrOffsetMatrix())
+            .getInverse(localMatrix)
+        );
+      const {extents, loadFactor} = this;
+      if (extents.length > 0 && isFinite(loadFactor)) {
+        return extents.some(([x1, y1, x2, y2]) => {
+          const cx = (x1 + x2) / 2;
+          const cy = (y1 + y2) / 2;
+          const sx = (x2 - x1) * loadFactor;
+          const sy = (y2 - y1) * loadFactor;
+          const minX = cx - sx/2;
+          const minY = cy - sy/2;
+          const maxX = cx + sx/2;
+          const maxY = cy + sy/2;
+          return localVector.x >= minX && localVector.z >= minY && localVector.x < maxX && localVector.z < maxY;
+        });
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
   }
 
   postMessage(m, transfers) {
