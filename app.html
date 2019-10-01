@@ -58,6 +58,59 @@ const _addControls = xrIframe => {
 const _removeControls = xrIframe => {
   scene.remove(xrIframe.control);
 };
+const _insertBefore = (a, b) => {
+  scene.add(a);
+  const aIndex = scene.children.indexOf(a);
+  scene.children.splice(aIndex, 1);
+  const bIndex = scene.children.indexOf(b);
+  scene.children.splice(bIndex, 0, a);
+};
+const _addGuardian = xrIframe => {
+  const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
+  const childXrIframes = Array.from(xrIframe)
+    .concat(
+      Array.from(contentDocument.querySelectorAll('template')).flatMap(template => Array.from(template.content.querySelectorAll('xr-iframe')))
+    );
+  const xrExtents = childXrIframes.map(xrIframe => {
+    const extents = xrIframe.getAttribute('extents');
+    return extents ? XRIFrame.parseExtents(extents) : [];
+  });
+  for (let i = 0; i < xrExtents.length; i++) {
+    const xrExtent = xrExtents[i];
+    const sceneColor = 0x9ccc65;
+
+    const baseMesh = new THREE.Land(xrExtent, sceneColor);
+    scene.add(baseMesh);
+    if (guardianMeshes.length > 0) {
+      _insertBefore(baseMesh, guardianMeshes[0]);
+    } else {
+      baseMeshes.push(baseMesh);
+    }
+
+    const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
+    scene.add(guardianMesh);
+    guardianMeshes.push(guardianMesh);
+  }
+};
+const _updateGuardians = () => {
+  const xrIframes = Array.from(root.childNodes);
+  for (let i = 0; i < xrIframes.length; i++) {
+    const xrIframe = xrIframes[i];
+    if (!xrIframe.guardianMeshed) {
+      xrIframe.guardianMeshed = true;
+
+      if (xrIframe.loaded) {
+        _addGuardian(xrIframe);
+      } else {
+        xrIframe.addEventListener('load', () => {
+          _addGuardian(xrIframe);
+        }, {
+          once: true,
+        });
+      }
+    }
+  }
+};
 const _postTabs = () => {
   window.parentPostMessage({
     method: 'tabs',
@@ -119,6 +172,7 @@ root.layers.push(renderer.domElement);
 _addControls(floorXrIframe);
 _addControls(tutorialXrIframe);
 _addControls(subsceneXrIframe);
+_updateGuardians();
 _postTabs();
 
 function animate() {
@@ -203,32 +257,8 @@ window.addEventListener('message', e => {
         root.appendChild(xrIframe);
       }
       _cleanupRoot();
+      _updateGuardians();
       _postTabs();
-
-      xrIframe.addEventListener('load', () => {
-        const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
-        const childXrIframes = Array.from(xrIframe)
-          .concat(
-            Array.from(contentDocument.querySelectorAll('template')).flatMap(template => Array.from(template.content.querySelectorAll('xr-iframe')))
-          );
-        const xrExtents = childXrIframes.map(xrIframe => {
-          const extents = xrIframe.getAttribute('extents');
-          return extents ? XRIFrame.parseExtents(extents) : [];
-        });
-        const _updateGuardian = () => {
-          for (let i = 0; i < xrExtents.length; i++) {
-            const xrExtent = xrExtents[i];
-            const sceneColor = 0x9ccc65;
-            const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
-            scene.add(guardianMesh);
-            guardianMeshes.push(guardianMesh);
-            const baseMesh = new THREE.Land(xrExtent, sceneColor);
-            scene.add(baseMesh);
-            baseMeshes.push(baseMesh);
-          }
-        };
-        _updateGuardian();
-      });
 
       break;
     }
@@ -240,6 +270,7 @@ window.addEventListener('message', e => {
       }
       xrIframe.parentNode.removeChild(xrIframe);
       _cleanupRoot();
+      _updateGuardians();
       _postTabs();
 
       break;
@@ -261,6 +292,7 @@ window.addEventListener('message', e => {
       if (match) {
         root.innerHTML = /\S/.test(match[1]) ? match[1] : '';
       }
+      _updateGuardians();
       _postTabs();
       break;
     }
