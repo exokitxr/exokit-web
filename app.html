@@ -93,33 +93,34 @@ const _addGuardian = xrIframe => {
   xrIframe.guardianMeshes = [];
   for (let i = 0; i < xrExtents.length; i++) {
     const xrExtent = xrExtents[i];
-    const sceneColor = 0x9ccc65;
+    if (xrExtent.length > 0) {
+      const sceneColor = 0x9ccc65;
+      const baseMesh = new THREE.Land(xrExtent, sceneColor);
+      baseMesh.updateTransform = function() {
+        this.position.fromArray(xrIframe.position);
+        this.quaternion.fromArray(xrIframe.orientation);
+        this.scale.fromArray(xrIframe.scale);
+      };
+      baseMesh.updateTransform();
+      if (guardianMeshes.length > 0) {
+        _insertBefore(baseMesh, guardianMeshes[0]);
+      } else {
+        scene.add(baseMesh);
+      }
+      xrIframe.baseMeshes.push(baseMesh);
+      baseMeshes.push(baseMesh);
 
-    const baseMesh = new THREE.Land(xrExtent, sceneColor);
-    baseMesh.updateTransform = function() {
-      this.position.fromArray(xrIframe.position);
-      this.quaternion.fromArray(xrIframe.orientation);
-      this.scale.fromArray(xrIframe.scale);
-    };
-    baseMesh.updateTransform();
-    if (guardianMeshes.length > 0) {
-      _insertBefore(baseMesh, guardianMeshes[0]);
-    } else {
-      scene.add(baseMesh);
+      const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
+      guardianMesh.updateTransform = function() {
+        this.position.fromArray(xrIframe.position);
+        this.quaternion.fromArray(xrIframe.orientation);
+        this.scale.fromArray(xrIframe.scale);
+      };
+      guardianMesh.updateTransform();
+      scene.add(guardianMesh);
+      xrIframe.guardianMeshes.push(guardianMesh);
+      guardianMeshes.push(guardianMesh);
     }
-    xrIframe.baseMeshes.push(baseMesh);
-    baseMeshes.push(baseMesh);
-
-    const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
-    guardianMesh.updateTransform = function() {
-      this.position.fromArray(xrIframe.position);
-      this.quaternion.fromArray(xrIframe.orientation);
-      this.scale.fromArray(xrIframe.scale);
-    };
-    guardianMesh.updateTransform();
-    scene.add(guardianMesh);
-    xrIframe.guardianMeshes.push(guardianMesh);
-    guardianMeshes.push(guardianMesh);
   }
 };
 const _updateGuardians = () => {
