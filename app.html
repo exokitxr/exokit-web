@@ -39,6 +39,17 @@ const _addControls = xrIframe => {
     xrIframe.position = object.position.toArray();
     xrIframe.orientation = object.quaternion.toArray();
     xrIframe.scale = object.scale.toArray();
+
+    if (xrIframe.baseMeshes) {
+      for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
+        xrIframe.baseMeshes[i].updateTransform();
+      }
+    }
+    if (xrIframe.guardianMeshes) {
+      for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
+        xrIframe.guardianMeshes[i].updateTransform();
+      }
+    }
   });
   control.addEventListener('dragging-changed', e => {
     orbitControls.enabled = !e.value;
@@ -75,20 +86,36 @@ const _addGuardian = xrIframe => {
     const extents = xrIframe.getAttribute('extents');
     return extents ? XRIFrame.parseExtents(extents) : [];
   });
+  xrIframe.baseMeshes = [];
+  xrIframe.guardianMeshes = [];
   for (let i = 0; i < xrExtents.length; i++) {
     const xrExtent = xrExtents[i];
     const sceneColor = 0x9ccc65;
 
     const baseMesh = new THREE.Land(xrExtent, sceneColor);
-    scene.add(baseMesh);
+    baseMesh.updateTransform = function() {
+      this.position.fromArray(xrIframe.position);
+      this.quaternion.fromArray(xrIframe.orientation);
+      this.scale.fromArray(xrIframe.scale);
+    };
+    baseMesh.updateTransform();
     if (guardianMeshes.length > 0) {
       _insertBefore(baseMesh, guardianMeshes[0]);
     } else {
-      baseMeshes.push(baseMesh);
+      scene.add(baseMesh);
     }
+    xrIframe.baseMeshes.push(baseMesh);
+    baseMeshes.push(baseMesh);
 
     const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
+    guardianMesh.updateTransform = function() {
+      this.position.fromArray(xrIframe.position);
+      this.quaternion.fromArray(xrIframe.orientation);
+      this.scale.fromArray(xrIframe.scale);
+    };
+    guardianMesh.updateTransform();
     scene.add(guardianMesh);
+    xrIframe.guardianMeshes.push(guardianMesh);
     guardianMeshes.push(guardianMesh);
   }
 };
@@ -109,6 +136,14 @@ const _updateGuardians = () => {
         });
       }
     }
+  }
+  for (let i = 0; i < baseMeshes.length; i++) {
+    const baseMesh = baseMeshes[i];
+    baseMesh.updateTransform();
+  }
+  for (let i = 0; i < guardianMeshes.length; i++) {
+    const guardianMesh = guardianMeshes[i];
+    guardianMesh.updateTransform();
   }
 };
 const _postTabs = () => {
