@@ -550,7 +550,9 @@ const _fetchText = src => fetch(src)
       const layer = vrPresentState.layers[i];
       const contentWindow = layer && layer.contentWindow;
       if (contentWindow) {
-         _renderChild(contentWindow, true, highlight || contentWindow.highlight);
+        if (!(layer instanceof XRIFrame) || layer.visible) {
+          _renderChild(contentWindow, true, highlight || contentWindow.highlight);
+        }
         contentWindow.rendered = true;
       }
     }

@@ -230,20 +230,8 @@ function animate() {
 
     vrCamera.projectionMatrix.fromArray(root.projectionMatrix);
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
-
-    vrCamera.matrixWorld.decompose(vrCamera.position, vrCamera.quaternion, vrCamera.scale);
   };
   _updateVrCamera();
-
-  const xrIframes = Array.from(root.childNodes).filter(xrIframe => xrIframe instanceof XRIFrame);
-  for (let i = 0; i < xrIframes.length; i++) {
-    const xrIframe = xrIframes[i];
-    const childXrIframes = _getChildXrIframes(xrIframe);
-    if (childXrIframes.length > 1) {
-      const contains = childXrIframes.map(xrIframe => xrIframe.contains(vrCamera.position.toArray()));
-      // console.log('got contains', childXrIframes[0].position, contains);
-    }
-  }
 
   renderer.render(scene, camera);
 }
