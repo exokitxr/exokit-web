@@ -27,7 +27,7 @@ const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
-// const localMatrix2 = new THREE.Matrix4();
+const localMatrix2 = new THREE.Matrix4();
 const localXrOffsetMatrix = new THREE.Matrix4();
 const localXrOffsetMatrix2 = new THREE.Matrix4();
 
@@ -185,11 +185,16 @@ class VRStageParameters {
   } */
 }
 
+let localOffsetEpoch = 0;
 function getXrOffsetMatrix() {
-  let win = window;
-  localXrOffsetMatrix.fromArray(win.document.xrOffset.matrix);
-  for (win = win.parent; win.parent !== win; win = win.parent) {
-    localXrOffsetMatrix.premultiply(localXrOffsetMatrix2.fromArray(win.document.xrOffset.matrix));
+  const offsetEpoch = GlobalContext.xrState.offsetEpoch[0];
+  if (localOffsetEpoch !== offsetEpoch) {
+    let win = window;
+    localXrOffsetMatrix.fromArray(win.document.xrOffset.matrix);
+    for (win = win.parent; win.parent !== win; win = win.parent) {
+      localXrOffsetMatrix.premultiply(localXrOffsetMatrix2.fromArray(win.document.xrOffset.matrix));
+    }
+    localOffsetEpoch = offsetEpoch;
   }
   return localXrOffsetMatrix;
 }
@@ -244,7 +249,7 @@ class VRDisplay extends EventTarget {
     localMatrix
       .compose(localVector.fromArray(GlobalContext.xrState.position), localQuaternion.fromArray(GlobalContext.xrState.orientation), localVector2.set(1, 1, 1))
       .premultiply(
-        xrOffsetMatrix.getInverse(xrOffsetMatrix)
+        localMatrix2.getInverse(xrOffsetMatrix)
       )
       .decompose(localVector, localQuaternion, localVector2);
     localVector.toArray(frameData.pose.position);

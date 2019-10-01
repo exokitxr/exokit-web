@@ -335,18 +335,14 @@ class XRWebGLLayer {
 }
 
 const _applyXrOffsetToPose = (pose, xrOffsetMatrix, inverse, premultiply) => {
-  localMatrix
-    .fromArray(pose._realViewMatrix);
-  if (inverse) {
-    xrOffsetMatrix.getInverse(xrOffsetMatrix);
-  }
+  localMatrix.fromArray(pose._realViewMatrix);
+  const inverseXrOffsetMatrix = inverse ? localMatrix2.getInverse(xrOffsetMatrix) : xrOffsetMatrix;
   if (premultiply) {
-    localMatrix.premultiply(xrOffsetMatrix);
+    localMatrix.premultiply(inverseXrOffsetMatrix);
   } else {
-    localMatrix.multiply(xrOffsetMatrix);
+    localMatrix.multiply(inverseXrOffsetMatrix);
   }
-  localMatrix
-    .toArray(pose._localViewMatrix);
+  localMatrix.toArray(pose._localViewMatrix);
 };
 
 class XRFrame {
@@ -634,6 +630,8 @@ class XRRigidTransform {
     localVector.toArray(this.positionInverse);
     localQuaternion.toArray(this.orientationInverse);
     localVector2.toArray(this.scaleInverse);
+
+    GlobalContext.xrState.offsetEpoch[0]++;
   }
 }
 
