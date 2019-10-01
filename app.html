@@ -40,15 +40,11 @@ const _addControls = xrIframe => {
     xrIframe.orientation = object.quaternion.toArray();
     xrIframe.scale = object.scale.toArray();
 
-    if (xrIframe.baseMeshes) {
-      for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
-        xrIframe.baseMeshes[i].updateTransform();
-      }
+    for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
+      xrIframe.baseMeshes[i].updateTransform();
     }
-    if (xrIframe.guardianMeshes) {
-      for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
-        xrIframe.guardianMeshes[i].updateTransform();
-      }
+    for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
+      xrIframe.guardianMeshes[i].updateTransform();
     }
   });
   control.addEventListener('dragging-changed', e => {
@@ -89,8 +85,7 @@ const _addGuardian = xrIframe => {
     const extents = xrIframe.getAttribute('extents');
     return extents ? XRIFrame.parseExtents(extents) : [];
   });
-  xrIframe.baseMeshes = [];
-  xrIframe.guardianMeshes = [];
+
   for (let i = 0; i < xrExtents.length; i++) {
     const xrExtent = xrExtents[i];
     if (xrExtent.length > 0) {
@@ -127,8 +122,9 @@ const _updateGuardians = () => {
   const xrIframes = Array.from(root.childNodes).filter(xrIframe => xrIframe instanceof XRIFrame);
   for (let i = 0; i < xrIframes.length; i++) {
     const xrIframe = xrIframes[i];
-    if (!xrIframe.guardianMeshed) {
-      xrIframe.guardianMeshed = true;
+    if (!xrIframe.baseMeshes) {
+      xrIframe.baseMeshes = [];
+      xrIframe.guardianMeshes = [];
 
       if (xrIframe.loaded) {
         _addGuardian(xrIframe);
