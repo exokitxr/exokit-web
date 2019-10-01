@@ -112,7 +112,7 @@ THREE.Guardian = function Guardian(extents, color) {
 
 const planeGeometry = new THREE.PlaneBufferGeometry(1, 1)
   .applyMatrix(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)))
-  .applyMatrix(new THREE.Matrix4().makeTranslation(0.5, -0.01, 0.5));
+  .applyMatrix(new THREE.Matrix4().makeTranslation(0.5, 0.01, 0.5));
 THREE.Land = function Land(extents, color) {
   const _makeGeometry = () => {
     const geometries = [];
