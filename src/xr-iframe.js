@@ -245,5 +245,6 @@ class XRIFrame extends HTMLElement {
   }
 }
 customElements.define('xr-iframe', XRIFrame);
+XRIFrame.parseExtents = parseExtents;
 
 export default XRIFrame;
