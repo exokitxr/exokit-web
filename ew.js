@@ -477,8 +477,16 @@ core.animate = (timestamp, frame, referenceSpace) => {
     const _loadHmd = () => {
       xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
       xrState.leftProjectionMatrix.set(views[0].projectionMatrix);
+
       xrState.rightViewMatrix.set(views[1].transform.inverse.matrix);
       xrState.rightProjectionMatrix.set(views[1].projectionMatrix);
+
+      localMatrix
+        .fromArray(xrState.leftViewMatrix)
+        .getInverse(localMatrix)
+        .decompose(localVector, localQuaternion, localVector2)
+      localVector.toArray(xrState.position);
+      localQuaternion.toArray(xrState.orientation);
     };
     _loadHmd();
  
