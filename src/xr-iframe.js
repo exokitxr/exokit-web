@@ -37,6 +37,7 @@ class XRIFrame extends HTMLElement {
     this.xrOffset = new XRRigidTransform();
     this._highlight = null;
     this._extents = [];
+    this._loadFactor = Infinity;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -150,6 +151,11 @@ class XRIFrame extends HTMLElement {
       }
     } else if (name === 'extents') {
       this.extents = parseExtents(newValue);
+    } else if (name === 'load-factor') {
+      const loadFactor = parseFloat(newValue);
+      if (isFinite(loadFactor)) {
+        this.loadFactor = loadFactor;
+      }
     }
   }
   static get observedAttributes() {
@@ -160,6 +166,7 @@ class XRIFrame extends HTMLElement {
       'scale',
       'highlight',
       'extents',
+      'load-factor',
     ];
   }
   get src() {
@@ -235,6 +242,13 @@ class XRIFrame extends HTMLElement {
   }
   set extents(extents) {
     this._extents = extents;
+  }
+
+  get loadFactor() {
+    return this._loadFactor;
+  }
+  set loadFactor(loadFactor) {
+    this._loadFactor = loadFactor;
   }
 
   postMessage(m, transfers) {
