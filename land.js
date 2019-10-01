@@ -12,7 +12,7 @@ const boxGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries([
   leftGeometry.clone().applyMatrix(new THREE.Matrix4().makeTranslation(0, -0.5, -0.5)),
 ]);
 
-THREE.Guardian = function Guardian(extents, color) {
+THREE.Guardian = function Guardian(extents, distanceFactor, color) {
   const _makeGeometry = () => {
     const pixels = {};
     for (let i = 0; i < extents.length; i++) {
@@ -82,7 +82,7 @@ THREE.Guardian = function Guardian(extents, color) {
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
       // vUv = uv;
       vWorldPos = abs(position);
-      vDepth = gl_Position.z / 2.0;
+      vDepth = gl_Position.z / ${distanceFactor.toFixed(8)};
     }
   `;
   const gridFsh = `
