@@ -69,6 +69,13 @@ const _addControls = xrIframe => {
 const _removeControls = xrIframe => {
   scene.remove(xrIframe.control);
 };
+const _getChildXrIframes = xrIframe => {
+  const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
+  return Array.from(xrIframe)
+    .concat(
+      Array.from(contentDocument.querySelectorAll('xr-iframe'))
+    );
+};
 const _insertBefore = (a, b) => {
   scene.add(a);
   const aIndex = scene.children.indexOf(a);
@@ -77,11 +84,7 @@ const _insertBefore = (a, b) => {
   scene.children.splice(bIndex, 0, a);
 };
 const _addGuardian = xrIframe => {
-  const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
-  const childXrIframes = Array.from(xrIframe)
-    .concat(
-      Array.from(contentDocument.querySelectorAll('template')).flatMap(template => Array.from(template.content.querySelectorAll('xr-iframe')))
-    );
+  const childXrIframes = _getChildXrIframes(xrIframe);
   const xrExtents = childXrIframes.map(xrIframe => {
     const extents = xrIframe.getAttribute('extents');
     return extents ? XRIFrame.parseExtents(extents) : [];
