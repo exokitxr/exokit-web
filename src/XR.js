@@ -39,20 +39,6 @@ class XR extends EventTarget {
       });
       this.session = session;
     }
-    /* if (this.session) {
-      if (extensions.meshing) {
-        GlobalContext.xrState.meshing[0] = 1;
-      }
-      if (extensions.planeTracking) {
-        GlobalContext.xrState.planeTracking[0] = 1;
-      }
-      if (extensions.handTracking) {
-        GlobalContext.xrState.handTracking[0] = 1;
-      }
-      if (extensions.eyeTracking) {
-        GlobalContext.xrState.eyeTracking[0] = 1;
-      }
-    } */
     return Promise.resolve(this.session);
   }
   /* async requestDevice() {
