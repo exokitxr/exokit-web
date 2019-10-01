@@ -305,6 +305,12 @@ window.addEventListener('message', e => {
         xrIframe.parentNode.removeChild(xrIframe.previousSibling);
       }
       xrIframe.parentNode.removeChild(xrIframe);
+      for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
+        scene.remove(xrIframe.baseMeshes[i]);
+      }
+      for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
+        scene.remove(xrIframe.guardianMeshes[i]);
+      }
       _cleanupRoot();
       _updateGuardians();
       _postTabs();
