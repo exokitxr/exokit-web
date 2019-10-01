@@ -10,6 +10,8 @@
 <script src="three.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="TransformControls.js"></script>
+<script src="BufferGeometryUtils.js "></script>
+<script src="land.js"></script>
 <script>
 (async () => {
 try {
@@ -17,6 +19,8 @@ try {
 console.log('app 1');
 
 const root = document.querySelector('xr-site');
+const guardianMeshes = [];
+const baseMeshes = [];
 const floorXrIframe = document.querySelector('xr-iframe[name=Floor]');
 /* floorXrIframe.addEventListener('load', e => {
   console.log('floor load', e);
@@ -200,6 +204,31 @@ window.addEventListener('message', e => {
       }
       _cleanupRoot();
       _postTabs();
+
+      xrIframe.addEventListener('load', () => {
+        const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
+        const childXrIframes = Array.from(xrIframe)
+          .concat(
+            Array.from(contentDocument.querySelectorAll('template')).flatMap(template => Array.from(template.content.querySelectorAll('xr-iframe')))
+          );
+        const xrExtents = childXrIframes.map(xrIframe => {
+          const extents = xrIframe.getAttribute('extents');
+          return extents ? XRIFrame.parseExtents(extents) : [];
+        });
+        const _updateGuardian = () => {
+          for (let i = 0; i < xrExtents.length; i++) {
+            const xrExtent = xrExtents[i];
+            const sceneColor = 0x9ccc65;
+            const guardianMesh = new THREE.Guardian(xrExtent, sceneColor);
+            scene.add(guardianMesh);
+            guardianMeshes.push(guardianMesh);
+            const baseMesh = new THREE.Land(xrExtent, sceneColor);
+            scene.add(baseMesh);
+            baseMeshes.push(baseMesh);
+          }
+        };
+        _updateGuardian();
+      });
 
       break;
     }
