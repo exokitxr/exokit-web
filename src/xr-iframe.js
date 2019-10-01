@@ -1,5 +1,6 @@
 import {_makeWindow} from './WindowVm.js';
 
+import THREE from '../lib/three-min.js';
 import {XRRigidTransform} from './XR.js';
 
 import utils from './utils.js';
@@ -8,6 +9,9 @@ const {_normalizeUrl/*, _getProxyUrl*/} = utils;
 import symbols from './symbols.js';
 
 import GlobalContext from './GlobalContext.js';
+
+const localVector = new THREE.Vector3();
+const localMatrix = new THREE.Matrix4();
 
 function parseExtents(s) {
   const regex = /(?:\[([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\]|([0-9]+)\s+([0-9]+))\s*/g;
@@ -37,7 +41,7 @@ class XRIFrame extends HTMLElement {
     this.xrOffset = new XRRigidTransform();
     this._highlight = null;
     this._extents = [];
-    this._loadFactor = Infinity;
+    this._loadDistance = Infinity;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -151,10 +155,10 @@ class XRIFrame extends HTMLElement {
       }
     } else if (name === 'extents') {
       this.extents = parseExtents(newValue);
-    } else if (name === 'load-factor') {
-      const loadFactor = parseFloat(newValue);
-      if (isFinite(loadFactor)) {
-        this.loadFactor = loadFactor;
+    } else if (name === 'load-distance') {
+      const loadDistance = parseFloat(newValue);
+      if (isFinite(loadDistance)) {
+        this.loadDistance = loadDistance;
       }
     }
   }
@@ -166,7 +170,7 @@ class XRIFrame extends HTMLElement {
       'scale',
       'highlight',
       'extents',
-      'load-factor',
+      'load-distance',
     ];
   }
   get src() {
@@ -244,11 +248,39 @@ class XRIFrame extends HTMLElement {
     this._extents = extents;
   }
 
-  get loadFactor() {
-    return this._loadFactor;
+  get loadDistance() {
+    return this._loadDistance;
   }
-  set loadFactor(loadFactor) {
-    this._loadFactor = loadFactor;
+  set loadDistance(loadDistance) {
+    this._loadDistance = loadDistance;
+  }
+
+  get visible() {
+    localVector
+      .fromArray(GlobalContext.xrState.position)
+      .applyMatrix4(
+        localMatrix
+          .copy(GlobalContext.getXrOffsetMatrix())
+          .getInverse(localMatrix)
+      );
+    const {extents, loadDistance} = this;
+    if (extents.length > 0 && isFinite(loadDistance)) {
+      return extents.some(([x1, y1, x2, y2]) => {
+        x2++;
+        y2++;
+        const cx = (x1 + x2) / 2;
+        const cy = (y1 + y2) / 2;
+        const sx = x2 - x1 + loadDistance * 2;
+        const sy = y2 - y1 + loadDistance * 2;
+        const minX = cx - sx/2;
+        const minY = cy - sy/2;
+        const maxX = cx + sx/2;
+        const maxY = cy + sy/2;
+        return localVector.x >= minX && localVector.z >= minY && localVector.x < maxX && localVector.z < maxY;
+      });
+    } else {
+      return true;
+    }
   }
 
   postMessage(m, transfers) {

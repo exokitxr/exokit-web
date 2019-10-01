@@ -12,7 +12,7 @@ const boxGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries([
   leftGeometry.clone().applyMatrix(new THREE.Matrix4().makeTranslation(0, -0.5, -0.5)),
 ]);
 
-THREE.Guardian = function Guardian(extents, color) {
+THREE.Guardian = function Guardian(extents, distanceFactor, color) {
   const _makeGeometry = () => {
     const pixels = {};
     for (let i = 0; i < extents.length; i++) {
@@ -82,20 +82,25 @@ THREE.Guardian = function Guardian(extents, color) {
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
       // vUv = uv;
       vWorldPos = abs(position);
-      vDepth = gl_Position.z / 2.0;
+      vDepth = gl_Position.z / ${distanceFactor.toFixed(8)};
     }
   `;
   const gridFsh = `
     // uniform sampler2D uTex;
+    uniform vec3 uColor;
     uniform float uAnimation;
     varying vec3 vWorldPos;
     varying float vDepth;
     void main() {
-      gl_FragColor = vec4(${new THREE.Color(color/*0x5c6bc0*/).toArray().map(n => n.toFixed(8)).join(',')}, (1.0-vDepth)*uAnimation);
+      gl_FragColor = vec4(uColor, (1.0-vDepth)*uAnimation);
     }
   `;
   const material = new THREE.ShaderMaterial({
     uniforms: {
+      uColor: {
+        type: 'c',
+        value: new THREE.Color(color),
+      },
       uAnimation: {
         type: 'f',
         value: 1,
@@ -107,6 +112,9 @@ THREE.Guardian = function Guardian(extents, color) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
+  mesh.setColor = c => {
+    mesh.material.uniforms.uColor.value.setHex(c);
+  };
   return mesh;
 };
 
@@ -136,13 +144,18 @@ THREE.Land = function Land(extents, color) {
     }
   `;
   const baseFsh = `
+    uniform vec3 uColor;
     uniform float uAnimation;
     void main() {
-      gl_FragColor = vec4(${new THREE.Color(color/*0x5c6bc0*/).toArray().map(n => n.toFixed(8)).join(',')}, uAnimation*0.5);
+      gl_FragColor = vec4(uColor, uAnimation*0.5);
     }
   `;
   const material = new THREE.ShaderMaterial({
     uniforms: {
+      uColor: {
+        type: 'c',
+        value: new THREE.Color(color),
+      },
       uAnimation: {
         type: 'f',
         value: 1,
@@ -155,6 +168,9 @@ THREE.Land = function Land(extents, color) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
+  mesh.setColor = c => {
+    mesh.material.uniforms.uColor.value.setHex(c);
+  };
   return mesh;
 };
 THREE.Land.parseExtents = s => {
