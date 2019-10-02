@@ -196,6 +196,16 @@ for (const k in WebGLRenderingContext.prototype) {
             return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
           }
         };
+      } else if (k === 'texImage2D' || k === 'texSubImage2D') {
+        ProxiedWebGLRenderingContext.prototype[k] = function(a, b, c, d, e, f, g, h, i) {
+          this.setProxyState();
+          if (i instanceof Float32Array) {
+            c = GlobalContext.proxyContext.RGBA32F;
+            return GlobalContext.proxyContext[k].call(GlobalContext.proxyContext, a, b, c, d, e, f, g, h, i);
+          } else {
+            return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
+          }
+        };
       } else {
         ProxiedWebGLRenderingContext.prototype[k] = function() {
           this.setProxyState();
