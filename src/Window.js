@@ -16,6 +16,7 @@ import {
   GamepadButton,
   lookupHMDTypeString,
   getGamepads,
+  getXrOffsetMatrix,
 } from './VR.js';
 
 import GlobalContext from './GlobalContext.js';
@@ -474,8 +475,7 @@ const _fetchText = src => fetch(src)
       localMatrix
         .fromArray(xrGamepad.transformMatrix)
         .premultiply(
-          localMatrix2
-            .fromArray(window.document.xrOffset.matrixInverse)
+          localMatrix2.getInverse(getXrOffsetMatrix())
         )
         .decompose(localVector, localQuaternion, localVector2);
 
