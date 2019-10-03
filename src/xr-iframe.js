@@ -260,7 +260,7 @@ class XRIFrame extends HTMLElement {
       .fromArray(GlobalContext.xrState.position)
       .applyMatrix4(
         localMatrix
-          .copy(GlobalContext.getXrOffsetMatrix())
+          .copy(getXrOffsetMatrix())
           .getInverse(localMatrix)
       );
     const {extents, loadDistance} = this;
