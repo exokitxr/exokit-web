@@ -113,8 +113,7 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
   } else if (/janusweb\.js$/.test(originalUrl)) {
     return _rewriteResText(res, jsString =>
       jsString
-        .replace('renderer.setSize( eyeParamsL.renderWidth * 2', 'renderer.setSize( eyeParamsL.renderWidth')
-        .replace('renderer.setSize( eyeWidth * 2', 'renderer.setSize( eyeWidth')
+        .replace("https://p.janusvr.com/", "")
     );
   } else if (originalUrl === 'https://https-moonrider-xyz.proxy.exokit.org/build/build.js') {
     return _rewriteResText(res, jsString => jsString.replace('getDistance:function(){var e=this.axis;', 'getDistance:function(){if (!this.axis)this.axis=[0,0,0];var e=this.axis;'));
