@@ -1,6 +1,7 @@
 import {_makeWindow} from './WindowVm.js';
 
 import THREE from '../lib/three-min.js';
+import {getXrOffsetMatrix} from './VR.js';
 import {XRRigidTransform} from './XR.js';
 
 import utils from './utils.js';
@@ -11,6 +12,8 @@ import symbols from './symbols.js';
 import GlobalContext from './GlobalContext.js';
 
 const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 
 function parseExtents(s) {
@@ -217,6 +220,18 @@ class XRIFrame extends HTMLElement {
     if (scale.length === 3 && scale.every(n => isFinite(n))) {
       this.setAttribute('scale', scale.join(' '));
     }
+  }
+
+  get worldOffset() {
+    localMatrix
+      .compose(localVector.fromArray(this.position), localQuaternion.fromArray(this.orientation), localVector2.fromArray(this.scale))
+      .premultiply(getXrOffsetMatrix())
+      .decompose(localVector, localQuaternion, localVector2);
+    return {
+      position: localVector.toArray(),
+      orientation: localQuaternion.toArray(),
+      scale: localVector2.toArray(),
+    };
   }
 
   get name() {
