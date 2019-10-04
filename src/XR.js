@@ -629,7 +629,7 @@ class XRRigidTransform extends EventEmitter {
         key: 'position',
         value: position,
       },
-    });
+    }));
   }
   get orientation() {
     return this._orientation;
