@@ -634,7 +634,7 @@ class XRRigidTransform extends EventEmitter {
         key: 'orientation',
         value: orientation,
       },
-    });
+    }));
   }
   get scale() {
     return this._scale;
@@ -645,7 +645,7 @@ class XRRigidTransform extends EventEmitter {
         key: 'scale',
         value: scale,
       },
-    });
+    }));
   }
 
   pushUpdate() {
