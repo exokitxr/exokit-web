@@ -111,12 +111,15 @@ class XRIFrame extends HTMLElement {
           onxroffsetchange: event => {
             const {key, value} = event;
             if (key === 'position') {
+              this.position = value;
               this.xrOffset._position.set(value);
               this.xrOffset.pushUpdate();
             } else if (key === 'orientation') {
+              this.orientation = value;
               this.xrOffset._orientation.set(value);
               this.xrOffset.pushUpdate();
             } else if (key === 'scale') {
+              this.scale = value;
               this.xrOffset._scale.set(value);
               this.xrOffset.pushUpdate();
             }
