@@ -50,153 +50,155 @@ class XRIFrame extends HTMLElement {
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
 
-    if (name === 'src') {
-      let url = this.getAttribute('src');
+    if (newValue !== oldValue) {
+      if (name === 'src') {
+        let url = this.getAttribute('src');
 
-      if (url) {
-        const parentWindow = window;
-        const options = parentWindow[symbols.optionsSymbol];
+        if (url) {
+          const parentWindow = window;
+          const options = parentWindow[symbols.optionsSymbol];
 
-        const baseUrl = _normalizeUrl(url, options.baseUrl);
-        // url = _getProxyUrl(baseUrl);
-        url = baseUrl;
+          const baseUrl = _normalizeUrl(url, options.baseUrl);
+          // url = _getProxyUrl(baseUrl);
+          url = baseUrl;
 
-        const parent = {};
-        const top = parentWindow === parentWindow.top ? parent : {};
-        const win = _makeWindow({
-          url,
-          baseUrl,
-          args: options.args,
-          xrTop: false,
-          // dataPath: options.dataPath,
-          replacements: options.replacements,
-          parent,
-          top,
-          // hidden: this.d === 3,
-          xrOffsetBuffer: this.xrOffset._buffer,
-          datasetObject: this._data,
-          onnavigate: (href) => {
-            this.readyState = null;
+          const parent = {};
+          const top = parentWindow === parentWindow.top ? parent : {};
+          const win = _makeWindow({
+            url,
+            baseUrl,
+            args: options.args,
+            xrTop: false,
+            // dataPath: options.dataPath,
+            replacements: options.replacements,
+            parent,
+            top,
+            // hidden: this.d === 3,
+            xrOffsetBuffer: this.xrOffset._buffer,
+            datasetObject: this._data,
+            onnavigate: (href) => {
+              this.readyState = null;
 
-            this.setAttribute('src', href);
-          },
-          onrequest(req) {
-            window._postMessageUp(req);
-          },
-          onpointerlock(event) {
-            window._postMessageUp({
-              method: 'emit',
-              type: 'pointerLock',
-              event,
-            });
-          },
-          onhapticpulse(event) {
-            window._postMessageUp({
-              method: 'emit',
-              type: 'hapticPulse',
-              event,
-            });
-          },
-          onpaymentrequest(event) {
-            if (window.listeners('paymentrequest').length > 0) {
-              window.dispatchEvent(new CustomEvent('paymentrequest', {
-                detail: event,
-              }));
-            } else {
+              this.setAttribute('src', href);
+            },
+            onrequest(req) {
+              window._postMessageUp(req);
+            },
+            onpointerlock(event) {
               window._postMessageUp({
                 method: 'emit',
-                type: 'paymentRequest',
+                type: 'pointerLock',
                 event,
               });
-            }
-          },
-          onxroffsetchange: event => {
-            const {key, value} = event;
-            if (key === 'position') {
-              this.position = value;
-              this.xrOffset._position.set(value);
-              this.xrOffset.pushUpdate();
-            } else if (key === 'orientation') {
-              this.orientation = value;
-              this.xrOffset._orientation.set(value);
-              this.xrOffset.pushUpdate();
-            } else if (key === 'scale') {
-              this.scale = value;
-              this.xrOffset._scale.set(value);
-              this.xrOffset.pushUpdate();
-            }
-          },
-          ondatasetchange: event => {
-            const {key, value} = event;
-            const {data} = this;
-            if (data[key] !== value) {
-              this.data = data;
-              this._data[key] = value;
-              win.iframe.contentDocument.dataset.pushUpdate(key, value);
-            }
-          },
-        });
-        win.highlight = this._highlight;
-        win.addEventListener('load', () => {
-          this.dispatchEvent(new CustomEvent('load'));
-        });
-        win.addEventListener('message', m => {
-          const {data} = m;
-          this.dispatchEvent(new MessageEvent('message', {
-            data,
-          }));
-        });
-        this.contentWindow = win;
-      }
-    } else if (name === 'position') {
-      let position = newValue.split(' ');
-      if (position.length === 3) {
-        position = position.map(s => parseFloat(s));
-        if (position.every(n => isFinite(n)) && position.some((n, i) => n !== this.xrOffset._position[i])) {
-          this.xrOffset._position.set(position);
-          this.xrOffset.pushUpdate();
+            },
+            onhapticpulse(event) {
+              window._postMessageUp({
+                method: 'emit',
+                type: 'hapticPulse',
+                event,
+              });
+            },
+            onpaymentrequest(event) {
+              if (window.listeners('paymentrequest').length > 0) {
+                window.dispatchEvent(new CustomEvent('paymentrequest', {
+                  detail: event,
+                }));
+              } else {
+                window._postMessageUp({
+                  method: 'emit',
+                  type: 'paymentRequest',
+                  event,
+                });
+              }
+            },
+            onxroffsetchange: event => {
+              const {key, value} = event;
+              if (key === 'position') {
+                this.position = value;
+                this.xrOffset._position.set(value);
+                this.xrOffset.pushUpdate();
+              } else if (key === 'orientation') {
+                this.orientation = value;
+                this.xrOffset._orientation.set(value);
+                this.xrOffset.pushUpdate();
+              } else if (key === 'scale') {
+                this.scale = value;
+                this.xrOffset._scale.set(value);
+                this.xrOffset.pushUpdate();
+              }
+            },
+            ondatasetchange: event => {
+              const {key, value} = event;
+              const {data} = this;
+              if (data[key] !== value) {
+                this.data = data;
+                this._data[key] = value;
+                win.iframe.contentDocument.dataset.pushUpdate(key, value);
+              }
+            },
+          });
+          win.highlight = this._highlight;
+          win.addEventListener('load', () => {
+            this.dispatchEvent(new CustomEvent('load'));
+          });
+          win.addEventListener('message', m => {
+            const {data} = m;
+            this.dispatchEvent(new MessageEvent('message', {
+              data,
+            }));
+          });
+          this.contentWindow = win;
         }
-      }
-    } else if (name === 'orientation') {
-      let orientation = newValue.split(' ');
-      if (orientation.length === 4) {
-        orientation = orientation.map(s => parseFloat(s));
-        if (orientation.every(n => isFinite(n)) && orientation.some((n, i) => n !== this.xrOffset._orientation[i])) {
-          this.xrOffset._orientation.set(orientation);
-          this.xrOffset.pushUpdate();
+      } else if (name === 'position') {
+        let position = newValue.split(' ');
+        if (position.length === 3) {
+          position = position.map(s => parseFloat(s));
+          if (position.every(n => isFinite(n))) {
+            this.xrOffset._position.set(position);
+            this.xrOffset.pushUpdate();
+          }
         }
-      }
-    } else if (name === 'scale') {
-      let scale = newValue.split(' ');
-      if (scale.length === 3) {
-        scale = scale.map(s => parseFloat(s));
-        if (scale.every(n => isFinite(n)) && scale.some((n, i) => n !== this.xrOffset._scale[i])) {
-          this.xrOffset._scale.set(scale);
-          this.xrOffset.pushUpdate();
+      } else if (name === 'orientation') {
+        let orientation = newValue.split(' ');
+        if (orientation.length === 4) {
+          orientation = orientation.map(s => parseFloat(s));
+          if (orientation.every(n => isFinite(n))) {
+            this.xrOffset._orientation.set(orientation);
+            this.xrOffset.pushUpdate();
+          }
         }
-      }
-    } else if (name === 'highlight') {
-      let highlight = newValue.split(' ');
-      if (highlight.length === 4) {
-        highlight = highlight.map(s => parseFloat(s));
-        if (highlight.every(n => isFinite(n))) {
-          this.highlight = highlight;
+      } else if (name === 'scale') {
+        let scale = newValue.split(' ');
+        if (scale.length === 3) {
+          scale = scale.map(s => parseFloat(s));
+          if (scale.every(n => isFinite(n))) {
+            this.xrOffset._scale.set(scale);
+            this.xrOffset.pushUpdate();
+          }
         }
-      }
-    } else if (name === 'extents') {
-      this.extents = parseExtents(newValue);
-    } else if (name === 'load-distance') {
-      const loadDistance = parseFloat(newValue);
-      if (isFinite(loadDistance)) {
-        this.loadDistance = loadDistance;
-      }
-    } else if (name === 'data') {
-      const newData = JSON.parse(newValue);
-      for (const k in this._data) {
-        delete this._data[k];
-      }
-      for (const k in newData) {
-        this._data[k] = newData[k];
+      } else if (name === 'highlight') {
+        let highlight = newValue.split(' ');
+        if (highlight.length === 4) {
+          highlight = highlight.map(s => parseFloat(s));
+          if (highlight.every(n => isFinite(n))) {
+            this.highlight = highlight;
+          }
+        }
+      } else if (name === 'extents') {
+        this.extents = parseExtents(newValue);
+      } else if (name === 'load-distance') {
+        const loadDistance = parseFloat(newValue);
+        if (isFinite(loadDistance)) {
+          this.loadDistance = loadDistance;
+        }
+      } else if (name === 'data') {
+        const newData = JSON.parse(newValue);
+        for (const k in this._data) {
+          delete this._data[k];
+        }
+        for (const k in newData) {
+          this._data[k] = newData[k];
+        }
       }
     }
   }
