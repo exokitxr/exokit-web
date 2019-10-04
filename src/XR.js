@@ -517,7 +517,7 @@ class XRInputSourceEvent extends Event {
 }
 GlobalContext.XRInputSourceEvent = XRInputSourceEvent;
 
-class XRRigidTransform extends EventEmitter {
+class XRRigidTransform extends EventTarget {
   constructor(position, orientation, scale) {
     if (typeof position == 'object') {
       const inverse = orientation instanceof XRRigidTransform ? orientation : null;
