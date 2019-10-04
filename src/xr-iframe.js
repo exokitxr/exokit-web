@@ -108,6 +108,16 @@ class XRIFrame extends HTMLElement {
               });
             }
           },
+          onxroffsetchange(event) {
+            const {key, value} = event.detail;
+            if (key === 'position') {
+              this.position = value;
+            } else if (key === 'orientation') {
+              this.orientation = value;
+            } else if (key === 'scale') {
+              this.scale = value;
+            }
+          },
         });
         win.highlight = this._highlight;
         win.addEventListener('load', () => {
