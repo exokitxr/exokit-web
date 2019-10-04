@@ -325,6 +325,9 @@ const _makeWindow = (options = {}) => {
   window.addEventListener('paymentRequest', e => {
     options.onpaymentrequest && options.onpaymentrequest(e.detail);
   });
+  window.addEventListener('xrOffsetChange', e => {
+    options.onxroffsetchange && options.onxroffsetchange(e.detail);
+  });
   window.addEventListener('load', () => {
     window.loaded = true;
   }, {

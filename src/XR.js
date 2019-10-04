@@ -686,6 +686,10 @@ class XRRigidTransform extends EventEmitter {
 
     GlobalContext.xrState.offsetEpoch[0]++;
   }
+
+  /* pushEvent() {
+    this.dispatchEvent(new CustomEvent('change'));
+  } */
 }
 
 class XRSpace extends EventTarget {
