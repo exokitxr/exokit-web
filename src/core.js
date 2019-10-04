@@ -56,6 +56,7 @@ exokit.load = (src, options = {}) => {
     onhapticpulse: options.onhapticpulse,
     onpaymentrequest: options.onpaymentrequest,
     onxroffsetchange: options.onxroffsetchange,
+    ondatasetchange: options.ondatasetchange,
   });
 };
 exokit.setArgs = newArgs => {

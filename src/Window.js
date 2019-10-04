@@ -769,6 +769,43 @@ const _fetchText = src => fetch(src)
   });
   window.document.xrOffset = xrOffset;
 
+  class Dataset extends EventTarget {
+    constructor(data) {
+      super();
+
+      this.data = data || {};
+    }
+    get(k) {
+      let v = this.data[k];
+      if (v === undefined) {
+        v = null;
+      }
+      return v;
+    }
+    set(key, value) {
+      self._postMessageUp({
+        method: 'emit',
+        type: 'datasetChange',
+        event: {
+          key,
+          value,
+        },
+      });
+    }
+    pushUpdate(key, value) {
+      this.data[key] = value;
+
+      this.dispatchEvent(new CustomEvent('change', {
+        detail: {
+          key,
+          value,
+        },
+      }));
+    }
+  }
+  const dataset = options.datasetObject ? new Dataset(options.datasetObject) : new Dataset();
+  window.document.dataset = dataset;
+
   /* {
     const _insertAfter = s => {
       htmlString = htmlString.slice(0, match.index) + match[0] + s + htmlString.slice();

@@ -45,6 +45,7 @@ class XRIFrame extends HTMLElement {
     this._highlight = null;
     this._extents = [];
     this._loadDistance = Infinity;
+    this._data = {};
   }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
@@ -73,6 +74,7 @@ class XRIFrame extends HTMLElement {
           top,
           // hidden: this.d === 3,
           xrOffsetBuffer: this.xrOffset._buffer,
+          datasetObject: this._data,
           onnavigate: (href) => {
             this.readyState = null;
 
@@ -122,6 +124,15 @@ class XRIFrame extends HTMLElement {
               this.scale = value;
               this.xrOffset._scale.set(value);
               this.xrOffset.pushUpdate();
+            }
+          },
+          ondatasetchange: event => {
+            const {key, value} = event;
+            const {data} = this;
+            if (data[key] !== value) {
+              this.data = data;
+              this._data[key] = value;
+              win.iframe.contentDocument.dataset.pushUpdate(key, value);
             }
           },
         });
@@ -179,6 +190,14 @@ class XRIFrame extends HTMLElement {
       if (isFinite(loadDistance)) {
         this.loadDistance = loadDistance;
       }
+    } else if (name === 'data') {
+      const newData = JSON.parse(newValue);
+      for (const k in this._data) {
+        delete this._data[k];
+      }
+      for (const k in newData) {
+        this._data[k] = newData[k];
+      }
     }
   }
   static get observedAttributes() {
@@ -190,6 +209,7 @@ class XRIFrame extends HTMLElement {
       'highlight',
       'extents',
       'load-distance',
+      'data',
     ];
   }
   get src() {
@@ -236,6 +256,14 @@ class XRIFrame extends HTMLElement {
     if (scale.length === 3 && scale.every(n => isFinite(n))) {
       this.setAttribute('scale', scale.join(' '));
     }
+  }
+
+  get data() {
+    const s = this.getAttribute('data');
+    return s ? JSON.parse(s) : {};
+  }
+  set data(data) {
+    this.setAttribute('data', JSON.stringify(data));
   }
 
   get worldOffset() {
