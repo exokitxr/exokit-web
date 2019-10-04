@@ -618,12 +618,6 @@ class XRRigidTransform extends EventEmitter {
     return this._position;
   }
   set position(position) {
-    /* this._position[0] = position[0];
-    this._position[1] = position[1];
-    this._position[2] = position[2];
-
-    this.pushUpdate();
-    this.pushEvent(); */
     this.dispatchEvent(new CustomEvent('change', {
       detail: {
         key: 'position',
@@ -635,13 +629,6 @@ class XRRigidTransform extends EventEmitter {
     return this._orientation;
   }
   set orientation(orientation) {
-    /* this._orientation[0] = orientation[0];
-    this._orientation[1] = orientation[1];
-    this._orientation[2] = orientation[2];
-    this._orientation[3] = orientation[3];
-
-    this.pushUpdate();
-    this.pushEvent(); */
     this.dispatchEvent(new CustomEvent('change', {
       detail: {
         key: 'orientation',
@@ -653,12 +640,6 @@ class XRRigidTransform extends EventEmitter {
     return this._scale;
   }
   set scale(scale) {
-    /* this._scale[0] = scale[0];
-    this._scale[1] = scale[1];
-    this._scale[2] = scale[2];
-
-    this.pushUpdate();
-    this.pushEvent(); */
     this.dispatchEvent(new CustomEvent('change', {
       detail: {
         key: 'scale',
@@ -686,10 +667,6 @@ class XRRigidTransform extends EventEmitter {
 
     GlobalContext.xrState.offsetEpoch[0]++;
   }
-
-  /* pushEvent() {
-    this.dispatchEvent(new CustomEvent('change'));
-  } */
 }
 
 class XRSpace extends EventTarget {
