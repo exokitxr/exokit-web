@@ -517,8 +517,10 @@ class XRInputSourceEvent extends Event {
 }
 GlobalContext.XRInputSourceEvent = XRInputSourceEvent;
 
-class XRRigidTransform {
+class XRRigidTransform extends EventTarget {
   constructor(position, orientation, scale) {
+    super();
+
     if (typeof position == 'object') {
       const inverse = orientation instanceof XRRigidTransform ? orientation : null;
 
@@ -542,30 +544,30 @@ class XRRigidTransform {
         scale = {x: 1, y: 1, z: 1};
       }
 
-      this.position[0] = position.x;
-      this.position[1] = position.y;
-      this.position[2] = position.z;
+      this._position[0] = position.x;
+      this._position[1] = position.y;
+      this._position[2] = position.z;
 
-      this.orientation[0] = orientation.x;
-      this.orientation[1] = orientation.y;
-      this.orientation[2] = orientation.z;
-      this.orientation[3] = orientation.w;
+      this._orientation[0] = orientation.x;
+      this._orientation[1] = orientation.y;
+      this._orientation[2] = orientation.z;
+      this._orientation[3] = orientation.w;
 
-      this.scale[0] = scale.x;
-      this.scale[1] = scale.y;
-      this.scale[2] = scale.z;
+      this._scale[0] = scale.x;
+      this._scale[1] = scale.y;
+      this._scale[2] = scale.z;
 
       localMatrix
-        .compose(localVector.fromArray(this.position), localQuaternion.fromArray(this.orientation), localVector2.fromArray(this.scale))
+        .compose(localVector.fromArray(this._position), localQuaternion.fromArray(this._orientation), localVector2.fromArray(this._scale))
         .toArray(this.matrix);
       localMatrix
         .getInverse(localMatrix)
         .toArray(this.matrixInverse);
       localMatrix
         .decompose(localVector, localQuaternion, localVector2);
-      localVector.toArray(this.positionInverse);
-      localQuaternion.toArray(this.orientationInverse);
-      localVector2.toArray(this.scaleInverse);
+      localVector.toArray(this._positionInverse);
+      localQuaternion.toArray(this._orientationInverse);
+      localVector2.toArray(this._scaleInverse);
     }
 
     if (!this._inverse) {
@@ -580,13 +582,13 @@ class XRRigidTransform {
     {
       let index = this._inverse ? ((3 + 4 + 3 + 16) * Float32Array.BYTES_PER_ELEMENT) : 0;
 
-      this.position = new Float32Array(this._buffer, index, 3);
+      this._position = new Float32Array(this._buffer, index, 3);
       index += 3 * Float32Array.BYTES_PER_ELEMENT;
 
-      this.orientation = new Float32Array(this._buffer, index, 4);
+      this._orientation = new Float32Array(this._buffer, index, 4);
       index += 4 * Float32Array.BYTES_PER_ELEMENT;
 
-      this.scale = new Float32Array(this._buffer, index, 3);
+      this._scale = new Float32Array(this._buffer, index, 3);
       index += 3 * Float32Array.BYTES_PER_ELEMENT;
 
       this.matrix = new Float32Array(this._buffer, index, 16);
@@ -595,13 +597,13 @@ class XRRigidTransform {
     {
       let index = this._inverse ? 0 : ((3 + 4 + 3 + 16) * Float32Array.BYTES_PER_ELEMENT);
 
-      this.positionInverse = new Float32Array(this._buffer, index, 3);
+      this._positionInverse = new Float32Array(this._buffer, index, 3);
       index += 3 * Float32Array.BYTES_PER_ELEMENT;
 
-      this.orientationInverse = new Float32Array(this._buffer, index, 4);
+      this._orientationInverse = new Float32Array(this._buffer, index, 4);
       index += 4 * Float32Array.BYTES_PER_ELEMENT;
 
-      this.scaleInverse = new Float32Array(this._buffer, index, 3);
+      this._scaleInverse = new Float32Array(this._buffer, index, 3);
       index += 3 * Float32Array.BYTES_PER_ELEMENT;
 
       this.matrixInverse = new Float32Array(this._buffer, index, 16);
@@ -614,12 +616,46 @@ class XRRigidTransform {
   }
   set inverse(inverse) {}
 
+  get position() {
+    return this._position;
+  }
+  set position(position) {
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        key: 'position',
+        value: position,
+      },
+    }));
+  }
+  get orientation() {
+    return this._orientation;
+  }
+  set orientation(orientation) {
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        key: 'orientation',
+        value: orientation,
+      },
+    }));
+  }
+  get scale() {
+    return this._scale;
+  }
+  set scale(scale) {
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        key: 'scale',
+        value: scale,
+      },
+    }));
+  }
+
   pushUpdate() {
     localMatrix
       .compose(
-        localVector.fromArray(this.position),
-        localQuaternion.fromArray(this.orientation),
-        localVector2.fromArray(this.scale)
+        localVector.fromArray(this._position),
+        localQuaternion.fromArray(this._orientation),
+        localVector2.fromArray(this._scale)
       )
       .toArray(this.matrix);
     localMatrix
@@ -627,9 +663,9 @@ class XRRigidTransform {
       .toArray(this.matrixInverse);
     localMatrix
       .decompose(localVector, localQuaternion, localVector2);
-    localVector.toArray(this.positionInverse);
-    localQuaternion.toArray(this.orientationInverse);
-    localVector2.toArray(this.scaleInverse);
+    localVector.toArray(this._positionInverse);
+    localQuaternion.toArray(this._orientationInverse);
+    localVector2.toArray(this._scaleInverse);
 
     GlobalContext.xrState.offsetEpoch[0]++;
   }

@@ -108,6 +108,19 @@ class XRIFrame extends HTMLElement {
               });
             }
           },
+          onxroffsetchange: event => {
+            const {key, value} = event;
+            if (key === 'position') {
+              this.xrOffset._position.set(value);
+              this.xrOffset.pushUpdate();
+            } else if (key === 'orientation') {
+              this.xrOffset._orientation.set(value);
+              this.xrOffset.pushUpdate();
+            } else if (key === 'scale') {
+              this.xrOffset._scale.set(value);
+              this.xrOffset.pushUpdate();
+            }
+          },
         });
         win.highlight = this._highlight;
         win.addEventListener('load', () => {
@@ -126,7 +139,7 @@ class XRIFrame extends HTMLElement {
       if (position.length === 3) {
         position = position.map(s => parseFloat(s));
         if (position.every(n => isFinite(n))) {
-          this.xrOffset.position.set(position);
+          this.xrOffset._position.set(position);
           this.xrOffset.pushUpdate();
         }
       }
@@ -135,7 +148,7 @@ class XRIFrame extends HTMLElement {
       if (orientation.length === 4) {
         orientation = orientation.map(s => parseFloat(s));
         if (orientation.every(n => isFinite(n))) {
-          this.xrOffset.orientation.set(orientation);
+          this.xrOffset._orientation.set(orientation);
           this.xrOffset.pushUpdate();
         }
       }
@@ -144,7 +157,7 @@ class XRIFrame extends HTMLElement {
       if (scale.length === 3) {
         scale = scale.map(s => parseFloat(s));
         if (scale.every(n => isFinite(n))) {
-          this.xrOffset.scale.set(scale);
+          this.xrOffset._scale.set(scale);
           this.xrOffset.pushUpdate();
         }
       }

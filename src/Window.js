@@ -759,7 +759,15 @@ const _fetchText = src => fetch(src)
     document.childNodes.removeChild(document.childNodes[i]);
   } */
 
-  window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
+  const xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
+  xrOffset.addEventListener('change', e => {
+    self._postMessageUp({
+      method: 'emit',
+      type: 'xrOffsetChange',
+      event: e.detail,
+    });
+  });
+  window.document.xrOffset = xrOffset;
 
   /* {
     const _insertAfter = s => {
