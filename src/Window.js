@@ -762,7 +762,8 @@ const _fetchText = src => fetch(src)
   const xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
   xrOffset.addEventListener('change', e => {
     self._postMessageUp({
-      method: 'xrOffsetChange',
+      method: 'emit',
+      type: 'xrOffsetChange',
       event: e.detail,
     });
   });
