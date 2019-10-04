@@ -138,7 +138,7 @@ class XRIFrame extends HTMLElement {
       let position = newValue.split(' ');
       if (position.length === 3) {
         position = position.map(s => parseFloat(s));
-        if (position.every(n => isFinite(n))) {
+        if (position.every(n => isFinite(n)) && position.some((n, i) => n !== this.xrOffset._position[i])) {
           this.xrOffset._position.set(position);
           this.xrOffset.pushUpdate();
         }
@@ -147,7 +147,7 @@ class XRIFrame extends HTMLElement {
       let orientation = newValue.split(' ');
       if (orientation.length === 4) {
         orientation = orientation.map(s => parseFloat(s));
-        if (orientation.every(n => isFinite(n))) {
+        if (orientation.every(n => isFinite(n)) && orientation.some((n, i) => n !== this.xrOffset._orientation[i])) {
           this.xrOffset._orientation.set(orientation);
           this.xrOffset.pushUpdate();
         }
@@ -156,7 +156,7 @@ class XRIFrame extends HTMLElement {
       let scale = newValue.split(' ');
       if (scale.length === 3) {
         scale = scale.map(s => parseFloat(s));
-        if (scale.every(n => isFinite(n))) {
+        if (scale.every(n => isFinite(n)) && scale.some((n, i) => n !== this.xrOffset._scale[i])) {
           this.xrOffset._scale.set(scale);
           this.xrOffset.pushUpdate();
         }
