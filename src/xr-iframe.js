@@ -195,13 +195,13 @@ class XRIFrame extends HTMLElement {
         for (const k in this._data) {
           if (!(k in newData)) {
             delete this._data[k];
-            this.contentWindow && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, undefined);
+            this.contentWindow && this.contentWindow.loaded && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, undefined);
           }
         }
         for (const k in newData) {
           const v = newData[k];
           this._data[k] = v;
-          this.contentWindow && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, v);
+          this.contentWindow && this.contentWindow.loaded && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, v);
         }
       }
     }
