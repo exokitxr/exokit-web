@@ -193,10 +193,15 @@ class XRIFrame extends HTMLElement {
       } else if (name === 'data') {
         const newData = JSON.parse(newValue);
         for (const k in this._data) {
-          delete this._data[k];
+          if (!(k in newData)) {
+            delete this._data[k];
+            this.contentWindow && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, undefined);
+          }
         }
         for (const k in newData) {
-          this._data[k] = newData[k];
+          const v = newData[k];
+          this._data[k] = v;
+          this.contentWindow && this.contentWindow.iframe.contentDocument.dataset.pushUpdate(k, v);
         }
       }
     }
