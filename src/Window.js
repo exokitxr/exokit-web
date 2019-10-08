@@ -793,7 +793,7 @@ const _fetchText = src => fetch(src)
       });
     }
     pushUpdate(key, value) {
-      this.data[key] = value;
+      // this.data[key] = value;
 
       this.dispatchEvent(new CustomEvent('change', {
         detail: {
