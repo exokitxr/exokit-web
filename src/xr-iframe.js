@@ -129,10 +129,9 @@ class XRIFrame extends HTMLElement {
             },
             ondatasetchange: event => {
               const {key, value} = event;
-              const {data} = this;
-              if (data[key] !== value) {
-                this.data = data;
+              if (this._data[key] !== value) {
                 this._data[key] = value;
+                this.data = this._data;
                 win.iframe.contentDocument.dataset.pushUpdate(key, value);
               }
             },
