@@ -81,6 +81,7 @@ const xrState = (() => {
   result.leftFov.set(Float32Array.from([45, 45, 45, 45]));
   result.rightFov = _makeTypedArray(Float32Array, 4);
   result.rightFov.set(result.leftFov);
+  result.offsetEpoch = _makeTypedArray(Uint32Array, 1);
   const _makeGamepad = () => ({
     connected: _makeTypedArray(Uint32Array, 1),
     position: _makeTypedArray(Float32Array, 3),
@@ -476,8 +477,16 @@ core.animate = (timestamp, frame, referenceSpace) => {
     const _loadHmd = () => {
       xrState.leftViewMatrix.set(views[0].transform.inverse.matrix);
       xrState.leftProjectionMatrix.set(views[0].projectionMatrix);
+
       xrState.rightViewMatrix.set(views[1].transform.inverse.matrix);
       xrState.rightProjectionMatrix.set(views[1].projectionMatrix);
+
+      localMatrix
+        .fromArray(xrState.leftViewMatrix)
+        .getInverse(localMatrix)
+        .decompose(localVector, localQuaternion, localVector2)
+      localVector.toArray(xrState.position);
+      localQuaternion.toArray(xrState.orientation);
     };
     _loadHmd();
  
@@ -538,68 +547,6 @@ core.animate = (timestamp, frame, referenceSpace) => {
     const win = windows[0];
     const {canvas, ctx} = win;
     ctx.xrFramebuffer = framebuffer;
-    
-    /* ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
-    ctx.clearColor(1, 1, 0, 1);
-    ctx.clear(ctx.COLOR_BUFFER_BIT|ctx.DEPTH_BUFFER_BIT|ctx.STENCIL_BUFFER_BIT); */
-    
-    // XXX three.js
-    /* const viewport = baseLayer.getViewport(pose.views[0]);
-
-    var views = pose.views;
-    var baseLayer = session.renderState.baseLayer;
-
-    for ( var i = 0; i < views.length; i ++ ) {
-
-      var view = views[ i ];
-      // var viewport = baseLayer.getViewport( view );
-      var viewMatrix = view.transform.inverse.matrix;
-
-      var camera = cameraVR.cameras[ i ];
-      camera.matrix.fromArray( viewMatrix ).getInverse( camera.matrix );
-      camera.projectionMatrix.fromArray( view.projectionMatrix );
-      camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
-    } */
-    
-    // XXX native
-    /* // hmd pose
-    const hmdMatrix = localMatrix.fromArray(localFloat32HmdPoseArray);
-
-    hmdMatrix.decompose(localVector, localQuaternion, localVector2);
-    localVector.toArray(xrState.position);
-    localQuaternion.toArray(xrState.orientation);
-
-    hmdMatrix.getInverse(hmdMatrix);
-
-    // eye pose
-    const _loadHmd = (i, viewMatrix, projectionMatrix, eyeOffset, fov) => {
-      topVrPresentState.vrSystem.GetEyeToHeadTransform(i, localFloat32MatrixArray);
-      localMatrix2
-        .fromArray(localFloat32MatrixArray)
-        .decompose(localVector, localQuaternion, localVector2);
-      localVector.toArray(eyeOffset);
-      localMatrix2
-        .getInverse(localMatrix2)
-        .multiply(hmdMatrix)
-        .toArray(viewMatrix);
-
-      topVrPresentState.vrSystem.GetProjectionMatrix(i, xrState.depthNear[0], xrState.depthFar[0], localFloat32MatrixArray);
-      projectionMatrix.set(localFloat32MatrixArray);
-
-      topVrPresentState.vrSystem.GetProjectionRaw(i, localFovArray);
-      for (let i = 0; i < localFovArray.length; i++) {
-        fov[i] = Math.atan(localFovArray[i]) / Math.PI * 180;
-      }
-    };
-    _loadHmd(0, xrState.leftViewMatrix, xrState.leftProjectionMatrix, xrState.leftOffset, xrState.leftFov);
-    _loadHmd(1, xrState.rightViewMatrix, xrState.rightProjectionMatrix, xrState.rightOffset, xrState.rightFov);
-
-    // build stage parameters
-    // topVrPresentState.vrSystem.GetSeatedZeroPoseToStandingAbsoluteTrackingPose(localFloat32MatrixArray);
-    // stageParameters.sittingToStandingTransform.set(localFloat32MatrixArray);
-
-    // build gamepads data
-     */
   }
   
   _computeDerivedGamepadsData();

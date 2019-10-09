@@ -2,7 +2,7 @@
 <html>
 <body>
 <xr-site camera-position="0 2 3" camera-orientation="-0.2297529205473612 0 0 0.9732489894677301">
-  <xr-iframe src="examples/tutorial.html" position="0 0.5 0" name="Introduction" disabled></xr-iframe>
+  <xr-iframe src="examples/tutorial.html" position="0 0.5 0" name="Introduction"></xr-iframe>
   <xr-iframe src="examples/subscene.html" position="1 1 0" name="Subscene"></xr-iframe>
   <xr-iframe src="examples/floor.html" position="-1 0 0" name="Floor"></xr-iframe>
 </xr-site>
@@ -10,6 +10,8 @@
 <script src="three.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="TransformControls.js"></script>
+<script src="BufferGeometryUtils.js "></script>
+<script src="land.js"></script>
 <script>
 (async () => {
 try {
@@ -17,6 +19,8 @@ try {
 console.log('app 1');
 
 const root = document.querySelector('xr-site');
+const guardianMeshes = [];
+const baseMeshes = [];
 const floorXrIframe = document.querySelector('xr-iframe[name=Floor]');
 /* floorXrIframe.addEventListener('load', e => {
   console.log('floor load', e);
@@ -35,6 +39,13 @@ const _addControls = xrIframe => {
     xrIframe.position = object.position.toArray();
     xrIframe.orientation = object.quaternion.toArray();
     xrIframe.scale = object.scale.toArray();
+
+    for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
+      xrIframe.baseMeshes[i].updateTransform();
+    }
+    for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
+      xrIframe.guardianMeshes[i].updateTransform();
+    }
   });
   control.addEventListener('dragging-changed', e => {
     orbitControls.enabled = !e.value;
@@ -53,6 +64,99 @@ const _addControls = xrIframe => {
 };
 const _removeControls = xrIframe => {
   scene.remove(xrIframe.control);
+};
+const _getChildXrIframes = xrIframe => {
+  const contentDocument = xrIframe.contentWindow.iframe.contentDocument;
+  return Array.from(xrIframe)
+    .concat(
+      Array.from(contentDocument.querySelectorAll('xr-iframe'))
+    );
+};
+const _insertBefore = (a, b) => {
+  scene.add(a);
+  const aIndex = scene.children.indexOf(a);
+  scene.children.splice(aIndex, 1);
+  const bIndex = scene.children.indexOf(b);
+  scene.children.splice(bIndex, 0, a);
+};
+const colors = {
+  default: 0x42a5f5,
+  highlight: 0x9ccc65,
+};
+const _addGuardian = xrIframe => {
+  const childXrIframes = _getChildXrIframes(xrIframe);
+  const xrExtents = childXrIframes.map(xrIframe => {
+    const extents = xrIframe.getAttribute('extents');
+    return extents ? XRIFrame.parseExtents(extents) : [];
+  });
+
+  for (let i = 0; i < xrExtents.length; i++) {
+    const xrExtent = xrExtents[i];
+    if (xrExtent.length > 0) {
+      const childXrIframe = childXrIframes[i];
+      const baseMesh = new THREE.Land(xrExtent, colors.default);
+      baseMesh.xrIframe = childXrIframe;
+      baseMesh.updateTransform = function() {
+        this.position.fromArray(xrIframe.position);
+        this.quaternion.fromArray(xrIframe.orientation);
+        this.scale.fromArray(xrIframe.scale);
+        this.updateColor();
+      };
+      baseMesh.updateColor = function() {
+        this.setColor(this.xrIframe.visible ? colors.highlight : colors.default);
+      };
+      baseMesh.updateTransform();
+      if (guardianMeshes.length > 0) {
+        _insertBefore(baseMesh, guardianMeshes[0]);
+      } else {
+        scene.add(baseMesh);
+      }
+      xrIframe.baseMeshes.push(baseMesh);
+      baseMeshes.push(baseMesh);
+
+      const guardianMesh = new THREE.Guardian(xrExtent, 10, colors.default);
+      guardianMesh.xrIframe = childXrIframe;
+      guardianMesh.updateTransform = function() {
+        this.position.fromArray(xrIframe.position);
+        this.quaternion.fromArray(xrIframe.orientation);
+        this.scale.fromArray(xrIframe.scale);
+        this.updateColor();
+      };
+      guardianMesh.updateColor = function() {
+        this.setColor(this.xrIframe.visible ? colors.highlight : colors.default);
+      };
+      guardianMesh.updateTransform();
+      scene.add(guardianMesh);
+      xrIframe.guardianMeshes.push(guardianMesh);
+      guardianMeshes.push(guardianMesh);
+    }
+  }
+};
+const _refreshGuardians = () => {
+  const xrIframes = Array.from(root.childNodes).filter(xrIframe => xrIframe instanceof XRIFrame);
+  for (let i = 0; i < xrIframes.length; i++) {
+    const xrIframe = xrIframes[i];
+    if (!xrIframe.baseMeshes) {
+      xrIframe.baseMeshes = [];
+      xrIframe.guardianMeshes = [];
+
+      if (xrIframe.loaded) {
+        _addGuardian(xrIframe);
+      } else {
+        xrIframe.addEventListener('load', () => {
+          _addGuardian(xrIframe);
+        }, {
+          once: true,
+        });
+      }
+    }
+  }
+  for (let i = 0; i < baseMeshes.length; i++) {
+    baseMeshes[i].updateTransform();
+  }
+  for (let i = 0; i < guardianMeshes.length; i++) {
+    guardianMeshes[i].updateTransform();
+  }
 };
 const _postTabs = () => {
   window.parentPostMessage({
@@ -115,6 +219,7 @@ root.layers.push(renderer.domElement);
 _addControls(floorXrIframe);
 _addControls(tutorialXrIframe);
 _addControls(subsceneXrIframe);
+_refreshGuardians();
 _postTabs();
 
 function animate() {
@@ -131,10 +236,23 @@ function animate() {
   const _updateVrCamera = () => {
     vrCamera.matrixWorldInverse.fromArray(root.viewMatrix);
     vrCamera.matrixWorld.getInverse(vrCamera.matrixWorldInverse);
+
     vrCamera.projectionMatrix.fromArray(root.projectionMatrix);
     vrCamera.projectionMatrixInverse.getInverse(vrCamera.projectionMatrix);
+
+    vrCamera.matrixWorld.decompose(vrCamera.position, vrCamera.quaternion, vrCamera.scale);
   };
   _updateVrCamera();
+
+  const _updateGuardians = () => {
+    for (let i = 0; i < baseMeshes.length; i++) {
+      baseMeshes[i].updateColor();
+    }
+    for (let i = 0; i < guardianMeshes.length; i++) {
+      guardianMeshes[i].updateColor();
+    }
+  };
+  _updateGuardians();
 
   renderer.render(scene, camera);
 }
@@ -199,6 +317,7 @@ window.addEventListener('message', e => {
         root.appendChild(xrIframe);
       }
       _cleanupRoot();
+      _refreshGuardians();
       _postTabs();
 
       break;
@@ -210,7 +329,14 @@ window.addEventListener('message', e => {
         xrIframe.parentNode.removeChild(xrIframe.previousSibling);
       }
       xrIframe.parentNode.removeChild(xrIframe);
+      for (let i = 0; i < xrIframe.baseMeshes.length; i++) {
+        scene.remove(xrIframe.baseMeshes[i]);
+      }
+      for (let i = 0; i < xrIframe.guardianMeshes.length; i++) {
+        scene.remove(xrIframe.guardianMeshes[i]);
+      }
       _cleanupRoot();
+      _refreshGuardians();
       _postTabs();
 
       break;
@@ -232,6 +358,7 @@ window.addEventListener('message', e => {
       if (match) {
         root.innerHTML = /\S/.test(match[1]) ? match[1] : '';
       }
+      _refreshGuardians();
       _postTabs();
       break;
     }

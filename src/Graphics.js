@@ -189,7 +189,6 @@ for (const k in WebGLRenderingContext.prototype) {
   } else {
     const {value} = o;
     if (typeof value === 'function') {
-      // const {getError} = WebGLRenderingContext.prototype;
       if (k === 'drawElements' || k === 'drawArrays' || k === 'drawElementsInstanced' || k === 'drawArraysInstanced' || k === 'clear') {
         ProxiedWebGLRenderingContext.prototype[k] = function() {
           if (window[symbols.mrDisplaysSymbol].vrDisplay.isPresenting) {
@@ -197,13 +196,18 @@ for (const k in WebGLRenderingContext.prototype) {
             return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
           }
         };
+      } else if (k === 'texImage2D' || k === 'texSubImage2D') {
+        ProxiedWebGLRenderingContext.prototype[k] = function(a, b, c, d, e, f, g, h, i) {
+          this.setProxyState();
+          if (i instanceof Float32Array) {
+            c = GlobalContext.proxyContext.RGBA32F;
+            return GlobalContext.proxyContext[k].call(GlobalContext.proxyContext, a, b, c, d, e, f, g, h, i);
+          } else {
+            return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
+          }
+        };
       } else {
         ProxiedWebGLRenderingContext.prototype[k] = function() {
-          /* const error = getError.call(this);
-          if (error) {
-            Error.stackTraceLimit = 300;
-            console.log('fn', error, !!GlobalContext.proxyContext, this.lol, k, Array.from(arguments), new Error().stack);
-          } */
           this.setProxyState();
           return GlobalContext.proxyContext[k].apply(GlobalContext.proxyContext, arguments);
         };

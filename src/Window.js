@@ -16,6 +16,7 @@ import {
   GamepadButton,
   lookupHMDTypeString,
   getGamepads,
+  getXrOffsetMatrix,
 } from './VR.js';
 
 import GlobalContext from './GlobalContext.js';
@@ -474,8 +475,7 @@ const _fetchText = src => fetch(src)
       localMatrix
         .fromArray(xrGamepad.transformMatrix)
         .premultiply(
-          localMatrix2
-            .fromArray(window.document.xrOffset.matrixInverse)
+          localMatrix2.getInverse(getXrOffsetMatrix())
         )
         .decompose(localVector, localQuaternion, localVector2);
 
@@ -550,7 +550,9 @@ const _fetchText = src => fetch(src)
       const layer = vrPresentState.layers[i];
       const contentWindow = layer && layer.contentWindow;
       if (contentWindow) {
-         _renderChild(contentWindow, true, highlight || contentWindow.highlight);
+        if (!(layer instanceof XRIFrame) || layer.visible) {
+          _renderChild(contentWindow, true, highlight || contentWindow.highlight);
+        }
         contentWindow.rendered = true;
       }
     }
@@ -757,7 +759,50 @@ const _fetchText = src => fetch(src)
     document.childNodes.removeChild(document.childNodes[i]);
   } */
 
-  window.document.xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
+  const xrOffset = options.xrOffsetBuffer ? new XR.XRRigidTransform(options.xrOffsetBuffer) : new XR.XRRigidTransform();
+  xrOffset.addEventListener('change', e => {
+    self._postMessageUp({
+      method: 'emit',
+      type: 'xrOffsetChange',
+      event: e.detail,
+    });
+  });
+  window.document.xrOffset = xrOffset;
+
+  class Dataset extends EventTarget {
+    constructor(data) {
+      super();
+
+      this.data = data || {};
+    }
+    get(k) {
+      let v = this.data[k];
+      if (v === undefined) {
+        v = null;
+      }
+      return v;
+    }
+    set(key, value) {
+      self._postMessageUp({
+        method: 'emit',
+        type: 'datasetChange',
+        event: {
+          key,
+          value,
+        },
+      });
+    }
+    pushUpdate(key, value) {
+      this.dispatchEvent(new CustomEvent('change', {
+        detail: {
+          key,
+          value,
+        },
+      }));
+    }
+  }
+  const dataset = options.datasetObject ? new Dataset(options.datasetObject) : new Dataset();
+  window.document.dataset = dataset;
 
   /* {
     const _insertAfter = s => {
