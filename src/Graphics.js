@@ -21,6 +21,7 @@ const _makeState = () => {
     arrayBuffer: null,
     renderbuffer: {},
     framebuffer: {},
+    framebufferCount: 0,
 
     blend: false,
     cullFace: false,
@@ -318,7 +319,7 @@ ProxiedWebGLRenderingContext.prototype.disable = (oldDisable => function disable
   }
 })(ProxiedWebGLRenderingContext.prototype.disable);
 ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
-  if (this._enabled.clear) {
+  if (this._enabled.clear || this.state.framebufferCount > 0) {
     oldClear.apply(this, arguments);
   }
 })(ProxiedWebGLRenderingContext.prototype.clear);
@@ -459,6 +460,11 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
   return _deleteRenderbuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
+  if (fbo === null) {
+    this.state.framebufferCount--;
+  } else if (!this.state.framebuffer[target]) {
+    this.state.framebufferCount++;
+  }
   this.state.framebuffer[target] = fbo;
   return _bindFramebuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindFramebuffer);
