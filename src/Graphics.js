@@ -19,8 +19,8 @@ const _makeState = () => {
     vao: null,
 
     arrayBuffer: null,
-    renderbuffer: {},
-    framebuffer: {},
+    renderbuffer: null,
+    framebuffer: null,
 
     blend: false,
     cullFace: false,
