@@ -20,11 +20,11 @@ const _makeState = () => {
 
     arrayBuffer: null,
     renderbuffer: {
-      gl.RENDERBUFFER: null,
+      [gl.RENDERBUFFER]: null,
     },
     framebuffer: {
-      gl.READ_FRAMEBUFFER: null,
-      gl.DRAW_FRAMEBUFFER: null,
+      [gl.READ_FRAMEBUFFER]: null,
+      [gl.DRAW_FRAMEBUFFER]: null,
     },
 
     blend: false,
