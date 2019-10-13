@@ -452,7 +452,7 @@ ProxiedWebGLRenderingContext.prototype.bindRenderbuffer = (_bindRenderbuffer => 
 })(ProxiedWebGLRenderingContext.prototype.bindRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer => function deleteRenderbuffer(rbo) {
   for (const k in this.state.renderbuffer) {
-    if (this.state.renderbuffer[k] = rbo) {
+    if (this.state.renderbuffer[k] === rbo) {
       this.state.renderbuffer[k] = null;
     }
   }
@@ -464,7 +464,7 @@ ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => fu
 })(ProxiedWebGLRenderingContext.prototype.bindFramebuffer);
 ProxiedWebGLRenderingContext.prototype.deleteFramebuffer = (_deleteFramebuffer => function deleteFramebuffer(fbo) {
   for (const k in this.state.framebuffer) {
-    if (this.state.framebuffer[k] = fbo) {
+    if (this.state.framebuffer[k] === fbo) {
       this.state.framebuffer[k] = null;
     }
   }
