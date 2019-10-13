@@ -345,12 +345,9 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
-    for (const k in state.renderbuffer) {
-      gl.bindRenderbuffer(k, state.renderbuffer[k]);
-    }
-    for (const k in state.framebuffer) {
-      gl.bindFramebuffer(k, state.framebuffer[k]);
-    }
+    gl.bindRenderbuffer(gl.RENDERBUFFER, state.renderbuffer[gl.RENDERBUFFER]);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, state.framebuffer[gl.READ_FRAMEBUFFER]);
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, state.framebuffer[gl.DRAW_FRAMEBUFFER]);
 
     if (this._enabled.blend) {
       enableDisable(gl, gl.BLEND, state.blend);
