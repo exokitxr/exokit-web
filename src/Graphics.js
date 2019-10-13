@@ -19,8 +19,13 @@ const _makeState = () => {
     vao: null,
 
     arrayBuffer: null,
-    renderbuffer: {},
-    framebuffer: {},
+    renderbuffer: {
+      gl.RENDERBUFFER: null,
+    },
+    framebuffer: {
+      gl.READ_FRAMEBUFFER: null,
+      gl.DRAW_FRAMEBUFFER: null,
+    },
 
     blend: false,
     cullFace: false,
