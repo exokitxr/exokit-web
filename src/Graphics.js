@@ -19,9 +19,13 @@ const _makeState = () => {
     vao: null,
 
     arrayBuffer: null,
-    renderbuffer: {},
-    framebuffer: {},
-    framebufferCount: 0,
+    renderbuffer: {
+      [gl.RENDERBUFFER]: null,
+    },
+    framebuffer: {
+      [gl.READ_FRAMEBUFFER]: null,
+      [gl.DRAW_FRAMEBUFFER]: null,
+    },
 
     blend: false,
     cullFace: false,
@@ -319,7 +323,7 @@ ProxiedWebGLRenderingContext.prototype.disable = (oldDisable => function disable
   }
 })(ProxiedWebGLRenderingContext.prototype.disable);
 ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
-  if (this._enabled.clear || this.state.framebufferCount > 0) {
+  if (this._enabled.clear || this.state.framebuffer[this.DRAW_FRAMEBUFFER] !== null) {
     oldClear.apply(this, arguments);
   }
 })(ProxiedWebGLRenderingContext.prototype.clear);
@@ -341,12 +345,9 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
-    for (const k in state.renderbuffer) {
-      gl.bindRenderbuffer(k, state.renderbuffer[k]);
-    }
-    for (const k in state.framebuffer) {
-      gl.bindFramebuffer(k, state.framebuffer[k]);
-    }
+    gl.bindRenderbuffer(gl.RENDERBUFFER, state.renderbuffer[gl.RENDERBUFFER]);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, state.framebuffer[gl.READ_FRAMEBUFFER]);
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, state.framebuffer[gl.DRAW_FRAMEBUFFER]);
 
     if (this._enabled.blend) {
       enableDisable(gl, gl.BLEND, state.blend);
@@ -460,12 +461,12 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
   return _deleteRenderbuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
-  if (fbo === null) {
-    this.state.framebufferCount--;
-  } else if (!this.state.framebuffer[target]) {
-    this.state.framebufferCount++;
+  if (target === this.FRAMEBUFFER) {
+    this.state.framebuffer[this.READ_FRAMEBUFFER] = fbo;
+    this.state.framebuffer[this.DRAW_FRAMEBUFFER] = fbo;
+  } else {
+    this.state.framebuffer[target] = fbo;
   }
-  this.state.framebuffer[target] = fbo;
   return _bindFramebuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindFramebuffer);
 ProxiedWebGLRenderingContext.prototype.deleteFramebuffer = (_deleteFramebuffer => function deleteFramebuffer(fbo) {
