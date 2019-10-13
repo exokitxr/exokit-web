@@ -323,7 +323,8 @@ ProxiedWebGLRenderingContext.prototype.disable = (oldDisable => function disable
   }
 })(ProxiedWebGLRenderingContext.prototype.disable);
 ProxiedWebGLRenderingContext.prototype.clear = (oldClear => function clear() {
-  if (this._enabled.clear || this.state.framebuffer[this.DRAW_FRAMEBUFFER] !== null) {
+  const gl = GlobalContext.proxyContext;
+  if (this._enabled.clear || this.state.framebuffer[gl.DRAW_FRAMEBUFFER] !== null) {
     oldClear.apply(this, arguments);
   }
 })(ProxiedWebGLRenderingContext.prototype.clear);
@@ -462,8 +463,9 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
   if (target === this.FRAMEBUFFER) {
-    this.state.framebuffer[this.READ_FRAMEBUFFER] = fbo;
-    this.state.framebuffer[this.DRAW_FRAMEBUFFER] = fbo;
+    const gl = GlobalContext.proxyContext;
+    this.state.framebuffer[gl.READ_FRAMEBUFFER] = fbo;
+    this.state.framebuffer[gl.DRAW_FRAMEBUFFER] = fbo;
   } else {
     this.state.framebuffer[target] = fbo;
   }
