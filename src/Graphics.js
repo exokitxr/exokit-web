@@ -464,7 +464,12 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
   return _deleteRenderbuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
-  this.state.framebuffer[target] = fbo;
+  if (target === this.FRAMEBUFFER) {
+    this.state.framebuffer[this.READ_FRAMEBUFFER] = fbo;
+    this.state.framebuffer[this.DRAW_FRAMEBUFFER] = fbo;
+  } else {
+    this.state.framebuffer[target] = fbo;
+  }
   return _bindFramebuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.bindFramebuffer);
 ProxiedWebGLRenderingContext.prototype.deleteFramebuffer = (_deleteFramebuffer => function deleteFramebuffer(fbo) {
