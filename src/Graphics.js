@@ -22,9 +22,11 @@ const _makeState = () => {
     renderbuffer: {
       [gl.RENDERBUFFER]: null,
     },
-    framebuffer: {
+    framebuffer: hasWebGL2 ? {
       [gl.READ_FRAMEBUFFER]: null,
       [gl.DRAW_FRAMEBUFFER]: null,
+    } : {
+      [gl.FRAMEBUFFER]: null,
     },
 
     blend: false,
@@ -347,8 +349,12 @@ ProxiedWebGLRenderingContext.prototype.setProxyState = function setProxyState() 
 
     gl.bindBuffer(gl.ARRAY_BUFFER, state.arrayBuffer);
     gl.bindRenderbuffer(gl.RENDERBUFFER, state.renderbuffer[gl.RENDERBUFFER]);
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, state.framebuffer[gl.READ_FRAMEBUFFER]);
-    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, state.framebuffer[gl.DRAW_FRAMEBUFFER]);
+    if (hasWebGL2) {
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, state.framebuffer[gl.READ_FRAMEBUFFER]);
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, state.framebuffer[gl.DRAW_FRAMEBUFFER]);
+    } else {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, state.framebuffer[gl.FRAMEBUFFER]);
+    }
 
     if (this._enabled.blend) {
       enableDisable(gl, gl.BLEND, state.blend);
@@ -462,7 +468,7 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
   return _deleteRenderbuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
-  if (target === this.FRAMEBUFFER) {
+  if (hasWebGL2 && target === this.FRAMEBUFFER) {
     const gl = GlobalContext.proxyContext;
     this.state.framebuffer[gl.READ_FRAMEBUFFER] = fbo;
     this.state.framebuffer[gl.DRAW_FRAMEBUFFER] = fbo;
