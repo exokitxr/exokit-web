@@ -468,8 +468,8 @@ ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer = (_deleteRenderbuffer
   return _deleteRenderbuffer.apply(this, arguments);
 })(ProxiedWebGLRenderingContext.prototype.deleteRenderbuffer);
 ProxiedWebGLRenderingContext.prototype.bindFramebuffer = (_bindFramebuffer => function bindFramebuffer(target, fbo) {
-  if (hasWebGL2 && target === this.FRAMEBUFFER) {
-    const gl = GlobalContext.proxyContext;
+  const gl = GlobalContext.proxyContext;
+  if (hasWebGL2 && target === gl.FRAMEBUFFER) {
     this.state.framebuffer[gl.READ_FRAMEBUFFER] = fbo;
     this.state.framebuffer[gl.DRAW_FRAMEBUFFER] = fbo;
   } else {
