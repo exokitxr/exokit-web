@@ -115,7 +115,7 @@ const XREngineProto = {
           this.insertAdjacentElement('afterend', win.canvas);
         }
 
-        this.dispatchEvent(new MessageEvent('canvas', {
+        this.dispatchEvent(new MessageEvent('load', {
           data: win.canvas,
         }));
       }
