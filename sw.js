@@ -123,7 +123,7 @@ const _rewriteResExt = (url, originalUrl, headers, res) => {
     return _rewriteResText(res, jsString => {
       const result = jsString
         .replace(/https:\/\/www\.cryptovoxels\.com\//g, '/')
-        .replace('n._attached&&n.getEngine().enableVR()', 'n.getEngine().enableVR()')
+        .replace('r.enterVR()}))', 'r.enterVR()})),setTimeout(() => {this._btnVR.click();})')
         .replace(/this\._rigCameras\[0\]\.viewport=new ([a-zA-Z0-9\.]+)\(0\,0\,\.5\,1\)/g, 'this._rigCameras[0].viewport=new $1(0,0,new FakeXRDisplay().stereo?0.5:1,1)')
         .replace(/this\._rigCameras\[1\]\.viewport=new ([a-zA-Z0-9\.]+)\(\.5\,0\,\.5\,1\)/g, 'this._rigCameras[1].viewport=new $1(new FakeXRDisplay().stereo?0.5:0,0,new FakeXRDisplay().stereo?0.5:0,1)')
       return result;
