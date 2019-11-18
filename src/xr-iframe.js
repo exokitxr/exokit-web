@@ -42,15 +42,28 @@ class XRIFrame extends HTMLElement {
 
     this.contentWindow = null;
     this.xrOffset = new XRRigidTransform();
+    this.connected = false;
     this._highlight = null;
     this._extents = [];
     this._loadDistance = Infinity;
     this._data = {};
   }
+  connectedCallback() {
+    this.connected = true;
+
+    const {observedAttributes} = XRIFrame;
+    for (let i = 0; i < observedAttributes.length; i++) {
+      const attributeName = observedAttributes[i];
+      this.attributeChangedCallback(attributeName, null, this.getAttribute(attributeName));
+    }
+  }
+  disconnectedCallback() {
+    this.connected = false;
+  }
   async attributeChangedCallback(name, oldValue, newValue) {
     await GlobalContext.loadPromise;
 
-    if (newValue !== oldValue) {
+    if (this.connected && newValue !== oldValue) {
       if (name === 'src') {
         let url = this.getAttribute('src');
 
