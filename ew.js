@@ -562,7 +562,7 @@ export default {
   async unregister() {
     const registrations = await navigator.serviceWorker.getRegistrations();
     for (let i = 0; i < registrations.length; i++) {
-      registrations[i].unregister();
+      await registrations[i].unregister();
     }
   },
 };
