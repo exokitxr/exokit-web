@@ -103,7 +103,7 @@ class XRSession extends EventTarget {
   /* requestFrameOfReference() { // non-standard
     return this.requestReferenceSpace.apply(this, arguments);
   } */
-  getInputSources() {
+  get inputSources() {
     return this._inputSources.filter(inputSource => inputSource.connected);
   }
   requestAnimationFrame(fn) {
@@ -151,7 +151,7 @@ class XRSession extends EventTarget {
     this.dispatchEvent(new CustomEvent('end'));
   }
   update() {
-    const inputSources = this.getInputSources();
+    const {inputSources} = this;
     const gamepads = GlobalContext.getGamepads();
 
     for (let i = 0; i < inputSources.length; i++) {
