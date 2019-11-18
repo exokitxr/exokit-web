@@ -61,9 +61,9 @@ class XRIFrame extends HTMLElement {
     this.connected = false;
   }
   async attributeChangedCallback(name, oldValue, newValue) {
-    await GlobalContext.loadPromise;
-
     if (this.connected && newValue !== oldValue) {
+      await GlobalContext.loadPromise;
+
       if (name === 'src') {
         let url = this.getAttribute('src');
 
