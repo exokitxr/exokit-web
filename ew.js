@@ -144,16 +144,6 @@ customElements.define('xr-engine-template', XREngineTemplate, {
   extends: 'template',
 });
 
-(async () => {
-
-navigator.serviceWorker.register('/sw.js');
-
-if (navigator.serviceWorker.controller) {
-  GlobalContext.loadPromise.resolve();
-} else {
-  window.location.reload();
-}
-
 ['keydown', 'keyup', 'keypress', 'paste'].forEach(type => {
   window.addEventListener(type, e => {
     const event = {
@@ -544,4 +534,35 @@ core.animate = (timestamp, frame, referenceSpace) => {
 };
 core.setSession(null);
 
-})();
+export default {
+  async register() {
+    await navigator.serviceWorker.register('/sw.js');
+
+    if (!navigator.serviceWorker.controller) {
+      await new Promise((accept, reject) => {
+        const _controllerchange = () => {
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.removeEventListener('controllerchange', _controllerchange);
+            clearTimeout(timeout);
+            accept();
+          }
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', _controllerchange);
+        const timeout = setTimeout(() => {
+          console.warn('ew timed out');
+          debugger;
+        }, 10 * 1000);
+      });
+    }
+
+    console.log('got registration', window.registration);
+
+    GlobalContext.loadPromise.resolve();
+  },
+  async unregister() {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (let i = 0; i < registrations.length; i++) {
+      registrations[i].unregister();
+    }
+  },
+};
