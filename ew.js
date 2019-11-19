@@ -295,8 +295,8 @@ window.addEventListener('contextmenu', e => {
   e.preventDefault();
 });
 
-const topVrPresentState = {
-  /* hmdType: null,
+/* const topVrPresentState = {
+  hmdType: null,
   windowHandle: null,
   fbo: null,
   msFbo: 0,
@@ -307,8 +307,8 @@ const topVrPresentState = {
   mesher: null,
   planeTracker: null,
   handTracker: null,
-  eyeTracker: null, */
-};
+  eyeTracker: null,
+}; */
 
 const requests = [];
 const handleRequest = req => {
