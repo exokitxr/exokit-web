@@ -413,7 +413,8 @@ core.animate = (timestamp, frame, referenceSpace) => {
     // console.log('got gamepads', gamepads);
     // debugger;
     const _loadGamepad = i => {
-      const inputSource = inputSources[i];
+      const handedness = i === 0 ? 'left' : 'right';
+      const inputSource = inputSources.find(inputSource => inputSource.handedness === handedness);
       const xrGamepad = xrState.gamepads[i];
 
       let pose, gamepad;
