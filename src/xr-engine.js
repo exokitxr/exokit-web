@@ -247,9 +247,9 @@ const XREngineProto = {
             win.canvas.width = fullWidth;
             win.canvas.height = height;
 
-            await win.runAsync({
+            /* await win.runAsync({
               method: 'enterXr',
-            });
+            }); */
 
             console.log('XR setup complete');
           });

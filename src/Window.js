@@ -844,7 +844,7 @@ self.onrunasync = req => {
       self.tickAnimationFrame(req);
       break;
     }
-    case 'enterXr': {
+    /* case 'enterXr': {
       console.log('handle enter xr', GlobalContext.id);
       self.vrdisplaypresentchange();
       for (let i = 0; i < windows.length; i++) {
@@ -862,7 +862,7 @@ self.onrunasync = req => {
         });
       }
       break;
-    }
+    } */
     case 'response': {
       const {keypath} = req;
 
