@@ -78,8 +78,41 @@ const XREngineProto = {
         win.canvas.height = GlobalContext.xrState.renderHeight[0];
         win.canvas.style.width = '100%';
         win.canvas.style.height = '100%';
-        win.canvas.addEventListener('mousedown', e => {
-          e.preventDefault();
+        ['mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'wheel'].forEach(type => {
+          win.canvas.addEventListener(type, e => {
+            const event = {
+              altKey: e.altKey,
+              button: e.button,
+              buttons: e.buttons,
+              clientX: e.clientX,
+              clientY: e.clientY,
+              ctrlKey: e.ctrlKey,
+              deltaMode: e.deltaMode,
+              deltaX: e.deltaX,
+              deltaY: e.deltaY,
+              deltaZ: e.deltaZ,
+              // detail: e.detail,
+              layerX: e.layerX,
+              layerY: e.layerY,
+              metaKey: e.metaKey,
+              movementX: e.movementX,
+              movementY: e.movementY,
+              offsetX: e.offsetX,
+              offsetY: e.offsetY,
+              pageX: e.pageX,
+              pageY: e.pageY,
+              screenX: e.screenX,
+              screenY: e.screenY,
+              shiftKey: e.shiftKey,
+              // timeStamp: e.timeStamp,
+              which: e.which,
+              x: e.x,
+              y: e.y,
+            };
+            for (let i = 0; i < GlobalContext.windows.length; i++) {
+              GlobalContext.windows[i].emit(type, event);
+            }
+          });
         });
         win.canvas.addEventListener('mouseenter', e => {
           const {x, y, width, height} = win.canvas.getBoundingClientRect();

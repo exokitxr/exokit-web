@@ -173,42 +173,6 @@ customElements.define('xr-engine-template', XREngineTemplate, {
     }
   });
 });
-['mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'wheel'].forEach(type => {
-  window.addEventListener(type, e => {
-    const event = {
-      altKey: e.altKey,
-      button: e.button,
-      buttons: e.buttons,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      ctrlKey: e.ctrlKey,
-      deltaMode: e.deltaMode,
-      deltaX: e.deltaX,
-      deltaY: e.deltaY,
-      deltaZ: e.deltaZ,
-      // detail: e.detail,
-      layerX: e.layerX,
-      layerY: e.layerY,
-      metaKey: e.metaKey,
-      movementX: e.movementX,
-      movementY: e.movementY,
-      offsetX: e.offsetX,
-      offsetY: e.offsetY,
-      pageX: e.pageX,
-      pageY: e.pageY,
-      screenX: e.screenX,
-      screenY: e.screenY,
-      shiftKey: e.shiftKey,
-      // timeStamp: e.timeStamp,
-      which: e.which,
-      x: e.x,
-      y: e.y,
-    };
-    for (let i = 0; i < windows.length; i++) {
-      windows[i].emit(type, event);
-    }
-  });
-});
 window.addEventListener('resize', e => {
   xrState.metrics[0] = window.innerWidth;
   xrState.metrics[1] = window.innerHeight;
