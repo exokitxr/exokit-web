@@ -696,10 +696,10 @@ class XRBoundedReferenceSpace extends XRReferenceSpace {
     super();
 
     this.boundsGeometry = [
-      new GlobalContext.DOMPoint(-3, -3),
-      new GlobalContext.DOMPoint(3, -3),
-      new GlobalContext.DOMPoint(3, 3),
-      new GlobalContext.DOMPoint(-3, 3),
+      new DOMPoint(-3, -3),
+      new DOMPoint(3, -3),
+      new DOMPoint(3, 3),
+      new DOMPoint(-3, 3),
     ];
     this.emulatedHeight = 0;
   }
