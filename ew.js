@@ -220,76 +220,52 @@ window.addEventListener('resize', e => {
 });
 window.document.addEventListener('pointerlockchange', e => {
   const pointerLockElement = !!window.document.pointerLockElement;
-
   for (let i = 0; i < windows.length; i++) {
     windows[i].emit('pointerlockchange', {
       pointerLockElement,
     });
   }
 });
-window.addEventListener('drop', e => {
-  console.log('drop event', e);
-  /* const _readFiles = paths => {
-    const result = [];
+window.document.addEventListener('drop', e => {
+  const {
+    clientX,
+    clientY,
+    pageX,
+    pageY,
+    offsetX,
+    offsetY,
+    screenX,
+    screenY,
+    movementX,
+    movementY,
+    ctrlKey,
+    shiftKey,
+    altKey,
+    metaKey,
+    button,
+    dataTransfer,
+  } = e;
 
-    return Promise.all(paths.map(p =>
-      new Promise((accept, reject) => {
-        fs.lstat(p, (err, stats) => {
-          if (!err) {
-            if (stats.isFile()) {
-              fs.readFile(p, (err, data) => {
-                if (!err) {
-                  const file = new window.Blob([data]);
-                  file.name = path.basename(p);
-                  file.path = p;
-                  result.push(file);
-
-                  accept();
-                } else {
-                  reject(err);
-                }
-              });
-            } else if (stats.isDirectory()) {
-              fs.readdir(p, (err, fileNames) => {
-                if (!err) {
-                  _readFiles(fileNames.map(fileName => path.join(p, fileName)))
-                    .then(files => {
-                      result.push.apply(result, files);
-
-                      accept();
-                    })
-                    .catch(err => {
-                      reject(err);
-                    });
-                } else {
-                  reject(err);
-                }
-              });
-            } else {
-              accept();
-            }
-          } else {
-            reject(err);
-          }
-        });
-      })
-    ))
-      .then(() => result);
-  };
-
-  _readFiles(data.paths)
-    .then(files => {
-      const dataTransfer = new window.DataTransfer({
-        files,
-      });
-      const e = new window.DragEvent('drop');
-      e.dataTransfer = dataTransfer;
-      canvas.dispatchEvent(e);
-    })
-    .catch(err => {
-      console.warn(err.stack);
+  for (let i = 0; i < windows.length; i++) {
+    windows[i].emit('drop', {
+      clientX,
+      clientY,
+      pageX,
+      pageY,
+      offsetX,
+      offsetY,
+      screenX,
+      screenY,
+      movementX,
+      movementY,
+      ctrlKey,
+      shiftKey,
+      altKey,
+      metaKey,
+      button,
+      dataTransfer,
     });
-  break; */
+  }
 });
 window.addEventListener('contextmenu', e => {
   e.preventDefault();

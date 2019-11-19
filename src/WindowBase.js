@@ -230,6 +230,11 @@ const _oninitmessage = async e => {
               target = 'input';
               break;
             }
+            case 'drop': {
+              constructor = DragEvent;
+              target = 'document';
+              break;
+            }
             default: {
               constructor = function(type) {
                 return new Event(type, {
