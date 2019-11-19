@@ -114,13 +114,14 @@ const XREngineProto = {
             }
           });
         });
-        win.canvas.addEventListener('mouseenter', e => {
+        const _mouseenter = () => {
           const {x, y, width, height} = win.canvas.getBoundingClientRect();
           GlobalContext.xrState.canvasViewport[0] = x;
           GlobalContext.xrState.canvasViewport[1] = y;
           GlobalContext.xrState.canvasViewport[2] = width;
           GlobalContext.xrState.canvasViewport[3] = height;
-        });
+        };
+        win.canvas.addEventListener('mouseenter', _mouseenter);
         win.ctx = win.canvas.getContext(window.WebGL2RenderingContext ? 'webgl2' : 'webgl', {
           antialias: true,
           alpha: true,
@@ -151,6 +152,8 @@ const XREngineProto = {
         this.dispatchEvent(new MessageEvent('canvas', {
           data: win.canvas,
         }));
+
+        _mouseenter();
       }
       return win.ctx;
     };
