@@ -234,6 +234,23 @@ window.document.addEventListener('drop', e => {
 window.addEventListener('contextmenu', e => {
   e.preventDefault();
 });
+window.addEventListener('vrdisplayconnect', e => {
+  const {display} = e;
+  const eyeParameters = ['left', 'right'].map(eye => display.getEyeParameters(eye));
+  const width = Math.max(eyeParameters[0].renderWidth, eyeParameters[1].renderWidth);
+  const height = Math.max(eyeParameters[0].renderHeight, eyeParameters[1].renderHeight);
+
+  xrState.renderWidth[0] = width;
+  xrState.renderHeight[0] = height;
+
+  for (let i = 0; i < windows.length; i++) {
+    const win = windows[i];
+    if (win.canvas) {
+      win.canvas.width = width * 2;
+      win.canvas.height = height;
+    }
+  }
+});
 
 /* const topVrPresentState = {
   hmdType: null,
