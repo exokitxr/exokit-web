@@ -456,18 +456,6 @@ class FakeXRDisplay {
     GlobalContext.xrState.fakeVrDisplayEnabled[0] = 0;
   }
 
-  /* get width() {
-    return GlobalContext.xrState.renderWidth[0]*2;
-  }
-  set width(width) {
-    GlobalContext.xrState.renderWidth[0] = width/2;
-  }
-  get height() {
-    return GlobalContext.xrState.renderHeight[0];
-  }
-  set height(height) {
-    GlobalContext.xrState.renderHeight[0] = height;
-  } */
   get width() {
     if (GlobalContext.xrState.stereo[0]) {
       return GlobalContext.xrState.renderWidth[0];
