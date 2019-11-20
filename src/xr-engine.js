@@ -217,6 +217,7 @@ const XREngineProto = {
             }
 
             if (referenceSpaceType !== lastReferenceSpaceType) {
+              core.setReferenceSpace(referenceSpace);
               console.log(`referenceSpace changed to ${referenceSpaceType}`);
             }
           };
