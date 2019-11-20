@@ -362,6 +362,7 @@ const _fetchText = src => fetch(src)
     window.XRPose = XR.XRPose;
     window.XRViewerPose = XR.XRViewerPose;
     window.XRInputSource = XR.XRInputSource;
+    window.DOMPoint = XR.DOMPoint;
     window.XRRay = XR.XRRay;
     window.XRInputPose = XR.XRInputPose;
     window.XRInputSourceEvent = XR.XRInputSourceEvent;
