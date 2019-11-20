@@ -128,15 +128,15 @@ class XRIFrame extends HTMLElement {
               const {key, value} = event;
               if (key === 'position') {
                 this.position = value;
-                this.xrOffset._position.set(value);
+                this.xrOffset._position._buffer.set(value);
                 this.xrOffset.pushUpdate();
               } else if (key === 'orientation') {
                 this.orientation = value;
-                this.xrOffset._orientation.set(value);
+                this.xrOffset._orientation._buffer.set(value);
                 this.xrOffset.pushUpdate();
               } else if (key === 'scale') {
                 this.scale = value;
-                this.xrOffset._scale.set(value);
+                this.xrOffset._scale._buffer.set(value);
                 this.xrOffset.pushUpdate();
               }
             },
@@ -166,7 +166,7 @@ class XRIFrame extends HTMLElement {
         if (position.length === 3) {
           position = position.map(s => parseFloat(s));
           if (position.every(n => isFinite(n))) {
-            this.xrOffset._position.set(position);
+            this.xrOffset._position._buffer.set(position);
             this.xrOffset.pushUpdate();
           }
         }
@@ -175,7 +175,7 @@ class XRIFrame extends HTMLElement {
         if (orientation.length === 4) {
           orientation = orientation.map(s => parseFloat(s));
           if (orientation.every(n => isFinite(n))) {
-            this.xrOffset._orientation.set(orientation);
+            this.xrOffset._orientation._buffer.set(orientation);
             this.xrOffset.pushUpdate();
           }
         }
@@ -184,7 +184,7 @@ class XRIFrame extends HTMLElement {
         if (scale.length === 3) {
           scale = scale.map(s => parseFloat(s));
           if (scale.every(n => isFinite(n))) {
-            this.xrOffset._scale.set(scale);
+            this.xrOffset._scale._buffer.set(scale);
             this.xrOffset.pushUpdate();
           }
         }
