@@ -6,7 +6,7 @@
   &mdash;
   <a href="https://docs.exokit.org/">Docs</a>
   &mdash;
-  <a href="https://discordapp.com/invite/Apk6cZN">Discord</a>
+  <a href="https://discord.gg/9M8awV8">Discord</a>
   &mdash;
   <a href="https://twitter.com/exokitxr">Twitter</a>
   &mdash;
